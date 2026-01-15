@@ -45,7 +45,7 @@ export default function MediaPage() {
               </h2>
             </div>
             <Link
-              href="/blog"
+              href="/media/blog"
               className="inline-flex items-center gap-2 border-2 border-gray-300 hover:border-primary text-gray-900 hover:text-primary px-6 py-3 rounded-lg font-bold transition-colors"
             >
               View All Posts
@@ -63,7 +63,7 @@ export default function MediaPage() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <Link
-                  href={`/blog/${blog.slug}`}
+                  href={`/media/blog/${blog.slug}`}
                   className="block bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg hover:border-primary transition-all group"
                 >
                   <div className="relative w-full aspect-video overflow-hidden">

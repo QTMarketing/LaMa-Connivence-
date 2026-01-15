@@ -19,7 +19,7 @@ export default function BlogDetailPage() {
           <h1 className="text-4xl font-black text-secondary mb-4">Blog Not Found</h1>
           <p className="text-gray-600 mb-8">The blog post you're looking for doesn't exist.</p>
           <Link
-            href="/blog"
+            href="/media/blog"
             className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-bold transition-all hover:scale-105"
             style={{ backgroundColor: '#FF6B35' }}
           >
@@ -138,7 +138,7 @@ export default function BlogDetailPage() {
                   transition={{ duration: 0.6, delay: index * 0.1, type: 'spring', stiffness: 100 }}
                 >
                   <Link
-                    href={`/blog/${relatedBlog.slug}`}
+                    href={`/media/blog/${relatedBlog.slug}`}
                     className="block bg-white rounded-xl border-2 border-gray-100 overflow-hidden hover:shadow-xl hover:border-primary transition-all duration-300 group"
                   >
                     <div className="relative w-full aspect-video overflow-hidden">
@@ -184,7 +184,7 @@ export default function BlogDetailPage() {
       <section className="py-12 px-6 bg-white">
         <div className="max-w-7xl mx-auto text-center">
           <Link
-            href="/blog"
+            href="/media/blog"
             className="inline-flex items-center gap-2 text-primary font-bold hover:underline transition-all"
             style={{ color: '#FF6B35' }}
           >

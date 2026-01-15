@@ -121,12 +121,36 @@ export const deals: Deal[] = [
   },
 ];
 
-export const getDealsByCategory = (category: Deal['category']): Deal[] => {
-  return deals.filter(deal => deal.category === category);
+/**
+ * Get all deals (for listing pages)
+ * Reads from localStorage if available (admin-managed), otherwise uses static array
+ */
+export const getAllDeals = (): Deal[] => {
+  if (typeof window !== 'undefined') {
+    const savedDeals = localStorage.getItem('adminAllDeals');
+    if (savedDeals) {
+      try {
+        return JSON.parse(savedDeals);
+      } catch {
+        return deals; // Fallback to static
+      }
+    }
+  }
+  return deals; // Default to static array
 };
 
+/**
+ * Get deals by category (reads from getAllDeals to get admin-managed deals)
+ */
+export const getDealsByCategory = (category: Deal['category']): Deal[] => {
+  return getAllDeals().filter(deal => deal.category === category);
+};
+
+/**
+ * Get featured deals (reads from getAllDeals to get admin-managed deals)
+ */
 export const getFeaturedDeals = (): Deal[] => {
-  return deals.filter(deal => deal.featured);
+  return getAllDeals().filter(deal => deal.featured);
 };
 
 /**
@@ -135,7 +159,8 @@ export const getFeaturedDeals = (): Deal[] => {
  * and displayName in the deals array to control what shows on homepage
  */
 export const getHomepagePromos = (): Deal[] => {
-  const featured = deals.filter(deal => deal.featured || deal.homepageOrder);
+  const allDeals = getAllDeals();
+  const featured = allDeals.filter(deal => deal.featured || deal.homepageOrder);
   
   // Sort by homepageOrder if available, otherwise use default order
   const sorted = featured.sort((a, b) => {
@@ -153,16 +178,9 @@ export const getHomepagePromos = (): Deal[] => {
 };
 
 /**
- * Get a single deal by ID
+ * Get a single deal by ID (reads from getAllDeals to get admin-managed deals)
  */
 export const getDealById = (id: number): Deal | undefined => {
-  return deals.find(deal => deal.id === id);
-};
-
-/**
- * Get all deals (for listing pages)
- */
-export const getAllDeals = (): Deal[] => {
-  return deals;
+  return getAllDeals().find(deal => deal.id === id);
 };
 

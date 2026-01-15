@@ -66,7 +66,7 @@ export default function BlogPage() {
                 transition={{ duration: 0.6, delay: index * 0.1, type: 'spring', stiffness: 100 }}
               >
                 <Link
-                  href={`/blog/${blog.slug}`}
+                  href={`/media/blog/${blog.slug}`}
                   className="block bg-white rounded-xl border-2 border-gray-100 overflow-hidden hover:shadow-xl hover:border-primary transition-all duration-300 group"
                 >
                   <div className="relative w-full aspect-video overflow-hidden">

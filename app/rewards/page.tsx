@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Gift, Star, TrendingUp, Zap, Smartphone, Download, Check } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import GlassBanner from '@/components/GlassBanner';
 
 export default function RewardsPage() {
   const benefits = [
@@ -62,25 +63,31 @@ export default function RewardsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white pt-24 md:pt-28">
-      {/* Hero Section */}
-      <section className="relative bg-secondary py-16 md:py-24 px-6" style={{ backgroundColor: '#1A1A1A' }}>
-        <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-white">
+      {/* Hero Section - Full Width Image with Text Overlay */}
+      <section className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
+        {/* Glass Banner - Floating Inside Hero */}
+        <GlassBanner />
+        <div className="absolute inset-0">
+          <Image
+            src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=1080&fit=crop"
+            alt="Rewards Hero"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-black/50"></div>
+        </div>
+        <div className="relative z-40 h-full flex items-start justify-center pt-4 px-6 pb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center text-white"
+            className="text-center text-white max-w-4xl"
           >
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-full mb-6" style={{ backgroundColor: '#FF6B35' }}>
-              <Gift className="text-white" size={40} />
-            </div>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6">
-              LaMa Rewards
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-8">
+              Rewards
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed">
-              Join our rewards program and start earning points on every purchase. Unlock exclusive deals and save more with Lama.
-            </p>
           </motion.div>
         </div>
       </section>

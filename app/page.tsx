@@ -206,7 +206,7 @@ export default function Home() {
             className="w-full h-[550px] md:h-[650px] lg:h-[750px] rounded-t-none rounded-b-3xl md:rounded-b-[40px] border-2 border-t-0"
             style={{ 
               backgroundColor: '#FF6B35',
-              borderColor: '#F5F5DC',
+              borderColor: '#FAFAF5',
               boxShadow: 'inset 0 0 40px rgba(0, 0, 0, 0.3)'
             }}
           >
@@ -669,7 +669,7 @@ export default function Home() {
                     <div 
                       className="px-6 py-3 rounded-md shadow-lg"
                       style={{ 
-                        backgroundColor: '#F5F5DC',
+                        backgroundColor: '#FAFAF5',
                         color: '#1A1A1A'
                       }}
                     >
@@ -732,7 +732,7 @@ export default function Home() {
                     <div 
                       className="px-6 py-3 rounded-md shadow-lg"
                       style={{ 
-                        backgroundColor: '#F5F5DC',
+                        backgroundColor: '#FAFAF5',
                         color: '#1A1A1A'
                       }}
                     >
@@ -812,7 +812,7 @@ export default function Home() {
       </section>
 
       {/* LaMa Rewards Section */}
-      <section className="py-12 md:py-16 lg:py-20 px-6" style={{ backgroundColor: '#F5F5DC' }}>
+      <section className="py-12 md:py-16 lg:py-20 px-6" style={{ backgroundColor: '#FAFAF5' }}>
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <motion.div

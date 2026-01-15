@@ -39,10 +39,10 @@ export default function DealDetailPage({ params }: DealDetailPageProps) {
     );
   }
 
-  // Get related deals (same category, excluding current deal)
+  // Get all other deals (excluding current deal)
   const relatedDeals = getAllDeals()
-    .filter(d => d.category === deal.category && d.id !== deal.id)
-    .slice(0, 3);
+    .filter(d => d.id !== deal.id)
+    .slice(0, 6);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return null;
@@ -207,10 +207,10 @@ export default function DealDetailPage({ params }: DealDetailPageProps) {
               className="mb-8"
             >
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-secondary mb-4">
-                More {deal.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                More Deals
               </h2>
               <p className="text-lg text-gray-600">
-                Check out these other great deals in the same category.
+                Check out these other great deals and promotions.
               </p>
             </motion.div>
 

@@ -3,30 +3,38 @@
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Clock, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { stores } from '@/lib/storeData';
+import GlassBanner from '@/components/GlassBanner';
 
 export default function StoresPage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.h1
+      {/* Hero Section - Full Width Image with Text Overlay */}
+      <section className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
+        {/* Glass Banner - Floating Inside Hero */}
+        <GlassBanner />
+        <div className="absolute inset-0">
+          <Image
+            src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=1080&fit=crop"
+            alt="Find a Store Hero"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-black/50"></div>
+        </div>
+        <div className="relative z-40 h-full flex items-start justify-center pt-4 px-6 pb-8">
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-5xl md:text-7xl font-black text-secondary mb-6"
+            className="text-center text-white max-w-4xl"
           >
-            Find a Store
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-xl text-gray-600"
-          >
-            Visit one of our convenient locations. All stores offer fresh food, quality products, and friendly service.
-          </motion.p>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-8">
+              Find a Store
+            </h1>
+          </motion.div>
         </div>
       </section>
 
@@ -82,5 +90,7 @@ export default function StoresPage() {
     </div>
   );
 }
+
+
 
 
