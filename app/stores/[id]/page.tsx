@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, MapPin, Phone, Clock, Navigation } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { stores } from '@/lib/storeData';
+import { getStoreById } from '@/lib/storeData';
 
 interface StoreDetailPageProps {
   params: {
@@ -13,7 +13,7 @@ interface StoreDetailPageProps {
 }
 
 export default function StoreDetailPage({ params }: StoreDetailPageProps) {
-  const store = stores.find(s => s.id === parseInt(params.id));
+  const store = getStoreById(parseInt(params.id));
 
   if (!store) {
     notFound();

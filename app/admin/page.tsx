@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Plus, Trash2, Edit2, X, Check, Eye, Star, AlertCircle, Info, LogOut, Search, Filter, Grid, List, TrendingUp, Tag, Calendar } from 'lucide-react';
+import { Save, Plus, Trash2, Edit2, X, Check, Eye, Star, AlertCircle, Info, LogOut, Search, Filter, Grid, List, TrendingUp, Tag, Calendar, MapPin, Store as StoreIcon, Phone, Clock } from 'lucide-react';
 import { deals, type Deal } from '@/lib/dealsData';
+import { stores, type Store } from '@/lib/storeData';
 import Image from 'next/image';
 
 // Helper function to get where a promo appears
@@ -30,6 +31,9 @@ const getPromoLocations = (promo: Deal): string[] => {
 
 export default function AdminPage() {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'promos' | 'stores'>('promos');
+  
+  // Promos state
   const [allDeals, setAllDeals] = useState<Deal[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingDeal, setEditingDeal] = useState<Partial<Deal>>({});
@@ -37,6 +41,14 @@ export default function AdminPage() {
   const [filter, setFilter] = useState<'all' | 'featured' | Deal['category']>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  
+  // Stores state
+  const [allStores, setAllStores] = useState<Store[]>([]);
+  const [editingStoreId, setEditingStoreId] = useState<number | null>(null);
+  const [editingStore, setEditingStore] = useState<Partial<Store>>({});
+  const [isAddingNewStore, setIsAddingNewStore] = useState(false);
+  const [storeSearchQuery, setStoreSearchQuery] = useState('');
+  
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [newDeal, setNewDeal] = useState<Partial<Deal>>({
     title: '',
@@ -46,6 +58,14 @@ export default function AdminPage() {
     savings: '',
     featured: false,
     expirationDate: '',
+  });
+  const [newStore, setNewStore] = useState<Partial<Store>>({
+    name: '',
+    address: '',
+    lat: 0,
+    lng: 0,
+    phone: '',
+    hours: '',
   });
 
   useEffect(() => {
@@ -69,6 +89,20 @@ export default function AdminPage() {
     } else {
       setAllDeals(deals);
       localStorage.setItem('adminAllDeals', JSON.stringify(deals));
+    }
+
+    // Load all stores from localStorage or use default stores
+    const savedStores = localStorage.getItem('adminAllStores');
+    if (savedStores) {
+      try {
+        setAllStores(JSON.parse(savedStores));
+      } catch {
+        setAllStores(stores);
+        localStorage.setItem('adminAllStores', JSON.stringify(stores));
+      }
+    } else {
+      setAllStores(stores);
+      localStorage.setItem('adminAllStores', JSON.stringify(stores));
     }
   }, [router]);
 
@@ -161,6 +195,78 @@ export default function AdminPage() {
     saveDeals(updated);
   };
 
+  // Store management functions
+  const saveStores = (updatedStores: Store[]) => {
+    setAllStores(updatedStores);
+    localStorage.setItem('adminAllStores', JSON.stringify(updatedStores));
+    window.dispatchEvent(new Event('storesUpdated'));
+  };
+
+  const handleEditStore = (store: Store) => {
+    setEditingStoreId(store.id);
+    setEditingStore({ ...store });
+    setIsAddingNewStore(false);
+  };
+
+  const handleSaveStore = () => {
+    if (editingStoreId) {
+      const updated = allStores.map(s => 
+        s.id === editingStoreId ? { ...s, ...editingStore } as Store : s
+      );
+      saveStores(updated);
+      setEditingStoreId(null);
+      setEditingStore({});
+    }
+  };
+
+  const handleCancelStore = () => {
+    setEditingStoreId(null);
+    setEditingStore({});
+    setIsAddingNewStore(false);
+    setNewStore({
+      name: '',
+      address: '',
+      lat: 0,
+      lng: 0,
+      phone: '',
+      hours: '',
+    });
+  };
+
+  const handleAddStore = () => {
+    if (!newStore.name || !newStore.address || !newStore.phone || !newStore.hours || !newStore.lat || !newStore.lng) {
+      alert('Please fill in all required fields (Name, Address, Phone, Hours, Latitude, and Longitude)');
+      return;
+    }
+    
+    const newId = allStores.length > 0 ? Math.max(...allStores.map(s => s.id)) + 1 : 1;
+    const storeToAdd: Store = {
+      id: newId,
+      name: newStore.name || '',
+      address: newStore.address || '',
+      lat: newStore.lat || 0,
+      lng: newStore.lng || 0,
+      phone: newStore.phone || '',
+      hours: newStore.hours || '',
+    };
+    saveStores([...allStores, storeToAdd]);
+    setIsAddingNewStore(false);
+    setNewStore({
+      name: '',
+      address: '',
+      lat: 0,
+      lng: 0,
+      phone: '',
+      hours: '',
+    });
+  };
+
+  const handleDeleteStore = (id: number) => {
+    if (confirm('Are you sure you want to delete this store? This action cannot be undone.')) {
+      saveStores(allStores.filter(s => s.id !== id));
+    }
+  };
+
   // Filter and search deals
   let filteredDeals = filter === 'all' 
     ? allDeals 
@@ -193,6 +299,15 @@ export default function AdminPage() {
     { value: 'combo-offers', label: 'Combo Offers' },
   ];
 
+  // Filter stores
+  const filteredStores = storeSearchQuery
+    ? allStores.filter(store =>
+        store.name.toLowerCase().includes(storeSearchQuery.toLowerCase()) ||
+        store.address.toLowerCase().includes(storeSearchQuery.toLowerCase()) ||
+        store.phone.toLowerCase().includes(storeSearchQuery.toLowerCase())
+      )
+    : allStores;
+
   // Show loading or nothing while checking auth
   if (!isAuthenticated) {
     return (
@@ -210,10 +325,10 @@ export default function AdminPage() {
       {/* Top Navigation Bar */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-2xl font-black text-secondary">Promo Management</h1>
-              <p className="text-sm text-gray-500">Dashboard</p>
+              <h1 className="text-2xl font-black text-secondary">Admin Dashboard</h1>
+              <p className="text-sm text-gray-500">Manage promos and store locations</p>
             </div>
             <button
               onClick={handleLogout}
@@ -223,10 +338,45 @@ export default function AdminPage() {
               Logout
             </button>
           </div>
+          
+          {/* Tabs */}
+          <div className="flex gap-2 border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab('promos')}
+              className={`px-6 py-3 font-bold transition-colors border-b-2 ${
+                activeTab === 'promos'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+              style={activeTab === 'promos' ? { borderColor: '#FF6B35', color: '#FF6B35' } : {}}
+            >
+              <div className="flex items-center gap-2">
+                <Tag size={18} />
+                Promos
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('stores')}
+              className={`px-6 py-3 font-bold transition-colors border-b-2 ${
+                activeTab === 'stores'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+              style={activeTab === 'stores' ? { borderColor: '#FF6B35', color: '#FF6B35' } : {}}
+            >
+              <div className="flex items-center gap-2">
+                <StoreIcon size={18} />
+                Store Locations
+              </div>
+            </button>
+          </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Promos Tab Content */}
+        {activeTab === 'promos' && (
+          <>
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <motion.div
@@ -721,6 +871,369 @@ export default function AdminPage() {
               </button>
             )}
           </div>
+        )}
+        </>
+        )}
+
+        {/* Stores Tab Content */}
+        {activeTab === 'stores' && (
+          <>
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Total Stores</p>
+                    <p className="text-3xl font-black text-secondary">{allStores.length}</p>
+                  </div>
+                  <div className="bg-primary/10 p-3 rounded-lg">
+                    <StoreIcon className="text-primary" size={24} />
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Cities</p>
+                    <p className="text-3xl font-black text-secondary">
+                      {new Set(allStores.map(s => {
+                        const parts = s.address.split(',');
+                        return parts.length >= 2 ? parts[1].trim() : '';
+                      }).filter(Boolean)).size}
+                    </p>
+                  </div>
+                  <div className="bg-blue-100 p-3 rounded-lg">
+                    <MapPin className="text-blue-600" size={24} />
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">24/7 Locations</p>
+                    <p className="text-3xl font-black text-secondary">
+                      {allStores.filter(s => s.hours.toLowerCase().includes('24/7')).length}
+                    </p>
+                  </div>
+                  <div className="bg-green-100 p-3 rounded-lg">
+                    <Clock className="text-green-600" size={24} />
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Actions Bar */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+              <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+                <div className="flex-1 w-full lg:w-auto">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                    <input
+                      type="text"
+                      placeholder="Search stores by name, address, or phone..."
+                      value={storeSearchQuery}
+                      onChange={(e) => setStoreSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsAddingNewStore(true);
+                    setEditingStoreId(null);
+                  }}
+                  className="flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-lg font-bold transition-all hover:scale-105"
+                  style={{ backgroundColor: '#FF6B35' }}
+                >
+                  <Plus size={20} />
+                  Add New Store
+                </button>
+              </div>
+              <p className="text-sm text-gray-600 mt-3">
+                Showing <strong>{filteredStores.length}</strong> of <strong>{allStores.length}</strong> stores
+              </p>
+            </div>
+
+            {/* Add New Store Form */}
+            <AnimatePresence>
+              {isAddingNewStore && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="bg-white rounded-xl shadow-sm border-2 border-primary border-dashed p-8 mb-6"
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-black text-secondary">Add New Store</h3>
+                    <button
+                      onClick={handleCancelStore}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <X size={24} />
+                    </button>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">
+                        Store Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={newStore.name}
+                        onChange={(e) => setNewStore({ ...newStore, name: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                        placeholder="LaMa Downtown"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">
+                        Phone <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={newStore.phone}
+                        onChange={(e) => setNewStore({ ...newStore, phone: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                        placeholder="(214) 555-0101"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-bold text-gray-700 mb-2">
+                        Address <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={newStore.address}
+                        onChange={(e) => setNewStore({ ...newStore, address: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                        placeholder="123 Main St, Dallas, TX 75201"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">
+                        Latitude <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={newStore.lat || ''}
+                        onChange={(e) => setNewStore({ ...newStore, lat: parseFloat(e.target.value) || 0 })}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                        placeholder="32.7767"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Get coordinates from Google Maps</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">
+                        Longitude <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={newStore.lng || ''}
+                        onChange={(e) => setNewStore({ ...newStore, lng: parseFloat(e.target.value) || 0 })}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                        placeholder="-96.7970"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">
+                        Hours <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={newStore.hours}
+                        onChange={(e) => setNewStore({ ...newStore, hours: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                        placeholder="24/7 or 6AM - 12AM"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-4 mt-6">
+                    <button
+                      onClick={handleAddStore}
+                      className="flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-lg font-bold transition-all hover:scale-105"
+                      style={{ backgroundColor: '#FF6B35' }}
+                    >
+                      <Check size={20} />
+                      Add Store
+                    </button>
+                    <button
+                      onClick={handleCancelStore}
+                      className="flex items-center gap-2 bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-bold transition-all hover:bg-gray-300"
+                    >
+                      <X size={20} />
+                      Cancel
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Stores List */}
+            <div className="space-y-4">
+              {filteredStores.map((store) => (
+                <motion.div
+                  key={store.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white border-2 rounded-xl overflow-hidden transition-all hover:shadow-lg border-gray-200"
+                >
+                  {editingStoreId === store.id ? (
+                    <div className="p-6">
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-2">Store Name</label>
+                          <input
+                            type="text"
+                            value={editingStore.name || ''}
+                            onChange={(e) => setEditingStore({ ...editingStore, name: e.target.value })}
+                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-2">Phone</label>
+                          <input
+                            type="text"
+                            value={editingStore.phone || ''}
+                            onChange={(e) => setEditingStore({ ...editingStore, phone: e.target.value })}
+                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-bold text-gray-700 mb-2">Address</label>
+                          <input
+                            type="text"
+                            value={editingStore.address || ''}
+                            onChange={(e) => setEditingStore({ ...editingStore, address: e.target.value })}
+                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-2">Latitude</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={editingStore.lat || ''}
+                            onChange={(e) => setEditingStore({ ...editingStore, lat: parseFloat(e.target.value) || 0 })}
+                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-2">Longitude</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={editingStore.lng || ''}
+                            onChange={(e) => setEditingStore({ ...editingStore, lng: parseFloat(e.target.value) || 0 })}
+                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-2">Hours</label>
+                          <input
+                            type="text"
+                            value={editingStore.hours || ''}
+                            onChange={(e) => setEditingStore({ ...editingStore, hours: e.target.value })}
+                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                          />
+                        </div>
+                        <div className="md:col-span-2 flex gap-4">
+                          <button
+                            onClick={handleSaveStore}
+                            className="flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-lg font-bold transition-all hover:scale-105"
+                            style={{ backgroundColor: '#FF6B35' }}
+                          >
+                            <Save size={20} />
+                            Save Changes
+                          </button>
+                          <button
+                            onClick={handleCancelStore}
+                            className="flex items-center gap-2 bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-bold transition-all hover:bg-gray-300"
+                          >
+                            <X size={20} />
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <h3 className="text-2xl font-black text-secondary mb-2">
+                            {store.name}
+                          </h3>
+                          <div className="space-y-2 text-gray-600">
+                            <div className="flex items-start gap-3">
+                              <MapPin className="text-primary flex-shrink-0 mt-1" size={18} />
+                              <p className="text-sm">{store.address}</p>
+                            </div>
+                            <div className="flex items-start gap-3">
+                              <Phone className="text-primary flex-shrink-0 mt-1" size={18} />
+                              <p className="text-sm">{store.phone}</p>
+                            </div>
+                            <div className="flex items-start gap-3">
+                              <Clock className="text-primary flex-shrink-0 mt-1" size={18} />
+                              <p className="text-sm">{store.hours}</p>
+                            </div>
+                            <div className="flex items-start gap-3 mt-3">
+                              <span className="text-xs text-gray-500">
+                                Coordinates: {store.lat.toFixed(4)}, {store.lng.toFixed(4)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        <button
+                          onClick={() => handleEditStore(store)}
+                          className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-bold text-sm transition-all hover:bg-gray-200"
+                        >
+                          <Edit2 size={16} />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteStore(store.id)}
+                          className="flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-lg font-bold text-sm transition-all hover:bg-red-200"
+                        >
+                          <Trash2 size={16} />
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+
+            {filteredStores.length === 0 && (
+              <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+                <AlertCircle className="mx-auto text-gray-400 mb-4" size={48} />
+                <p className="text-gray-600 text-lg">
+                  {storeSearchQuery 
+                    ? `No stores found matching "${storeSearchQuery}"` 
+                    : 'No stores yet. Add your first store!'}
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

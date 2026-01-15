@@ -15,8 +15,9 @@ const defaultPromo: Deal = {
 };
 
 function getInitialFeaturedDeals(): Deal[] {
+  // During SSR/build, return empty array - will be populated in useEffect
   if (typeof window === 'undefined') {
-    return getFeaturedDeals();
+    return [];
   }
   return getFeaturedDeals();
 }

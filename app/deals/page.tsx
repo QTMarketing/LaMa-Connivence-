@@ -4,16 +4,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { deals, getDealsByCategory, type Deal } from '@/lib/dealsData';
+import { getAllDeals, getDealsByCategory, type Deal } from '@/lib/dealsData';
 import { ArrowRight, Tag, Coffee, Zap, Gift, Users } from 'lucide-react';
 import GlassBanner from '@/components/GlassBanner';
 import { usePromo } from '@/hooks/usePromo';
 
 export default function DealsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<'all' | Deal['category']>('all');
+  const [selectedCategory, setSelectedCategory] = useState<'all' | Deal['category'] | 'member-exclusive'>('all');
   const { currentPromo, currentIndex, totalPromos, goToPromo, featuredDeals } = usePromo();
 
-  const categories = [
+  const categories: Array<{ id: 'all' | Deal['category'] | 'member-exclusive', label: string, icon: typeof Tag }> = [
     { id: 'all' as const, label: 'ALL DEALS', icon: Tag },
     { id: 'meal-deals' as const, label: 'FOOD', icon: Coffee },
     { id: 'daily-specials' as const, label: 'DRINKS', icon: Zap },
@@ -24,6 +24,8 @@ export default function DealsPage() {
 
   const filteredDeals = selectedCategory === 'all' 
     ? getAllDeals() 
+    : selectedCategory === 'member-exclusive'
+    ? getAllDeals().filter(d => d.featured)
     : getDealsByCategory(selectedCategory);
 
   return (
@@ -171,7 +173,7 @@ export default function DealsPage() {
       <section className="py-12 md:py-16 px-6" style={{ backgroundColor: '#E5E5E5' }}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {filteredDeals.map((deal, index) => (
+            {filteredDeals.map((deal: Deal, index: number) => (
               <motion.div
                 key={deal.id}
                 initial={{ opacity: 0, y: 20 }}

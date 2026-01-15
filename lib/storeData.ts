@@ -1,4 +1,14 @@
-export const stores = [
+export interface Store {
+  id: number;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  phone: string;
+  hours: string;
+}
+
+export const stores: Store[] = [
     {
         id: 1,
         name: "LaMa Downtown",
@@ -45,6 +55,30 @@ export const stores = [
         hours: "6AM - 2AM"
     }
 ];
+
+/**
+ * Get all stores (reads from localStorage if available, otherwise uses static array)
+ */
+export const getAllStores = (): Store[] => {
+  if (typeof window !== 'undefined') {
+    const savedStores = localStorage.getItem('adminAllStores');
+    if (savedStores) {
+      try {
+        return JSON.parse(savedStores);
+      } catch {
+        return stores; // Fallback to static
+      }
+    }
+  }
+  return stores; // Default to static array
+};
+
+/**
+ * Get a single store by ID
+ */
+export const getStoreById = (id: number): Store | undefined => {
+  return getAllStores().find(store => store.id === id);
+};
 
 
 
