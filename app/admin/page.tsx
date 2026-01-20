@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Plus, Trash2, Edit2, X, Check, Eye, Star, AlertCircle, Info, LogOut, Search, Filter, Grid, List, TrendingUp, Tag, Calendar, MapPin, Store as StoreIcon, Phone, Clock, FileText } from 'lucide-react';
-import Link from 'next/link';
+import { Save, Plus, Trash2, Edit2, X, Check, Eye, Star, AlertCircle, Info, LogOut, Search, Filter, Grid, List, TrendingUp, Tag, Calendar, MapPin, Store as StoreIcon, Phone, Clock } from 'lucide-react';
 import { deals, type Deal } from '@/lib/dealsData';
 import { stores, type Store } from '@/lib/storeData';
 import Image from 'next/image';
@@ -32,7 +31,7 @@ const getPromoLocations = (promo: Deal): string[] => {
 
 export default function AdminPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'promos' | 'stores' | 'blogs'>('promos');
+  const [activeTab, setActiveTab] = useState<'promos' | 'stores'>('promos');
   
   // Promos state
   const [allDeals, setAllDeals] = useState<Deal[]>([]);
@@ -370,15 +369,6 @@ export default function AdminPage() {
                 Store Locations
               </div>
             </button>
-            <Link
-              href="/admin/blog"
-              className="px-6 py-3 font-bold transition-colors border-b-2 border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300"
-            >
-              <div className="flex items-center gap-2">
-                <FileText size={18} />
-                Blog CMS
-              </div>
-            </Link>
           </div>
         </div>
       </header>

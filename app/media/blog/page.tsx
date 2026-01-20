@@ -4,59 +4,10 @@ import { motion } from 'framer-motion';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
-import { blogStorage, type BlogPost } from '@/lib/blogStorage';
-import { blogs as fallbackBlogs } from '@/lib/blogData';
+import { blogs } from '@/lib/blogData';
 import GlassBanner from '@/components/GlassBanner';
 
 export default function BlogPage() {
-  const [blogs, setBlogs] = useState<BlogPost[]>([]);
-
-  useEffect(() => {
-    // Load from localStorage, fallback to static data
-    const cmsBlogs = blogStorage.getPublished();
-    if (cmsBlogs.length > 0) {
-      setBlogs(cmsBlogs);
-    } else {
-      // Convert static blogs to BlogPost format for display
-      const staticBlogs = fallbackBlogs.map((blog, index) => ({
-        id: `static-${index}`,
-        title: blog.title,
-        slug: blog.slug,
-        content: blog.content,
-        excerpt: blog.description,
-        status: 'published' as const,
-        publishedAt: blog.date,
-        author: blog.author,
-        authorId: 'static-author',
-        featuredImage: blog.image,
-        seoTitle: blog.title,
-        seoDescription: blog.description,
-        focusKeyword: '',
-        seoScore: 0,
-        robotsIndex: true,
-        robotsFollow: true,
-        robotsNoArchive: false,
-        robotsNoSnippet: false,
-        readabilityScore: 0,
-        wordCount: 0,
-        tags: [],
-        createdAt: blog.date,
-        updatedAt: blog.date,
-      }));
-      setBlogs(staticBlogs);
-    }
-
-    // Listen for updates
-    const handleUpdate = () => {
-      const updated = blogStorage.getPublished();
-      if (updated.length > 0) {
-        setBlogs(updated);
-      }
-    };
-    window.addEventListener('blogsUpdated', handleUpdate);
-    return () => window.removeEventListener('blogsUpdated', handleUpdate);
-  }, []);
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section - Full Width Image with Text Overlay */}
@@ -120,34 +71,22 @@ export default function BlogPage() {
                 >
                   <div className="relative w-full aspect-video overflow-hidden">
                     <Image
-                      src={(() => {
-                        const imageUrl = blog.featuredImage || blog.ogImage || '';
-                        return imageUrl && imageUrl.startsWith('http') 
-                          ? imageUrl 
-                          : `https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&h=600&fit=crop`;
-                      })()}
-                      alt={blog.seoTitle || blog.title || 'Blog post'}
+                      src={blog.image.startsWith('http') ? blog.image : `https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&h=600&fit=crop`}
+                      alt={blog.title}
                       fill
                       className="object-cover group-hover:scale-110 transition-transform duration-500"
                     />
-                    {blog.category && (
-                      <div className="absolute top-4 left-4">
-                        <span className="bg-white/90 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg">
-                          {blog.category.name}
-                        </span>
-                      </div>
-                    )}
+                    <div className="absolute top-4 left-4">
+                      <span className="bg-white/90 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                        News
+                      </span>
+                    </div>
                   </div>
                   <div className="p-6 bg-white">
                     <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
                       <div className="flex items-center gap-1.5">
                         <Calendar size={14} />
-                        <span>
-                          {blog.publishedAt 
-                            ? new Date(blog.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                            : new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                          }
-                        </span>
+                        <span>{blog.date}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <User size={14} />
@@ -155,10 +94,10 @@ export default function BlogPage() {
                       </div>
                     </div>
                     <h3 className="text-xl md:text-2xl font-black text-secondary group-hover:text-primary transition-colors duration-300 mb-3">
-                      {blog.seoTitle || blog.title}
+                      {blog.title}
                     </h3>
                     <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                      {blog.excerpt || blog.seoDescription || 'Read more...'}
+                      {blog.description}
                     </p>
                     <div className="flex items-center text-primary font-bold text-sm group-hover:underline">
                       Read More
