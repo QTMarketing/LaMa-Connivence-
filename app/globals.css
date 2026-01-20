@@ -1,0 +1,225 @@
+@import "tailwindcss";
+@import 'leaflet/dist/leaflet.css';
+
+@theme {
+  /* Primary Colors (LaMa Brand - Orange) */
+  --color-primary: #FF6B35;
+  --color-primary-dark: #E55A2B;
+  
+  /* Secondary/Neutral Colors (Same as Yo Quiero - Pure Neutrals) */
+  --color-secondary: #1A1A1A;
+  
+  /* Background Colors (Same as Yo Quiero - Pure Neutrals) */
+  --color-background-white: #FFFFFF;
+  --color-background-light: #F7F7F7;
+  --color-background-dark: #1A1A1A;
+  
+  /* Text Colors (Same as Yo Quiero - Pure Neutrals) */
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #4A5568;
+  --color-text-light: #FFFFFF;
+  
+  /* Border Colors */
+  --color-border-light: #E2E8F0;
+  --color-border-hover: #FF6B35;
+}
+
+:root {
+  --foreground: #1A1A1A;
+  --background: #FFFFFF;
+}
+
+/* Widget Block Styles */
+.widget-block {
+  border: 2px dashed #D1D5DB !important;
+  border-radius: 8px !important;
+  background: #F9FAFB !important;
+  padding: 16px !important;
+  margin: 16px 0 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.widget-block:hover {
+  border-color: #3B82F6 !important;
+  background: #EFF6FF !important;
+}
+
+.widget-preview {
+  pointer-events: none;
+}
+
+/* Inline Image Styles - Google Docs/Word style */
+.ProseMirror img {
+  display: inline-block !important;
+  vertical-align: middle !important;
+  max-width: 100% !important;
+  height: auto !important;
+  margin: 4px 0 !important;
+}
+
+/* Allow images to flow with text */
+.ProseMirror p img,
+.ProseMirror li img {
+  display: inline-block !important;
+  vertical-align: baseline !important;
+}
+
+/* Custom Image Node Styles */
+.image-node-wrapper {
+  position: relative;
+  width: 100% !important;
+  clear: both;
+  margin: 16px 0 !important;
+}
+
+.image-node-wrapper > div {
+  position: relative;
+}
+
+.image-node-wrapper.selected > div {
+  outline: 3px solid #3B82F6 !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+}
+
+.image-container {
+  position: relative;
+}
+
+/* Resize Handle Styles */
+.resize-handle-right {
+  background: #3B82F6 !important;
+  border-radius: 2px !important;
+  opacity: 0 !important;
+  transition: opacity 0.2s !important;
+  width: 10px !important;
+  right: -5px !important;
+}
+
+.resize-handle-corner {
+  background: #3B82F6 !important;
+  border-radius: 50% !important;
+  opacity: 0 !important;
+  transition: opacity 0.2s !important;
+  width: 10px !important;
+  height: 10px !important;
+  right: -5px !important;
+  bottom: -5px !important;
+}
+
+.image-node-wrapper.selected .resize-handle-right,
+.image-node-wrapper.selected .resize-handle-corner {
+  opacity: 1 !important;
+}
+
+.image-node-wrapper:hover .resize-handle-right,
+.image-node-wrapper:hover .resize-handle-corner {
+  opacity: 0.5 !important;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  margin: 0;
+  padding: 0;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Hide scrollbar for horizontal scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* TipTap Placeholder Styles */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9CA3AF;
+  pointer-events: none;
+  height: 0;
+}
+
+.ProseMirror p.is-editor-empty:first-child {
+  color: transparent;
+}
+
+/* Slash Command Decoration */
+.slash-command-decoration {
+  color: #9CA3AF;
+  font-style: italic;
+}
+
+/* Draggable Blocks Styles */
+.draggable-block {
+  position: relative;
+  margin: 8px 0;
+  padding-left: 32px;
+}
+
+.draggable-block:hover {
+  background-color: rgba(0, 0, 0, 0.01);
+}
+
+.drag-handle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.2s;
+  margin-left: -32px;
+  margin-top: 2px;
+}
+
+.draggable-block:hover .drag-handle {
+  opacity: 1;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Leaflet Map Styles */
+.custom-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Fix for Leaflet popup styling */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+}
+

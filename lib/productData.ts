@@ -1,0 +1,417 @@
+export interface Product {
+  id: number;
+  name: string;
+  description: string;
+  image: string;
+  category: 'hot-beverages' | 'fresh-food' | 'cold-drinks' | 'snacks' | 'grocery' | 'services';
+  price?: string;
+  featured?: boolean;
+}
+
+export const products: Product[] = [
+  // Hot Beverages
+  {
+    id: 1,
+    name: 'Premium Coffee Blend',
+    description: 'Rich, aromatic coffee made from carefully selected beans. Available in multiple roasts.',
+    image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&h=600&fit=crop',
+    category: 'hot-beverages',
+    price: '$2.49',
+    featured: true,
+  },
+  {
+    id: 2,
+    name: 'Espresso',
+    description: 'Strong, concentrated coffee shot perfect for your morning boost.',
+    image: 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=600&h=600&fit=crop',
+    category: 'hot-beverages',
+    price: '$2.99',
+  },
+  {
+    id: 3,
+    name: 'Cappuccino',
+    description: 'Smooth espresso with steamed milk and a perfect layer of foam.',
+    image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=600&h=600&fit=crop',
+    category: 'hot-beverages',
+    price: '$3.49',
+  },
+  {
+    id: 4,
+    name: 'Latte',
+    description: 'Creamy espresso with steamed milk, available in various flavors.',
+    image: 'https://images.unsplash.com/photo-1561882468-9110e03e0f78?w=600&h=600&fit=crop',
+    category: 'hot-beverages',
+    price: '$3.99',
+  },
+  {
+    id: 5,
+    name: 'Hot Chocolate',
+    description: 'Rich, creamy hot chocolate topped with whipped cream and marshmallows.',
+    image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=600&h=600&fit=crop',
+    category: 'hot-beverages',
+    price: '$2.99',
+  },
+  {
+    id: 6,
+    name: 'Green Tea',
+    description: 'Premium green tea with antioxidants, served hot or iced.',
+    image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&h=600&fit=crop',
+    category: 'hot-beverages',
+    price: '$2.49',
+  },
+  {
+    id: 7,
+    name: 'Chai Latte',
+    description: 'Spiced tea blend with steamed milk for a warm, comforting drink.',
+    image: 'https://images.unsplash.com/photo-1597481485369-e8e675ac67a7?w=600&h=600&fit=crop',
+    category: 'hot-beverages',
+    price: '$3.49',
+  },
+  {
+    id: 8,
+    name: 'Americano',
+    description: 'Espresso shots topped with hot water for a smooth, full-bodied coffee.',
+    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=600&fit=crop',
+    category: 'hot-beverages',
+    price: '$2.79',
+  },
+  
+  // Fresh Food
+  {
+    id: 9,
+    name: 'Gourmet Hot Dog',
+    description: 'Premium beef hot dog with your choice of toppings: chili, cheese, onions, and more.',
+    image: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=600&h=600&fit=crop',
+    category: 'fresh-food',
+    price: '$4.99',
+    featured: true,
+  },
+  {
+    id: 10,
+    name: 'Fresh Pizza Slice',
+    description: 'New York style pizza by the slice. Pepperoni, cheese, veggie, and specialty options.',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=600&fit=crop',
+    category: 'fresh-food',
+    price: '$3.99',
+  },
+  {
+    id: 11,
+    name: 'Deli Sandwich',
+    description: 'Freshly made sandwiches with premium deli meats, cheese, and fresh vegetables.',
+    image: 'https://images.unsplash.com/photo-1539252554453-80ab65ce3586?w=600&h=600&fit=crop',
+    category: 'fresh-food',
+    price: '$5.99',
+  },
+  {
+    id: 12,
+    name: 'Chicken Wrap',
+    description: 'Grilled chicken, fresh veggies, and your choice of sauce wrapped in a soft tortilla.',
+    image: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=600&h=600&fit=crop',
+    category: 'fresh-food',
+    price: '$5.49',
+  },
+  {
+    id: 13,
+    name: 'Fresh Salad Bowl',
+    description: 'Crisp mixed greens, vegetables, and protein options with house-made dressings.',
+    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&h=600&fit=crop',
+    category: 'fresh-food',
+    price: '$6.99',
+  },
+  {
+    id: 14,
+    name: 'Breakfast Burrito',
+    description: 'Scrambled eggs, cheese, bacon or sausage, and hash browns in a flour tortilla.',
+    image: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=600&h=600&fit=crop',
+    category: 'fresh-food',
+    price: '$4.99',
+  },
+  {
+    id: 15,
+    name: 'Chicken Wings',
+    description: 'Crispy chicken wings with your choice of sauce: buffalo, BBQ, honey mustard.',
+    image: 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?w=600&h=600&fit=crop',
+    category: 'fresh-food',
+    price: '$7.99',
+  },
+  {
+    id: 16,
+    name: 'Taquitos',
+    description: 'Crispy rolled tortillas filled with seasoned beef or chicken, served with salsa.',
+    image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=600&h=600&fit=crop',
+    category: 'fresh-food',
+    price: '$4.49',
+  },
+  
+  // Cold Drinks
+  {
+    id: 17,
+    name: 'Iced Coffee',
+    description: 'Cold-brewed coffee served over ice, available in various flavors and sizes.',
+    image: 'https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=600&h=600&fit=crop',
+    category: 'cold-drinks',
+    price: '$2.99',
+    featured: true,
+  },
+  {
+    id: 18,
+    name: 'Energy Drinks',
+    description: 'Popular energy drink brands to keep you going throughout the day.',
+    image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=600&h=600&fit=crop',
+    category: 'cold-drinks',
+    price: '$3.49',
+  },
+  {
+    id: 19,
+    name: 'Premium Sodas',
+    description: 'Classic and specialty sodas in various flavors and sizes.',
+    image: 'https://images.unsplash.com/photo-1523362628745-0c100150b504?w=600&h=600&fit=crop',
+    category: 'cold-drinks',
+    price: '$1.99',
+  },
+  {
+    id: 20,
+    name: 'Bottled Water',
+    description: 'Pure, refreshing water in multiple sizes. Still and sparkling options available.',
+    image: 'https://images.unsplash.com/photo-1548839140-5a7c38eb6c5f?w=600&h=600&fit=crop',
+    category: 'cold-drinks',
+    price: '$1.49',
+  },
+  {
+    id: 21,
+    name: 'Fresh Juices',
+    description: '100% fruit juices in a variety of flavors: orange, apple, cranberry, and more.',
+    image: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=600&h=600&fit=crop',
+    category: 'cold-drinks',
+    price: '$3.99',
+  },
+  {
+    id: 22,
+    name: 'Sports Drinks',
+    description: 'Electrolyte-replenishing drinks for active lifestyles in multiple flavors.',
+    image: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600&h=600&fit=crop',
+    category: 'cold-drinks',
+    price: '$2.99',
+  },
+  {
+    id: 23,
+    name: 'Iced Tea',
+    description: 'Refreshing iced tea available in sweet, unsweetened, and flavored varieties.',
+    image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&h=600&fit=crop',
+    category: 'cold-drinks',
+    price: '$2.49',
+  },
+  {
+    id: 24,
+    name: 'Slushies',
+    description: 'Frozen slush drinks in rotating flavors. Perfect for cooling down!',
+    image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=600&h=600&fit=crop',
+    category: 'cold-drinks',
+    price: '$2.99',
+  },
+  
+  // Snacks
+  {
+    id: 25,
+    name: 'Premium Chips',
+    description: 'A wide selection of potato chips, tortilla chips, and specialty varieties.',
+    image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=600&h=600&fit=crop',
+    category: 'snacks',
+    price: '$2.99',
+    featured: true,
+  },
+  {
+    id: 26,
+    name: 'Candy Selection',
+    description: 'Popular candy brands including chocolate bars, gummies, and sour candies.',
+    image: 'https://images.unsplash.com/photo-1606312619070-d48b4cbc5f66?w=600&h=600&fit=crop',
+    category: 'snacks',
+    price: '$1.99',
+  },
+  {
+    id: 27,
+    name: 'Cookies & Pastries',
+    description: 'Fresh baked cookies, pastries, and sweet treats made daily.',
+    image: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=600&h=600&fit=crop',
+    category: 'snacks',
+    price: '$2.49',
+  },
+  {
+    id: 28,
+    name: 'Nuts & Trail Mix',
+    description: 'Premium nuts, trail mixes, and healthy snack options for on-the-go.',
+    image: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=600&h=600&fit=crop',
+    category: 'snacks',
+    price: '$4.99',
+  },
+  {
+    id: 29,
+    name: 'Granola Bars',
+    description: 'Healthy and delicious granola bars in various flavors and protein options.',
+    image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=600&h=600&fit=crop',
+    category: 'snacks',
+    price: '$2.99',
+  },
+  {
+    id: 30,
+    name: 'Jerky',
+    description: 'Premium beef, turkey, and specialty jerky in various flavors.',
+    image: 'https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=600&h=600&fit=crop',
+    category: 'snacks',
+    price: '$5.99',
+  },
+  {
+    id: 31,
+    name: 'Popcorn',
+    description: 'Microwave and bagged popcorn in butter, caramel, and cheese flavors.',
+    image: 'https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?w=600&h=600&fit=crop',
+    category: 'snacks',
+    price: '$2.49',
+  },
+  {
+    id: 32,
+    name: 'Pretzels',
+    description: 'Classic and flavored pretzels, from traditional twists to specialty varieties.',
+    image: 'https://images.unsplash.com/photo-1576402187878-974f70c9981e?w=600&h=600&fit=crop',
+    category: 'snacks',
+    price: '$2.99',
+  },
+  
+  // Grocery
+  {
+    id: 33,
+    name: 'Milk & Dairy',
+    description: 'Fresh milk, cream, yogurt, and other dairy essentials in various sizes.',
+    image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600&h=600&fit=crop',
+    category: 'grocery',
+    price: '$4.99',
+    featured: true,
+  },
+  {
+    id: 34,
+    name: 'Bread & Bakery',
+    description: 'Fresh bread, bagels, and baked goods delivered daily.',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=600&fit=crop',
+    category: 'grocery',
+    price: '$3.99',
+  },
+  {
+    id: 35,
+    name: 'Eggs',
+    description: 'Farm-fresh eggs available in various sizes and quantities.',
+    image: 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=600&h=600&fit=crop',
+    category: 'grocery',
+    price: '$4.49',
+  },
+  {
+    id: 36,
+    name: 'Frozen Foods',
+    description: 'Frozen meals, pizzas, ice cream, and convenient frozen options.',
+    image: 'https://images.unsplash.com/photo-1556910096-6f5e72db6803?w=600&h=600&fit=crop',
+    category: 'grocery',
+    price: 'Varies',
+  },
+  {
+    id: 37,
+    name: 'Canned Goods',
+    description: 'Essential canned foods including soups, vegetables, and proteins.',
+    image: 'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&h=600&fit=crop',
+    category: 'grocery',
+    price: '$2.99',
+  },
+  {
+    id: 38,
+    name: 'Pantry Staples',
+    description: 'Rice, pasta, sauces, and other pantry essentials for home cooking.',
+    image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=600&h=600&fit=crop',
+    category: 'grocery',
+    price: 'Varies',
+  },
+  {
+    id: 39,
+    name: 'Cleaning Supplies',
+    description: 'Household cleaning products, paper goods, and home essentials.',
+    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&h=600&fit=crop',
+    category: 'grocery',
+    price: 'Varies',
+  },
+  {
+    id: 40,
+    name: 'Personal Care',
+    description: 'Toiletries, hygiene products, and personal care essentials.',
+    image: 'https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?w=600&h=600&fit=crop',
+    category: 'grocery',
+    price: 'Varies',
+  },
+  
+  // Services
+  {
+    id: 41,
+    name: 'ATM Services',
+    description: 'Convenient ATM access with no surcharge fees. Available 24/7 at all locations.',
+    image: 'https://images.unsplash.com/photo-1556740758-90de374c12ad?w=600&h=600&fit=crop',
+    category: 'services',
+    featured: true,
+  },
+  {
+    id: 42,
+    name: 'Fuel Services',
+    description: 'Premium gasoline and diesel fuel. Rewards program members save on every fill-up.',
+    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=600&fit=crop',
+    category: 'services',
+  },
+  {
+    id: 43,
+    name: 'Car Wash',
+    description: 'Automated and hand car wash services. Various packages available.',
+    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=600&fit=crop',
+    category: 'services',
+  },
+  {
+    id: 44,
+    name: 'Money Orders',
+    description: 'Fast and secure money order services for sending payments.',
+    image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&h=600&fit=crop',
+    category: 'services',
+  },
+  {
+    id: 45,
+    name: 'Bill Payment',
+    description: 'Pay utility bills, phone bills, and more. Quick and convenient service.',
+    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=600&fit=crop',
+    category: 'services',
+  },
+  {
+    id: 46,
+    name: 'Lottery Tickets',
+    description: 'State lottery tickets and scratch-off games available at all locations.',
+    image: 'https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=600&h=600&fit=crop',
+    category: 'services',
+  },
+  {
+    id: 47,
+    name: 'Public Restrooms',
+    description: 'Clean, well-maintained restroom facilities available to all customers.',
+    image: 'https://images.unsplash.com/photo-1631889993952-9b67bfb19067?w=600&h=600&fit=crop',
+    category: 'services',
+  },
+  {
+    id: 48,
+    name: 'Wi-Fi Access',
+    description: 'Free high-speed Wi-Fi available to customers at all locations.',
+    image: 'https://images.unsplash.com/photo-1557838923-2985c318be48?w=600&h=600&fit=crop',
+    category: 'services',
+  },
+];
+
+export const getProductsByCategory = (category: Product['category']): Product[] => {
+  return products.filter(product => product.category === category);
+};
+
+export const getFeaturedProduct = (category: Product['category']): Product | undefined => {
+  return products.find(product => product.category === category && product.featured);
+};
+
+
+
+
