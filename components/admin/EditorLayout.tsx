@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Plus, Settings, Save, Image as ImageIcon, LayoutGrid, Undo, Redo } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Editor } from '@tiptap/react';
 
 interface EditorLayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,9 @@ interface EditorLayoutProps {
   isSaving?: boolean;
   seoScore?: number;
   savedStatus?: 'saved' | 'saving' | 'unsaved';
+  editor?: Editor | null;
+  onImageInsert?: () => void;
+  onWidgetToggle?: () => void;
   rightSidebarContent?: {
     postTab?: React.ReactNode;
     blockTab?: React.ReactNode;
