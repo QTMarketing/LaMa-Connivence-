@@ -83,7 +83,6 @@ export default function BlockMenu({ editor }: BlockMenuProps) {
     if (editor) {
       editor.chain().focus().insertContent('<p></p>').run();
       setIsExpanded(false);
-      expandedRef.current = false;
     }
   };
 
@@ -91,7 +90,6 @@ export default function BlockMenu({ editor }: BlockMenuProps) {
     if (editor) {
       editor.chain().focus().toggleHeading({ level: 2 }).run();
       setIsExpanded(false);
-      expandedRef.current = false;
     }
   };
 
@@ -101,7 +99,6 @@ export default function BlockMenu({ editor }: BlockMenuProps) {
       const event = new CustomEvent('openImageModal');
       window.dispatchEvent(event);
       setIsExpanded(false);
-      expandedRef.current = false;
     }
   };
 
@@ -109,7 +106,6 @@ export default function BlockMenu({ editor }: BlockMenuProps) {
     if (editor) {
       editor.chain().focus().toggleBulletList().run();
       setIsExpanded(false);
-      expandedRef.current = false;
     }
   };
 
@@ -117,7 +113,6 @@ export default function BlockMenu({ editor }: BlockMenuProps) {
     if (editor) {
       editor.chain().focus().setHorizontalRule().run();
       setIsExpanded(false);
-      expandedRef.current = false;
     }
   };
 
@@ -125,7 +120,6 @@ export default function BlockMenu({ editor }: BlockMenuProps) {
     if (editor) {
       editor.chain().focus().toggleBlockquote().run();
       setIsExpanded(false);
-      expandedRef.current = false;
     }
   };
 
