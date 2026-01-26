@@ -20,11 +20,16 @@ import BubbleMenuComponent from './BubbleMenu';
 import BlockMenu from './BlockMenu';
 import EditorBlockMenu from './EditorBlockMenu';
 import { PageBuilderBlock } from '@/lib/pageBuilderStorage';
+import { Editor } from '@tiptap/react';
 
 interface RichTextEditorProps {
   content: string;
   onChange: (content: string) => void;
   placeholder?: string;
+  onBlockSelect?: (block: { type: string; node: any; position: number } | null) => void;
+  editorRef?: (editor: Editor | null) => void;
+  title?: string;
+  onTitleChange?: (title: string) => void;
 }
 
 export default function RichTextEditor({ content, onChange, placeholder = 'Type / to choose a block', onBlockSelect, editorRef: setEditorRef, title, onTitleChange }: RichTextEditorProps) {
