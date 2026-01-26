@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2, Tag, X, Save } from 'lucide-react';
-import { tagStorage, blogStorage, type Tag } from '@/lib/blogStorage';
+import { tagStorage, blogStorage, type Tag as TagType } from '@/lib/blogStorage';
 
 export default function TagsPage() {
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
+  const [tags, setTags] = useState<TagType[]>([]);
+  const [filteredTags, setFilteredTags] = useState<TagType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Partial<Tag>>({
+  const [formData, setFormData] = useState<Partial<TagType>>({
     name: '',
     slug: '',
   });
@@ -71,7 +71,7 @@ export default function TagsPage() {
       return;
     }
 
-    const tag: Tag = {
+    const tag: TagType = {
       id: editingId || `tag-${Date.now()}`,
       name: formData.name,
       slug: formData.slug,
@@ -86,7 +86,7 @@ export default function TagsPage() {
     resetForm();
   };
 
-  const handleEdit = (tag: Tag) => {
+  const handleEdit = (tag: TagType) => {
     setEditingId(tag.id);
     setFormData({
       name: tag.name,
