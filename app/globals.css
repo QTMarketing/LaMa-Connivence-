@@ -80,3 +80,262 @@ html {
   margin: 0;
 }
 
+/* High-End Navbar Styles - 7-Eleven Scale */
+
+/* 7-Eleven Scale Navbar Links */
+.nav-link-premium {
+  font-family: var(--font-archivo-narrow), sans-serif;
+  font-size: 22px;
+  font-weight: 600; /* Semibold weight for bolder appearance */
+  letter-spacing: -0.02em; /* Tighter tracking for large text */
+  line-height: 1.2; /* Consistent line-height for vertical alignment */
+  display: flex;
+  align-items: center;
+}
+
+@media (min-width: 1280px) {
+  .nav-link-premium {
+    font-size: 24px; /* The 7-Eleven Scale */
+  }
+}
+
+/* Adjust dropdown arrow size for larger text */
+.nav-link-premium svg,
+.nav-link-premium .arrow {
+  width: 16px;
+  height: 16px;
+}
+
+/* Dynamic Underline Animation - Center Outward */
+.nav-link-premium::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: #FF6B35;
+  transform: translateX(-50%) scaleX(0);
+  transition: transform 0.3s ease-out, width 0.3s ease-out;
+  transform-origin: center;
+}
+
+.nav-link-premium:hover::after {
+  width: 100%;
+  transform: translateX(-50%) scaleX(1);
+}
+
+.nav-link-premium:hover {
+  color: #FF6B35;
+}
+
+/* Mobile Nav Link Underline */
+.nav-link-premium-mobile::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #FF6B35;
+  transform: scaleX(0);
+  transition: transform 0.3s ease-out, width 0.3s ease-out;
+  transform-origin: left;
+}
+
+.nav-link-premium-mobile:hover::after {
+  width: 100%;
+  transform: scaleX(1);
+}
+
+.nav-link-premium-mobile:hover {
+  color: #FF6B35;
+}
+
+/* 7-Eleven Style Mega-Menu */
+.menu-column {
+  min-width: 0;
+}
+
+.menu-column h3 {
+  letter-spacing: -0.02em;
+}
+
+.menu-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mega-menu-link {
+  position: relative;
+}
+
+.mega-menu-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: #FF6B35;
+  transition: width 0.2s ease-out;
+}
+
+.mega-menu-link:hover::after {
+  width: 100%;
+}
+
+/* ============================================
+   UNIFIED BRAND TYPOGRAPHY - 7-ELEVEN LOOK
+   ============================================ */
+
+/* 1. GLOBAL HEADLINES - ALL h1, h2, h3 automatically use Archivo Narrow */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-archivo-narrow), sans-serif !important;
+  text-transform: none; /* Title Case */
+  letter-spacing: -0.02em;
+  line-height: 1.1; /* Tighter for condensed headlines */
+  font-weight: 700; /* Bold default */
+}
+
+/* Large Hero Titles - Big and Clean */
+h1 {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+h3 {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+/* Responsive Headline Sizes */
+@media (min-width: 640px) {
+  h1 {
+    font-size: 56px;
+  }
+  h2 {
+    font-size: 48px;
+  }
+  h3 {
+    font-size: 36px;
+  }
+}
+
+@media (min-width: 1024px) {
+  h1 {
+    font-size: 64px;
+  }
+  h2 {
+    font-size: 56px;
+  }
+  h3 {
+    font-size: 40px;
+  }
+}
+
+/* 2. GLOBAL BODY TEXT - Inter for all paragraphs */
+p, li, .body-text, .description {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #444444;
+}
+
+/* Glass Banner paragraphs should be white */
+.glass-banner p {
+  color: #FFFFFF !important;
+}
+
+/* Buttons and utility text use Inter */
+button:not(.nav-link-premium), .btn, .btn-utility, .footer-text {
+  font-family: var(--font-inter), sans-serif;
+}
+
+/* Links (except nav links) use Inter */
+a:not(.nav-link-premium):not(.nav-link-premium-mobile) {
+  font-family: var(--font-inter), sans-serif;
+}
+
+/* 3. SPECIFIC SECTION CLASSES */
+.rewards-title {
+  font-size: 48px;
+  font-weight: 800;
+  font-family: var(--font-archivo-narrow), sans-serif;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+@media (min-width: 640px) {
+  .rewards-title {
+    font-size: 56px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .rewards-title {
+    font-size: 64px;
+  }
+}
+
+.hiring-banner {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: var(--font-archivo-narrow), sans-serif;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+@media (min-width: 768px) {
+  .hiring-banner {
+    font-size: 28px;
+  }
+}
+
+/* Section Title Class for Consistent Styling */
+.section-title-large {
+  font-family: var(--font-archivo-narrow), sans-serif;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+@media (min-width: 640px) {
+  .section-title-large {
+    font-size: 48px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .section-title-large {
+    font-size: 56px;
+  }
+}
+
+/* Footer logo - keep as Archivo Narrow */
+footer h1, footer h2, footer .logo-text {
+  font-family: var(--font-archivo-narrow), sans-serif;
+}
+
+/* Glass Banner titles */
+.glass-banner h2 {
+  font-family: var(--font-archivo-narrow), sans-serif;
+}
+
+/* Category labels and filters */
+.category-label, .filter-label {
+  font-family: var(--font-archivo-narrow), sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+

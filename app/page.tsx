@@ -253,7 +253,7 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="mb-8 md:mb-12"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-secondary mb-3 sm:mb-4 text-center">
+            <h2 className="section-title-large text-secondary mb-3 sm:mb-4 text-center">
               Current Promos
             </h2>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto text-center px-4">
@@ -442,7 +442,7 @@ export default function Home() {
         <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#FAFAF5] relative">
           {/* Title */}
           <div className="max-w-7xl mx-auto mb-12 sm:mb-16 md:mb-20">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-secondary text-center mb-4 sm:mb-6">
+            <h2 className="section-title-large text-secondary text-center mb-4 sm:mb-6">
               Current Promos
             </h2>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto text-center px-4">
@@ -532,7 +532,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-              <h3 className="text-xl md:text-2xl font-black text-white">We're Hiring!</h3>
+              <h3 className="hiring-banner text-white">We're Hiring!</h3>
               <p className="text-base md:text-lg text-white/90">Employees can save 15¢/gal.</p>
             </div>
             <Link
@@ -564,7 +564,7 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-secondary mb-4 sm:mb-6">
+              <h2 className="rewards-title text-secondary mb-4 sm:mb-6">
                 LaMa Rewards
               </h2>
               <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed mb-4 sm:mb-6">
@@ -638,7 +638,7 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-secondary mb-4 sm:mb-6">
+            <h2 className="section-title-large text-secondary mb-4 sm:mb-6">
               Most Recent Post
             </h2>
             <p className="text-sm sm:text-base md:text-base text-gray-600 max-w-2xl mx-auto">

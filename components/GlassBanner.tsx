@@ -19,11 +19,17 @@ export default function GlassBanner() {
           boxShadow: '0 4px 16px 0 rgba(0, 0, 0, 0.05)',
         }}
       >
-        <div className="text-center">
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white mb-3 md:mb-4 px-2">
+        <div className="text-center glass-banner">
+          <h2 
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-3 md:mb-4 px-2"
+            style={{ fontFamily: 'var(--font-archivo-narrow), sans-serif', letterSpacing: '-0.02em', lineHeight: '1.1' }}
+          >
             Join LaMa Convenience Rewards
           </h2>
-          <p className="text-sm sm:text-base md:text-lg text-white font-normal mb-6 md:mb-8 leading-relaxed px-2">
+          <p 
+            className="text-sm sm:text-base md:text-lg text-white font-normal mb-6 md:mb-8 leading-relaxed px-2"
+            style={{ color: '#FFFFFF' }}
+          >
             Unlock exclusive member-only deals and earn points on every purchase!
           </p>
           <Link
