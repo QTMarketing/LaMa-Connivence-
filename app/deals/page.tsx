@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAllDeals, getDealsByCategory, type Deal } from '@/lib/dealsData';
-import { ArrowRight, Tag, Coffee, Zap, Gift, Users } from 'lucide-react';
+import { Tag, Coffee, Zap, Gift, Users } from 'lucide-react';
 import GlassBanner from '@/components/GlassBanner';
 import { usePromo } from '@/hooks/usePromo';
 
@@ -32,8 +32,6 @@ export default function DealsPage() {
     <div className="min-h-screen bg-white">
       {/* Hero Section - Full Width Image with Text Overlay */}
       <section className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
-        {/* Glass Banner - Floating Inside Hero */}
-        <GlassBanner />
         <div className="absolute inset-0">
           <Image
             src="https://images.unsplash.com/photo-1551218808-94e220e084d2?w=1920&h=1080&fit=crop"
@@ -44,30 +42,33 @@ export default function DealsPage() {
           />
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
-        <div className="relative z-40 h-full flex items-start justify-center pt-4 px-6 pb-8">
+        {/* Container for Title and Glass Banner */}
+        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center text-white max-w-4xl"
+            className="text-center text-white max-w-4xl mb-6 sm:mb-6 md:mb-8"
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-8">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black">
               Deals
             </h1>
           </motion.div>
+          {/* Glass Banner - Floating Inside Hero */}
+          <GlassBanner />
         </div>
       </section>
 
       {/* Featured Deal Section */}
       {currentPromo && featuredDeals.length > 0 && (
-        <section className="py-12 px-6 bg-white">
+        <section className="py-12 px-4 sm:px-6 bg-white">
           <div className="max-w-7xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="bg-gray-50 rounded-2xl p-6 md:p-8 lg:p-12"
+              className="bg-gray-50 rounded-2xl p-4 sm:p-6 md:p-8 lg:p-12"
             >
               <div className="relative">
                 <AnimatePresence mode="wait">
@@ -97,7 +98,7 @@ export default function DealsPage() {
                       <div className="mb-6">
                         <Link
                           href="/stores"
-                          className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-bold transition-all hover:scale-105"
+                          className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-bold transition-all hover:scale-105 min-h-[44px]"
                           style={{ backgroundColor: '#FF6B35' }}
                         >
                           Find a Store
@@ -153,7 +154,7 @@ export default function DealsPage() {
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`px-6 py-3 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${
+                  className={`px-4 sm:px-6 py-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-2 min-h-[44px] ${
                     selectedCategory === category.id
                       ? 'bg-primary text-white'
                       : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
@@ -170,7 +171,7 @@ export default function DealsPage() {
       </section>
 
       {/* Deals Grid */}
-      <section className="py-12 md:py-16 px-6" style={{ backgroundColor: '#E5E5E5' }}>
+      <section className="py-12 md:py-16 px-6" style={{ backgroundColor: '#FAFAF5' }}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {filteredDeals.map((deal: Deal, index: number) => (
@@ -189,7 +190,7 @@ export default function DealsPage() {
                     fill
                     className="object-cover"
                   />
-                  <button className="absolute top-3 right-3 bg-white/90 hover:bg-white text-secondary px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
+                  <button className="absolute top-3 right-3 bg-white/90 hover:bg-white text-secondary px-3 py-2 rounded-lg text-xs font-bold transition-all min-h-[36px] min-w-[80px]">
                     Save deal
                   </button>
                 </div>
@@ -199,7 +200,7 @@ export default function DealsPage() {
                   </p>
                   <Link
                     href={`/deals/${deal.id}`}
-                    className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-bold text-sm transition-all hover:scale-105 w-full justify-center"
+                    className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-bold text-sm transition-all hover:scale-105 w-full justify-center min-h-[44px]"
                     style={{ backgroundColor: '#FF6B35' }}
                   >
                     View Detail
@@ -217,45 +218,6 @@ export default function DealsPage() {
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="py-12 md:py-16 px-6 bg-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-3xl md:text-4xl font-black text-secondary mb-4">
-              Never Miss a Deal
-            </h2>
-            <p className="text-lg text-gray-600 mb-6">
-              Sign up for our newsletter and get the latest promotions delivered straight to your inbox.
-            </p>
-            <form 
-              onSubmit={(e) => {
-                e.preventDefault();
-                // Handle newsletter subscription
-              }}
-              className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
-            >
-              <input
-                type="email"
-                placeholder="Enter your email"
-                required
-                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary text-sm"
-              />
-              <button
-                type="submit"
-                className="bg-primary text-white px-8 py-3 rounded-lg font-bold transition-all hover:scale-105 whitespace-nowrap"
-                style={{ backgroundColor: '#FF6B35' }}
-              >
-                Subscribe Now
-              </button>
-            </form>
-          </motion.div>
-        </div>
-      </section>
     </div>
   );
 }

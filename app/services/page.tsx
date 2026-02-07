@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowRight, CreditCard, Car, Droplets, FileText, DollarSign, Ticket, Wifi, RefreshCw, Building2, Wallet, Gift } from 'lucide-react';
+import { CreditCard, Car, Droplets, FileText, DollarSign, Ticket, Wifi, RefreshCw, Building2, Gift } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { products } from '@/lib/productData';
@@ -90,8 +90,6 @@ export default function ServicesPage() {
     <div className="min-h-screen bg-white">
       {/* Hero Section - Full Width Image with Text Overlay */}
       <section className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
-        {/* Glass Banner - Floating Inside Hero */}
-        <GlassBanner />
         <div className="absolute inset-0">
           <Image
             src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=1080&fit=crop"
@@ -100,19 +98,22 @@ export default function ServicesPage() {
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="absolute inset-0 bg-black/40"></div>
         </div>
-        <div className="relative z-40 h-full flex items-start justify-center pt-4 px-6 pb-8">
+        {/* Container for Title and Glass Banner */}
+        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center text-white max-w-4xl"
+            className="text-center text-white max-w-4xl mb-6 sm:mb-6 md:mb-8"
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-8">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black">
               Services
             </h1>
           </motion.div>
+          {/* Glass Banner - Floating Inside Hero */}
+          <GlassBanner />
         </div>
       </section>
 
@@ -122,7 +123,7 @@ export default function ServicesPage() {
           <nav className="flex flex-wrap gap-3 md:gap-4 justify-center">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`px-6 py-3 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${
+              className={`px-4 sm:px-6 py-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-2 min-h-[44px] ${
                 selectedCategory === 'all'
                   ? 'bg-primary text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
@@ -132,20 +133,8 @@ export default function ServicesPage() {
               ALL SERVICES
             </button>
             <button
-              onClick={() => setSelectedCategory('financial')}
-              className={`px-6 py-3 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${
-                selectedCategory === 'financial'
-                  ? 'bg-primary text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-              }`}
-              style={selectedCategory === 'financial' ? { backgroundColor: '#FF6B35' } : {}}
-            >
-              <Wallet size={18} />
-              Financial Services
-            </button>
-            <button
               onClick={() => setSelectedCategory('convenience')}
-              className={`px-6 py-3 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${
+              className={`px-4 sm:px-6 py-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-2 min-h-[44px] ${
                 selectedCategory === 'convenience'
                   ? 'bg-primary text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
@@ -235,11 +224,12 @@ export default function ServicesPage() {
           <div className="relative">
             <div
               ref={dealsCarouselRef}
-              className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+              className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4 -mx-4 sm:-mx-6 px-4 sm:px-6"
               style={{
                 scrollSnapType: 'x mandatory',
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch'
               }}
             >
               {featuredDeals.map((deal, index) => (
@@ -249,7 +239,7 @@ export default function ServicesPage() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="flex-shrink-0 w-full md:w-[400px] lg:w-[450px] bg-white rounded-xl overflow-hidden shadow-lg"
+                  className="flex-shrink-0 w-[calc(100vw-3rem)] sm:w-[calc(100vw-4rem)] md:w-[400px] lg:w-[450px] bg-white rounded-xl overflow-hidden shadow-lg"
                   style={{ scrollSnapAlign: 'start' }}
                 >
                   <div className="relative w-full aspect-video overflow-hidden">
@@ -314,29 +304,6 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Note Section */}
-      <section className="py-12 md:py-16 px-6 bg-white">
-        <div className="max-w-7xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <p className="text-lg text-gray-600 mb-6">
-              Some services are only available at select LaMa Convenience locations.
-            </p>
-            <Link
-              href="/stores"
-              className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-lg font-bold transition-all hover:scale-105"
-              style={{ backgroundColor: '#FF6B35' }}
-            >
-              Find a Store
-              <ArrowRight size={20} />
-            </Link>
-          </motion.div>
-        </div>
-      </section>
     </div>
   );
 }

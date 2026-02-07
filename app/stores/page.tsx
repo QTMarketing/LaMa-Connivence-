@@ -71,8 +71,6 @@ export default function StoresPage() {
     <div className="min-h-screen bg-white">
       {/* Hero Section - Full Width Image with Text Overlay */}
       <section className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
-        {/* Glass Banner - Floating Inside Hero */}
-        <GlassBanner />
         <div className="absolute inset-0">
           <Image
             src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=1080&fit=crop"
@@ -83,17 +81,20 @@ export default function StoresPage() {
           />
           <div className="absolute inset-0 bg-black/50"></div>
         </div>
-        <div className="relative z-40 h-full flex items-start justify-center pt-4 px-6 pb-8">
+        {/* Container for Title and Glass Banner */}
+        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center text-white max-w-4xl"
+            className="text-center text-white max-w-4xl mb-6 sm:mb-6 md:mb-8"
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-8">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black">
               Find a Store
             </h1>
           </motion.div>
+          {/* Glass Banner - Floating Inside Hero */}
+          <GlassBanner />
         </div>
       </section>
 
@@ -123,12 +124,12 @@ export default function StoresPage() {
                   value={searchCity}
                   onChange={(e) => setSearchCity(e.target.value)}
                   placeholder="Enter city name (e.g., Dallas, Fort Worth)"
-                  className="w-full pl-12 pr-12 py-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary text-lg"
+                  className="w-full pl-12 pr-12 py-3 sm:py-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary text-base sm:text-lg min-h-[44px]"
                 />
                 {searchCity && (
                   <button
                     onClick={() => setSearchCity('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                   >
                     <X size={20} />
                   </button>
@@ -199,7 +200,7 @@ export default function StoresPage() {
                     
                     <Link
                       href={`/stores/${store.id}`}
-                      className="inline-flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all group"
+                      className="inline-flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all group min-h-[44px]"
                     >
                       View Details
                       <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />

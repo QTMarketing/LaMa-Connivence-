@@ -119,7 +119,7 @@ export default function StoreDetailPage({ params }: StoreDetailPageProps) {
                 href={mapUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-lg font-bold transition-colors w-full justify-center"
+                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold transition-colors w-full justify-center min-h-[44px]"
               >
                 <Navigation size={20} />
                 Get Directions

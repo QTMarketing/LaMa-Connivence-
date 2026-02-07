@@ -23,7 +23,7 @@ export default function Footer() {
 
   const mediaLinks = [
     { href: '/media/blog', label: 'Blog' },
-    { href: '/media/press-room', label: 'Press Room' },
+    { href: '/media', label: 'Press Room' },
   ];
 
   const socialLinks = [

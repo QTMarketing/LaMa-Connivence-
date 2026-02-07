@@ -104,7 +104,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={isLoading || !password}
-            className="w-full bg-primary text-white px-6 py-3 rounded-lg font-bold text-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="w-full bg-primary text-white px-6 py-3 rounded-lg font-bold text-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 min-h-[44px]"
             style={{ backgroundColor: '#FF6B35' }}
           >
             {isLoading ? 'Logging in...' : 'Login'}

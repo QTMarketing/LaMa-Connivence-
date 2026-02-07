@@ -1,50 +1,17 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Coffee, ShoppingBag, IceCream, ShoppingCart, Package, UtensilsCrossed, MapPin, ArrowRight, Gift, Star, TrendingUp, Zap, Smartphone, Instagram, Facebook, Twitter, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Coffee, ShoppingBag, IceCream, ShoppingCart, Package, UtensilsCrossed, MapPin, ArrowRight, Gift, Star, TrendingUp, Zap, Smartphone, Instagram, Facebook, Twitter, ChevronLeft, ChevronRight, Search, Clock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getHomepagePromos, getFeaturedDeals } from '@/lib/dealsData';
 import { products } from '@/lib/productData';
-import { useState, useEffect, useRef } from 'react';
+import { blogs } from '@/lib/blogData';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentPromoSlide, setCurrentPromoSlide] = useState(0);
-  const [currentDealsIndex, setCurrentDealsIndex] = useState(0);
-  const dealsCarouselRef = useRef<HTMLDivElement>(null);
-
-  // Track scroll position to update active card
-  useEffect(() => {
-    const carousel = dealsCarouselRef.current;
-    if (!carousel) return;
-
-    const handleScroll = () => {
-      const scrollLeft = carousel.scrollLeft;
-      const cardWidth = 380; // base card width
-      const gap = 24; // gap-6 = 24px
-      const cardWidthWithGap = cardWidth + gap;
-      
-      // Find which card is most visible
-      let activeIndex = 0;
-      if (scrollLeft > 0) {
-        // First card is wider, so we need to account for that
-        const firstCardWidth = 540; // active card width
-        if (scrollLeft < firstCardWidth) {
-          activeIndex = 0;
-        } else {
-          // After first card, calculate based on standard width
-          const remainingScroll = scrollLeft - firstCardWidth;
-          activeIndex = Math.floor(remainingScroll / cardWidthWithGap) + 1;
-        }
-      }
-      
-      setCurrentDealsIndex(activeIndex);
-    };
-
-    carousel.addEventListener('scroll', handleScroll);
-    return () => carousel.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Hero slides data - Complete banners with both text and images
   const heroSlides = [
@@ -80,45 +47,35 @@ export default function Home() {
     },
   ];
 
-  // Promo slides data
-  const promoSlides = [
-    {
-      id: 1,
-      title: 'Special Promotion',
-      description: 'Discover our amazing deals and special offers. Don\'t miss out on these limited-time promotions.',
-      image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=800&fit=crop',
-      alt: 'Special Promotion',
-      ctaText: 'View Deals',
-      ctaLink: '/deals',
-    },
-    {
-      id: 2,
-      title: 'Weekly Specials',
-      description: 'Get great discounts on your favorite snacks and beverages every week. New deals updated every Monday!',
-      image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=1200&h=800&fit=crop',
-      alt: 'Weekly Specials',
-      ctaText: 'Shop Now',
-      ctaLink: '/deals',
-    },
-    {
-      id: 3,
-      title: 'Combo Offers',
-      description: 'Save more with our combo deals! Mix and match your favorites and get exclusive bundle pricing.',
-      image: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=1200&h=800&fit=crop',
-      alt: 'Combo Offers',
-      ctaText: 'Explore Combos',
-      ctaLink: '/deals',
-    },
-    {
-      id: 4,
-      title: 'Fresh Daily',
-      description: 'Made fresh daily! Hot food, cold drinks, and everything you need for your day-to-day convenience.',
-      image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200&h=800&fit=crop',
-      alt: 'Fresh Daily',
-      ctaText: 'Find a Store',
-      ctaLink: '/stores',
-    },
+  // Promo slides data - driven by admin-managed deals
+  const promoSlides = getHomepagePromos();
+
+  // Local hero banner images
+  const heroImages = [
+    '/photos/monster.jpg',
+    '/photos/redbull.jpg',
+    '/photos/c4.jpg',
+    '/photos/hotdog.jpg',
   ];
+
+  // Featured promo slider (Concha y Toro style)
+  const [featuredPromoIndex, setFeaturedPromoIndex] = useState(0);
+
+  const currentPromo = promoSlides[featuredPromoIndex % Math.max(promoSlides.length, 1)] || promoSlides[0];
+  const nextPromo =
+    promoSlides.length > 1
+      ? promoSlides[(featuredPromoIndex + 1) % promoSlides.length]
+      : currentPromo;
+
+  const goToNextFeaturedPromo = () => {
+    if (promoSlides.length === 0) return;
+    setFeaturedPromoIndex((prev) => (prev + 1) % promoSlides.length);
+  };
+
+  const goToPrevFeaturedPromo = () => {
+    if (promoSlides.length === 0) return;
+    setFeaturedPromoIndex((prev) => (prev - 1 + promoSlides.length) % promoSlides.length);
+  };
 
   // Auto-advance hero slides every 10 seconds
   useEffect(() => {
@@ -129,14 +86,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [heroSlides.length]);
 
-  // Auto-advance promo slides every 10 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentPromoSlide((prev) => (prev + 1) % promoSlides.length);
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, [promoSlides.length]);
+  // Hero section is static - no auto-advance needed
 
   // Manual navigation functions for hero
   const nextSlide = () => {
@@ -147,13 +97,13 @@ export default function Home() {
     setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
   };
 
-  // Manual navigation functions for promo
+  // Manual navigation functions for hero images
   const nextPromoSlide = () => {
-    setCurrentPromoSlide((prev) => (prev + 1) % promoSlides.length);
+    setCurrentPromoSlide((prev) => (prev + 1) % heroImages.length);
   };
 
   const prevPromoSlide = () => {
-    setCurrentPromoSlide((prev) => (prev - 1 + promoSlides.length) % promoSlides.length);
+    setCurrentPromoSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length);
   };
 
   const productCategories = [
@@ -188,7 +138,7 @@ export default function Home() {
       description: 'Everyday essentials and household items.',
     },
     {
-      href: '/products/services',
+      href: '/services',
       icon: ShoppingBag,
       title: 'Services',
       description: 'Additional services and conveniences we offer.',
@@ -198,402 +148,103 @@ export default function Home() {
   return (
     <>
     <div className="min-h-screen bg-white">
-      {/* Hero Banner Section - Empty Full Width Banner */}
-      <section className="relative pt-0 pb-12 md:pb-16 lg:pb-20 overflow-visible">
-        <div className="w-full h-[550px] md:h-[650px] lg:h-[750px] relative overflow-visible">
-          {/* Fixed Rectangle Container - Orange Background - Full Width */}
-          <div 
-            className="w-full h-[550px] md:h-[650px] lg:h-[750px] rounded-t-none rounded-b-3xl md:rounded-b-[40px] border-2 border-t-0"
-            style={{ 
-              backgroundColor: '#FF6B35',
-              borderColor: '#FAFAF5',
-              boxShadow: 'inset 0 0 40px rgba(0, 0, 0, 0.3)'
-            }}
-          >
-            {/* Long Rectangular Banner with Image and Content - Carousel */}
-            <div className="w-full h-full flex items-center justify-center px-2 md:px-4 lg:px-6 relative group/promo">
-              <div className="w-full max-w-[98%] relative">
-                <AnimatePresence mode="wait">
-                  {promoSlides.map((slide, index) => {
-                    if (index !== currentPromoSlide) return null;
-                    return (
+      {/* Hero Banner Section - Static hotdog image */}
+      <section className="relative pt-20 pb-0 overflow-hidden">
+        <div className="relative w-full h-[calc(100vh-80px)] min-h-[500px]">
+          <Image
+            src="/photos/hotdog.jpg"
+            alt="Hero banner"
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+      </section>
+
+      {/* Three Colored Cards Section - Full-width, touching hero and screen edges */}
+      <section className="bg-white">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
+          {/* Green Card */}
                       <motion.div
-                        key={slide.id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="bg-white rounded-2xl overflow-hidden shadow-xl flex flex-col md:flex-row relative"
-                      >
-                        {/* Content Section */}
-                        <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-                          <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-secondary mb-4">
-                            {slide.title}
-                          </h2>
-                          <p className="text-gray-600 text-base md:text-lg mb-6 leading-relaxed">
-                            {slide.description}
-                          </p>
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="relative overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]"
+            style={{ backgroundColor: '#2E7D32' }}
+          >
+            <Link
+              href="/deals"
+              className="block p-6 sm:p-8 md:p-10 min-h-[260px] sm:min-h-[320px] md:min-h-[360px] flex flex-col justify-center items-center text-center"
+            >
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-3 sm:mb-4">
+                Coffee Deals
+              </h3>
+              <p className="text-white/90 text-sm sm:text-base mb-4 sm:mb-6">
+                Fresh brews and specialty drinks
+              </p>
+              <span className="text-white font-bold text-sm sm:text-base uppercase tracking-wide">
+                View Deals →
+              </span>
+            </Link>
+          </motion.div>
+
+          {/* Black Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="relative overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]"
+            style={{ backgroundColor: '#1A1A1A' }}
+          >
                           <Link
-                            href={slide.ctaLink}
-                            className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-bold text-sm md:text-base uppercase transition-all hover:bg-primary-dark hover:scale-105 w-fit"
+              href="/products"
+              className="block p-6 sm:p-8 md:p-10 min-h-[260px] sm:min-h-[320px] md:min-h-[360px] flex flex-col justify-center items-center text-center"
+            >
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-3 sm:mb-4">
+                Fresh Food
+              </h3>
+              <p className="text-white/90 text-sm sm:text-base mb-4 sm:mb-6">
+                Hot meals made fresh daily
+              </p>
+              <span className="text-white font-bold text-sm sm:text-base uppercase tracking-wide">
+                Explore Menu →
+              </span>
+            </Link>
+          </motion.div>
+
+          {/* Orange Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="relative overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]"
                             style={{ backgroundColor: '#FF6B35' }}
                           >
-                            {slide.ctaText}
-                            <ArrowRight size={18} />
-            </Link>
-                        </div>
-                        
-                        {/* Image Section */}
-                        <div className="relative w-full md:w-1/2 h-96 md:h-[500px] lg:h-[600px]">
-                          <Image
-                            src={slide.image}
-                            alt={slide.alt}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
-
-                {/* Previous/Next Navigation Buttons (Visible on hover) */}
-                <button
-                  onClick={prevPromoSlide}
-                  className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-primary rounded-lg p-3 md:p-4 shadow-lg transition-all hover:scale-110 z-30 opacity-0 group-hover/promo:opacity-100"
-                  aria-label="Previous promo slide"
-                  style={{ color: '#FF6B35' }}
-                >
-                  <ChevronLeft size={24} className="md:w-6 md:h-6" />
-                </button>
-
-                <button
-                  onClick={nextPromoSlide}
-                  className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-primary rounded-lg p-3 md:p-4 shadow-lg transition-all hover:scale-110 z-30 opacity-0 group-hover/promo:opacity-100"
-                  aria-label="Next promo slide"
-                  style={{ color: '#FF6B35' }}
-                >
-                  <ChevronRight size={24} className="md:w-6 md:h-6" />
-                </button>
-
-                {/* Slide Indicators - Bottom Center */}
-                <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-                  {promoSlides.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentPromoSlide(index)}
-                      className={`transition-all duration-300 rounded-lg ${
-                        index === currentPromoSlide
-                          ? 'w-8 h-2 bg-primary'
-                          : 'w-2 h-2 bg-gray-400 hover:bg-gray-600'
-                      }`}
-                      aria-label={`Go to promo slide ${index + 1}`}
-                      style={index === currentPromoSlide ? { backgroundColor: '#FF6B35' } : {}}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Statistics Section - Right below orange border - Aligned with white card text */}
-        <div
-          className="absolute left-16 md:left-20 lg:left-24 z-40"
-          style={{ 
-            bottom: '3px',
-            transform: 'translateY(0%)'
-          }}
-        >
-          <div className="flex flex-wrap items-center gap-8 md:gap-10 lg:gap-12">
-            {/* Statistics */}
-            <div className="text-center">
-              <p className="text-xl md:text-2xl font-black text-secondary mb-1">25+</p>
-              <p className="text-xs text-gray-600 uppercase tracking-wide">Locations</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xl md:text-2xl font-black text-secondary mb-1">10+</p>
-              <p className="text-xs text-gray-600 uppercase tracking-wide">Years Serving</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xl md:text-2xl font-black text-secondary mb-1">150+</p>
-              <p className="text-xs text-gray-600 uppercase tracking-wide">Products</p>
-            </div>
-            
-            {/* Search Bar and Find a Store Button - Reduced gap */}
-            <div className="ml-4 md:ml-6 lg:ml-8 flex items-center gap-3">
-              {/* Search Bar - Longer width */}
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="pl-10 pr-4 py-2.5 border-2 rounded-lg focus:outline-none focus:border-secondary text-sm md:text-base w-56 md:w-72 lg:w-80"
-                  style={{ borderColor: 'rgba(156, 163, 175, 0.3)' }}
-                />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              </div>
-              
-              {/* Find a Store Button - Black color */}
-              <Link
-                href="/stores"
-                className="inline-flex items-center gap-2 bg-secondary hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-bold text-sm uppercase transition-all duration-300 hover:scale-105"
-                style={{ backgroundColor: '#1A1A1A' }}
-              >
-                Find a Store
-                <MapPin size={16} />
-            </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* LaMa Logo - Bottom right corner, overlapping hero and promo sections */}
-        <div
-          className="absolute"
-          style={{ 
-            right: '20px',
-            bottom: '100px',
-            transform: 'translateY(50%)',
-            pointerEvents: 'auto',
-            zIndex: 9999
-          }}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="relative"
-            style={{ display: 'block' }}
-          >
-            <Image
-              src="/Lama.png"
-              alt="LaMa Logo"
-              width={300}
-              height={300}
-              className="w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 object-contain"
-              priority
-            />
-          </motion.div>
-        </div>
-      </section>
-
-      {/* The star of Your Deals Section - Dark Theme Carousel (Yo Quiero Style) */}
-      <section className="py-16 md:py-20 lg:py-24 px-6 bg-secondary relative overflow-hidden group mt-8 md:mt-12 lg:mt-16" style={{ backgroundColor: '#1A1A1A' }}>
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="mb-8 md:mb-12"
-          >
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-8">
-              {/* Left Side - Title and Description */}
-              <div className="flex-1">
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4">
-                  <span className="italic font-light text-3xl md:text-4xl lg:text-5xl">The star of</span>{' '}
-                  <span className="uppercase text-4xl md:text-5xl lg:text-6xl">Your Deals</span>
-                </h2>
-                <p className="text-lg md:text-xl text-white/90 max-w-2xl leading-relaxed mb-6">
-                  We'll let you in on a little secret: You can save more with your convenience. Broaden your savings with some of our featured deals.
-                </p>
-                <Link
-                  href="/deals"
-                  className="inline-flex items-center gap-2 bg-white hover:bg-gray-100 text-secondary px-8 py-4 rounded-lg font-bold text-base transition-all duration-300 hover:scale-105"
-                  style={{ color: '#1A1A1A' }}
-                >
-                  Current Promos
-                </Link>
-              </div>
-
-              {/* Right Side - Carousel Navigation Arrows (Visible on hover) */}
-              <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button
-                  onClick={() => {
-                    if (dealsCarouselRef.current) {
-                      const prevIndex = Math.max(0, currentDealsIndex - 1);
-                      
-                      // Get actual card widths based on viewport
-                      const isMobile = window.innerWidth < 768;
-                      const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
-                      const activeCardWidth = isMobile ? 540 : isTablet ? 600 : 650;
-                      const normalCardWidth = isMobile ? 380 : isTablet ? 420 : 450;
-                      const gap = 24;
-                      
-                      // Calculate scroll position
-                      let scrollPosition = 0;
-                      if (prevIndex === 0) {
-                        scrollPosition = 0;
-                      } else {
-                        // Scroll past the first (wider) card
-                        scrollPosition = activeCardWidth + gap;
-                        // Add width of each normal card we need to pass
-                        for (let i = 1; i < prevIndex; i++) {
-                          scrollPosition += normalCardWidth + gap;
-                        }
-                      }
-                      
-                      setCurrentDealsIndex(prevIndex);
-                      dealsCarouselRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' });
-                    }
-                  }}
-                  className="w-12 h-12 md:w-14 md:h-14 bg-white/10 hover:bg-white/20 border-2 border-white/30 hover:border-white/50 rounded-lg flex items-center justify-center transition-all duration-300 group"
-                  aria-label="Previous deals"
-                >
-                  <ChevronLeft size={24} className="text-white group-hover:scale-110 transition-transform" />
-                </button>
-                <button
-                  onClick={() => {
-                    if (dealsCarouselRef.current) {
-                      const maxIndex = getFeaturedDeals().length - 1;
-                      const nextIndex = Math.min(maxIndex, currentDealsIndex + 1);
-                      
-                      // Get actual card widths based on viewport
-                      const isMobile = window.innerWidth < 768;
-                      const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
-                      const activeCardWidth = isMobile ? 540 : isTablet ? 600 : 650;
-                      const normalCardWidth = isMobile ? 380 : isTablet ? 420 : 450;
-                      const gap = 24;
-                      
-                      // Calculate scroll position
-                      let scrollPosition = 0;
-                      if (nextIndex === 0) {
-                        scrollPosition = 0;
-                      } else {
-                        // Scroll past the first (wider) card
-                        scrollPosition = activeCardWidth + gap;
-                        // Add width of each normal card we need to pass
-                        for (let i = 1; i < nextIndex; i++) {
-                          scrollPosition += normalCardWidth + gap;
-                        }
-                      }
-                      
-                      setCurrentDealsIndex(nextIndex);
-                      dealsCarouselRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' });
-                    }
-                  }}
-                  className="w-12 h-12 md:w-14 md:h-14 bg-white/10 hover:bg-white/20 border-2 border-white/30 hover:border-white/50 rounded-lg flex items-center justify-center transition-all duration-300 group"
-                  aria-label="Next deals"
-                >
-                  <ChevronRight size={24} className="text-white group-hover:scale-110 transition-transform" />
-                </button>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Carousel Container - Shows partial next card */}
-          <div className="relative">
-            <div 
-              ref={dealsCarouselRef}
-              className="overflow-x-auto scrollbar-hide pb-4 -mx-6 px-6"
-              style={{ 
-                scrollbarWidth: 'none', 
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch'
-              }}
+            <Link
+              href="/rewards"
+              className="block p-6 sm:p-8 md:p-10 min-h-[260px] sm:min-h-[320px] md:min-h-[360px] flex flex-col justify-center items-center text-center"
             >
-              <div className="flex gap-6 w-max">
-                {getFeaturedDeals().map((deal, index) => {
-                  // Determine if this card is currently active (should be wider)
-                  const isActive = index === currentDealsIndex;
-                  return (
-                    <motion.div
-                      key={deal.id}
-                      initial={{ opacity: 0, x: 50 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true, margin: '-100px' }}
-                      animate={{
-                        width: isActive ? 650 : 450
-                      }}
-                      transition={{ 
-                        width: { duration: 0.6, ease: 'easeInOut' }
-                      }}
-                      className={`flex-shrink-0 ${
-                        isActive 
-                          ? 'md:w-[600px] lg:w-[650px]' 
-                          : 'md:w-[420px] lg:w-[450px]'
-                      }`}
-                      style={{
-                        width: isActive ? '540px' : '380px'
-                      }}
-                    >
-                    <Link
-                      href={`/deals/${deal.id}`}
-                      className="block bg-white rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300 group"
-                      style={{ backgroundColor: '#FFFFFF' }}
-                    >
-                      {/* Image Section - Rounded Top Corners Only - Fixed Height for All Cards */}
-                      <div className="relative w-full h-[200px] md:h-[230px] lg:h-[260px] overflow-hidden rounded-t-xl">
-                        <Image
-                          src={deal.image}
-                          alt={deal.title}
-                          fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      </div>
-                      
-                      {/* Title and Metadata Section - Same Line, White Background */}
-                      <div 
-                        className="px-6 py-5 bg-white flex items-center justify-between gap-4"
-                      >
-                        {/* Title on the left */}
-                        <h3 
-                          className="text-xl md:text-2xl font-black leading-tight transition-colors duration-300 text-secondary flex-shrink-0"
-                          style={{ color: '#1A1A1A' }}
-                        >
-                          {deal.title}
-                        </h3>
-                        
-                        {/* Metadata on the right */}
-                        <div className="flex items-center gap-3 text-xs md:text-sm text-secondary uppercase tracking-wide font-medium flex-shrink-0">
-                          <span>{deal.savings.toUpperCase()}</span>
-                          {deal.expirationDate && (
-                            <>
-                              <span className="text-gray-400">|</span>
-                              <span>EXPIRES: {new Date(deal.expirationDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
-                            </>
-                          )}
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-3 sm:mb-4">
+                Rewards
+              </h3>
+              <p className="text-white/90 text-sm sm:text-base mb-4 sm:mb-6">
+                Earn points on every purchase
+              </p>
+              <span className="text-white font-bold text-sm sm:text-base uppercase tracking-wide">
+                Join Now →
+              </span>
+            </Link>
+          </motion.div>
                         </div>
-                      </div>
-
-                      {/* CTA Button - White Background with Orange Button (LaMa Style) */}
-                      <div className="px-6 pb-6 pt-5 bg-white">
-                        <button 
-                          className="text-white px-6 py-3 rounded-lg font-bold text-sm transition-all duration-300 hover:scale-105 w-full hover:opacity-90"
-                          style={{ 
-                            backgroundColor: '#FF6B35'
-                          }}
-                        >
-                          View Full Deal
-                        </button>
-                      </div>
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Carousel Progress Indicators (Yo Quiero Style) */}
-            <div className="flex items-center justify-center gap-2 mt-6">
-              {getFeaturedDeals().slice(0, 5).map((_, index) => (
-                <div
-                  key={index}
-                  className={`h-1 transition-all duration-300 ${
-                    index === currentDealsIndex ? 'w-8 bg-white' : 'w-2 bg-white/30'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
       </section>
 
-      {/* Spacer to allow logo overlap into promo section */}
-      <div className="relative overflow-visible" style={{ height: '150px', marginTop: '-150px', zIndex: 40 }}>
-      </div>
-
+      {/* OLD CURRENT PROMO SECTION - Hidden but preserved for future use */}
+      <div className="hidden" id="old-current-promo-section">
       {/* Current Promos Section - Yo Quiero Style Layout (Exact Match) */}
-      <section className="py-12 md:py-16 lg:py-20 px-6 bg-white">
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -602,10 +253,10 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="mb-8 md:mb-12"
           >
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-secondary mb-4 text-center">
+            <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-secondary mb-3 sm:mb-4 text-center">
               Current Promos
             </h2>
-            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto text-center">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto text-center px-4">
               Great deals happening now. Save more on your favorites every day.
             </p>
           </motion.div>
@@ -622,30 +273,30 @@ export default function Home() {
             >
               <Link href="/deals" className="block flex-1 flex flex-col">
                 {/* Large Image - Increased Height with Label Inside */}
-                <div className="relative w-full flex-1 min-h-[320px] md:min-h-[400px] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
-                  <Image
+                <div className="relative w-full flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[400px] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+                          <Image
                     src={getHomepagePromos()[0]?.image || 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop'}
                     alt={getHomepagePromos()[0]?.title || 'Promo'}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   {/* Label Inside Card - Top Left */}
-                  <div className="absolute top-4 left-4 z-10">
+                  <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-10">
                     <div 
-                      className="px-6 py-3 rounded-md shadow-lg"
+                      className="px-4 sm:px-6 py-2 sm:py-3 rounded-md shadow-lg"
                       style={{ 
                         backgroundColor: '#1A1A1A',
                         color: '#FFFFFF'
                       }}
                     >
-                      <span className="font-black text-lg md:text-xl uppercase tracking-wide">
+                      <span className="font-black text-sm sm:text-base md:text-lg lg:text-xl uppercase tracking-wide">
                         {getHomepagePromos()[0]?.title || 'Meal Deals'}
                       </span>
-                    </div>
+                        </div>
                   </div>
                 </div>
               </Link>
-            </motion.div>
+                      </motion.div>
 
             {/* Middle Column - Single Large Image (Wider) */}
             <motion.div
@@ -657,7 +308,7 @@ export default function Home() {
             >
               <Link href="/deals" className="block flex-1 flex flex-col">
                 {/* Large Image - Increased Height with Label Inside */}
-                <div className="relative w-full flex-1 min-h-[320px] md:min-h-[400px] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+                <div className="relative w-full flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[400px] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
                   <Image
                     src={getHomepagePromos()[1]?.image || 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=600&fit=crop'}
                     alt={getHomepagePromos()[1]?.title || 'Promo'}
@@ -665,20 +316,20 @@ export default function Home() {
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   {/* Label Inside Card - Top Left */}
-                  <div className="absolute top-4 left-4 z-10">
+                  <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-10">
                     <div 
-                      className="px-6 py-3 rounded-md shadow-lg"
+                      className="px-4 sm:px-6 py-2 sm:py-3 rounded-md shadow-lg"
                       style={{ 
                         backgroundColor: '#FAFAF5',
                         color: '#1A1A1A'
                       }}
                     >
-                      <span className="font-black text-lg md:text-xl uppercase tracking-wide">
+                      <span className="font-black text-sm sm:text-base md:text-lg lg:text-xl uppercase tracking-wide">
                         {getHomepagePromos()[1]?.title || 'Food Specials'}
                       </span>
-                    </div>
-                  </div>
                 </div>
+              </div>
+            </div>
             </Link>
             </motion.div>
 
@@ -688,7 +339,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="group flex flex-col gap-6 md:col-span-4"
+              className="group flex flex-col gap-4 sm:gap-6 md:col-span-4"
             >
               {/* Top Image in Right Column */}
               <Link href="/deals" className="block">
@@ -701,20 +352,20 @@ export default function Home() {
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   {/* Label Inside Card - Top Left */}
-                  <div className="absolute top-4 left-4 z-10">
+                  <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-10">
                     <div 
-                      className="px-6 py-3 rounded-md shadow-lg"
-                      style={{ 
+                      className="px-4 sm:px-6 py-2 sm:py-3 rounded-md shadow-lg"
+          style={{ 
                         backgroundColor: '#FF6B35',
                         color: '#FFFFFF'
                       }}
                     >
-                      <span className="font-black text-lg md:text-xl uppercase tracking-wide">
+                      <span className="font-black text-sm sm:text-base md:text-lg lg:text-xl uppercase tracking-wide">
                         {getHomepagePromos()[2]?.title || 'Weekly Promotions'}
                       </span>
-                    </div>
-                  </div>
-                </div>
+            </div>
+            </div>
+            </div>
               </Link>
 
               {/* Bottom Image in Right Column - Label Inside */}
@@ -728,15 +379,15 @@ export default function Home() {
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   {/* Label Inside Card - Top Left */}
-                  <div className="absolute top-4 left-4 z-10">
+                  <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-10">
                     <div 
-                      className="px-6 py-3 rounded-md shadow-lg"
+                      className="px-4 sm:px-6 py-2 sm:py-3 rounded-md shadow-lg"
                       style={{ 
                         backgroundColor: '#FAFAF5',
                         color: '#1A1A1A'
                       }}
                     >
-                      <span className="font-black text-lg md:text-xl uppercase tracking-wide">
+                      <span className="font-black text-sm sm:text-base md:text-lg lg:text-xl uppercase tracking-wide">
                         {getHomepagePromos()[3]?.title || 'Combo Offers'}
                       </span>
                     </div>
@@ -744,8 +395,8 @@ export default function Home() {
                 </div>
             </Link>
           </motion.div>
-        </div>
-
+              </div>
+              
           {/* Button Links Below - Matching Card Column Widths Above */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
             {['Coffee Deals', 'Food Specials', 'Combo Offers'].map((buttonText, index) => {
@@ -767,7 +418,7 @@ export default function Home() {
                   transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
                   className={colSpans[index]}
                 >
-                  <Link
+              <Link
                     href="/deals"
                     className="block w-full px-8 py-6 rounded-lg font-black text-xl md:text-2xl uppercase tracking-wide text-center transition-all duration-300 hover:scale-105 hover:shadow-xl"
                     style={{ 
@@ -776,16 +427,108 @@ export default function Home() {
                     }}
                   >
                     {buttonText}
-                  </Link>
+            </Link>
               </motion.div>
               );
             })}
+            </div>
           </div>
-        </div>
       </section>
+        </div>
+      {/* END OLD CURRENT PROMO SECTION */}
+
+      {/* Split Promo Slider Section - Below Hiring (Concha y Toro style) */}
+      {promoSlides.length > 0 && (
+        <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#FAFAF5] relative">
+          {/* Title */}
+          <div className="max-w-7xl mx-auto mb-12 sm:mb-16 md:mb-20">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-secondary text-center mb-4 sm:mb-6">
+              Current Promos
+            </h2>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto text-center px-4">
+              Great deals happening now. Save more on your favorites every day.
+            </p>
+          </div>
+
+          {/* Navigation arrows positioned from screen edges - parallel alignment */}
+          <button
+            onClick={goToPrevFeaturedPromo}
+            className="absolute left-4 sm:left-6 lg:left-8 top-1/2 -translate-y-1/2 z-40 inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#1A1A1A] text-white hover:bg-black transition-colors"
+            aria-label="Previous featured promo"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          
+          <button
+            onClick={goToNextFeaturedPromo}
+            className="absolute right-4 sm:right-6 lg:right-8 top-1/2 -translate-y-1/2 z-40 inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#1A1A1A] text-white hover:bg-black transition-colors"
+            aria-label="Next featured promo"
+          >
+            <ChevronRight size={24} />
+          </button>
+
+          <div className="max-w-7xl mx-auto relative flex items-center">
+            {/* Small card (left side) */}
+          <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="relative w-[280px] sm:w-[320px] md:w-[360px] lg:w-[400px] bg-white overflow-hidden shadow-xl flex flex-col z-30 flex-shrink-0"
+            >
+              <div className="relative w-full h-[300px] sm:h-[360px] md:h-[420px] overflow-hidden">
+            <Image
+                  src={heroImages[(featuredPromoIndex + 1) % heroImages.length]}
+                  alt={nextPromo.title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-4 sm:p-5 md:p-6 flex flex-col">
+                <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.18em] text-gray-500 mb-2">
+                  Next Promo
+                </p>
+                <h3 className="text-base sm:text-lg md:text-xl font-bold text-secondary">
+                  {nextPromo.title}
+                </h3>
+              </div>
+            </motion.div>
+
+            {/* Large background image card (right side, starts after small card) */}
+            <motion.div
+              key={currentPromo.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="relative ml-[-40px] sm:ml-[-50px] md:ml-[-60px] lg:ml-[-70px] flex-1 flex flex-col"
+            >
+              <div className="relative w-full h-[400px] sm:h-[480px] md:h-[560px] lg:h-[620px] overflow-hidden">
+                <Image
+                  src={heroImages[featuredPromoIndex % heroImages.length]}
+                  alt={currentPromo.title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              
+              {/* View Promo Button - Below the image */}
+              <div className="p-4 sm:p-6 bg-white flex justify-end">
+                <Link
+                  href="/deals"
+                  className="inline-flex items-center justify-center px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg bg-[#FF6B35] text-sm sm:text-base font-bold uppercase tracking-wide hover:bg-[#E55A2B] transition-colors text-white"
+                >
+                  View Promo
+                  <ArrowRight size={18} className="ml-2" />
+                </Link>
+              </div>
+          </motion.div>
+          </div>
+        </section>
+      )}
 
       {/* Hiring Banner - Orange Color */}
-      <section className="py-6 md:py-8 px-6" style={{ backgroundColor: '#FF6B35' }}>
+      <section className="py-6 md:py-8 px-6" style={{ backgroundColor: '#1A1A1A' }}>
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
@@ -812,19 +555,19 @@ export default function Home() {
       </section>
 
       {/* LaMa Rewards Section */}
-      <section className="py-12 md:py-16 lg:py-20 px-6" style={{ backgroundColor: '#FAFAF5' }}>
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6" style={{ backgroundColor: '#FAFAF5' }}>
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-secondary mb-6">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-secondary mb-4 sm:mb-6">
                 LaMa Rewards
               </h2>
-              <p className="text-lg text-gray-600 leading-relaxed mb-6">
+              <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed mb-4 sm:mb-6">
                 Join our rewards program and start earning points on every purchase. Unlock exclusive deals and save more with Lama.
               </p>
               <div className="space-y-4 mb-8">
@@ -881,6 +624,171 @@ export default function Home() {
         </div>
             </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* Blog & News Section */}
+      <section className="py-12 sm:py-16 md:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12 sm:mb-16"
+          >
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-secondary mb-4 sm:mb-6">
+              Most Recent Post
+            </h2>
+            <p className="text-sm sm:text-base md:text-base text-gray-600 max-w-2xl mx-auto">
+              Read our most recent post for the latest news and insights.
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Blog Cards Carousel - Full Width with Overflow */}
+        <div className="relative w-full overflow-hidden">
+          <div 
+            className="overflow-x-auto scrollbar-hide pb-4"
+            style={{ 
+              scrollbarWidth: 'none', 
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch'
+            }}
+          >
+            <div className="flex gap-6 sm:gap-8 w-max pl-4 sm:pl-6 pr-[calc(85vw-100px)] sm:pr-[calc(500px-100px)] md:pr-[calc(600px-120px)] lg:pr-[calc(700px-150px)]">
+              {blogs.slice(0, 4).map((blog, index) => {
+                // Calculate reading time (approximate: 200 words per minute)
+                const wordCount = blog.content.replace(/<[^>]*>/g, '').split(/\s+/).length;
+                const readingTime = Math.ceil(wordCount / 200);
+                
+                // Use different placeholder images for each blog post
+                const placeholderImages = [
+                  '/photos/store1.jpg', // Store/retail
+                  '/photos/food1.jpg', // Coffee/food
+                  '/photos/lama.jpg', // Community
+                  '/photos/food2.jpg', // Snacks
+                ];
+                
+                // Try to use blog image if it's a full URL, otherwise use placeholder
+                const imageSrc = blog.image.startsWith('http') 
+                  ? blog.image 
+                  : placeholderImages[index] || placeholderImages[0];
+                
+                return (
+                  <motion.div
+                    key={blog.id}
+                    initial={{ opacity: index < 3 ? 1 : 0, x: index < 3 ? 0 : 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: '-200px' }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className="flex-shrink-0 w-[85vw] sm:w-[500px] md:w-[600px] lg:w-[700px]"
+                  >
+                      <Link
+                        href={`/media/blog/${blog.slug}`}
+                        className="block bg-white rounded-xl overflow-hidden border-2 border-gray-100 hover:shadow-xl hover:border-primary transition-all duration-300 group h-full"
+                      >
+                        {/* Image Section */}
+                        <div className="relative w-full h-[400px] sm:h-[450px] md:h-[500px] lg:h-[550px] overflow-hidden bg-gray-200">
+                          <Image
+                            src={imageSrc}
+                            alt={blog.title}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 sm:p-6">
+                            <div className="flex items-center gap-2 text-white text-xs sm:text-sm mb-2">
+                              <Clock size={14} />
+                              <span>{readingTime} min</span>
+                            </div>
+                            <h3 className="text-base sm:text-lg md:text-xl font-black text-white line-clamp-2">
+                              {blog.title}
+                            </h3>
+                            <div className="mt-3 sm:mt-4">
+                              <span className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg font-bold text-xs sm:text-sm transition-all duration-300">
+                                Read More
+                                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+      </section>
+
+      {/* Store Locator Section */}
+      <section className="relative py-24 sm:py-28 md:py-32 lg:py-40 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/photos/lama.jpg"
+            alt="LaMa Store"
+            fill
+            className="object-cover"
+            priority
+          />
+          {/* Base overlay for text readability */}
+          <div className="absolute inset-0 bg-black/40"></div>
+          {/* Black mist at edges - top */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent"></div>
+          {/* Black mist at edges - bottom */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+          {/* Black mist at edges - left */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent"></div>
+          {/* Black mist at edges - right */}
+          <div className="absolute inset-0 bg-gradient-to-l from-black/50 via-transparent to-transparent"></div>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            {/* Heading */}
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 sm:mb-6">
+              Find Your Nearest
+              <br />
+              <span className="text-white">LaMa Convenience Store</span>
+            </h2>
+
+            {/* Search Form */}
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const searchQuery = formData.get('search') as string;
+                // Navigate to stores page with search query
+                window.location.href = `/stores?search=${encodeURIComponent(searchQuery)}`;
+              }}
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-2xl mx-auto"
+            >
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  name="search"
+                  placeholder="Enter your address, city, or zip code"
+                  className="w-full pl-12 pr-4 py-4 sm:py-5 rounded-lg bg-white/95 backdrop-blur-sm border-2 border-white/20 focus:outline-none focus:border-white/40 focus:bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base font-medium transition-all duration-300"
+                />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              </div>
+              <button
+                type="submit"
+                className="px-6 sm:px-8 py-4 sm:py-5 rounded-lg bg-[#1A1A1A] hover:bg-black text-white font-bold text-sm sm:text-base uppercase tracking-wide transition-all duration-300 hover:scale-105 min-h-[56px] sm:min-h-[60px] flex items-center justify-center gap-2 whitespace-nowrap"
+              >
+                <MapPin size={18} />
+                Find Store
+              </button>
+            </form>
+          </motion.div>
         </div>
       </section>
 

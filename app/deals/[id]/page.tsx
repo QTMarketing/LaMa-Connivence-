@@ -109,7 +109,7 @@ export default function DealDetailPage({ params }: DealDetailPageProps) {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/stores"
-                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-lg font-bold text-base uppercase transition-all duration-300 hover:scale-105"
+                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold text-sm sm:text-base uppercase transition-all duration-300 hover:scale-105 min-h-[44px]"
                 style={{ backgroundColor: '#FF6B35' }}
               >
                 <MapPin size={20} />
