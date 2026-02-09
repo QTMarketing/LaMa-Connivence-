@@ -21,6 +21,7 @@ import BlockMenu from './BlockMenu';
 import EditorBlockMenu from './EditorBlockMenu';
 import { PageBuilderBlock } from '@/lib/pageBuilderStorage';
 import { Editor } from '@tiptap/react';
+import type { Node as ProseMirrorNode } from '@tiptap/core';
 
 interface RichTextEditorProps {
   content: string;
@@ -363,7 +364,7 @@ export default function RichTextEditor({ content, onChange, placeholder = 'Type 
         const { $from } = selection;
         
         // Find image node at cursor
-        let imageNode = null;
+        let imageNode: ProseMirrorNode | null = null;
         let imagePos = -1;
         
         state.doc.nodesBetween(Math.max(0, $from.pos - 100), Math.min(state.doc.content.size, $from.pos + 100), (node, pos) => {
