@@ -250,7 +250,7 @@ export default function ServicesPage() {
                       className="object-cover"
                     />
                   </div>
-                  <div className="p-6">
+                  <div className="p-6 deal-card-title">
                     <div className="flex items-start justify-between mb-3">
                       <h3 className="text-2xl font-black text-secondary flex-1">
                         {deal.title}

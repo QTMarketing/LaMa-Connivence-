@@ -8,7 +8,6 @@ import {
   Eye, EyeOff, Calendar, User, FileText, CheckCircle, XCircle
 } from 'lucide-react';
 import { blogStorage, type BlogPost } from '@/lib/blogStorage';
-import { format } from 'date-fns';
 
 export default function BlogListPage() {
   const router = useRouter();
@@ -276,8 +275,16 @@ export default function BlogListPage() {
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600">
                     {blog.publishedAt 
-                      ? format(new Date(blog.publishedAt), 'MMM d, yyyy')
-                      : format(new Date(blog.createdAt), 'MMM d, yyyy')
+                      ? new Date(blog.publishedAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })
+                      : new Date(blog.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })
                     }
                   </td>
                   <td className="px-4 py-3">

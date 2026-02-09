@@ -243,6 +243,27 @@ h3 {
   }
 }
 
+/* Deal Card Titles - Override font size for specific cards only */
+.deal-card-title h3,
+.promo-card-title h3 {
+  font-size: 16px !important; /* Base size */
+  line-height: 1.5 !important; /* More readable line height */
+}
+
+@media (min-width: 640px) {
+  .deal-card-title h3,
+  .promo-card-title h3 {
+    font-size: 18px !important; /* sm breakpoint */
+  }
+}
+
+@media (min-width: 768px) {
+  .deal-card-title h3,
+  .promo-card-title h3 {
+    font-size: 20px !important; /* md breakpoint */
+  }
+}
+
 /* 2. GLOBAL BODY TEXT - Inter for all paragraphs */
 p, li, .body-text, .description {
   font-family: var(--font-inter), sans-serif;
@@ -254,6 +275,13 @@ p, li, .body-text, .description {
 /* Glass Banner paragraphs should be white */
 .glass-banner p {
   color: #FFFFFF !important;
+}
+
+/* All paragraphs in sections with black background (#1A1A1A) should be white */
+[style*="background-color: #1A1A1A"] p,
+[style*="background-color: #1A1A1A"] li,
+.timeline-content p {
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 
 /* Buttons and utility text use Inter */

@@ -5,28 +5,30 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAllDeals, getDealsByCategory, type Deal } from '@/lib/dealsData';
-import { Tag, Coffee, Zap, Gift, Users } from 'lucide-react';
+import { Tag, Coffee, Zap, Pizza, ArrowRight } from 'lucide-react';
 import GlassBanner from '@/components/GlassBanner';
 import { usePromo } from '@/hooks/usePromo';
 
 export default function DealsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<'all' | Deal['category'] | 'member-exclusive'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<'all' | Deal['category']>('all');
   const { currentPromo, currentIndex, totalPromos, goToPromo, featuredDeals } = usePromo();
 
-  const categories: Array<{ id: 'all' | Deal['category'] | 'member-exclusive', label: string, icon: typeof Tag }> = [
+  const categories: Array<{ id: 'all' | Deal['category']; label: string; icon: typeof Tag }> = [
     { id: 'all' as const, label: 'ALL DEALS', icon: Tag },
-    { id: 'meal-deals' as const, label: 'FOOD', icon: Coffee },
-    { id: 'daily-specials' as const, label: 'DRINKS', icon: Zap },
-    { id: 'weekly-promotions' as const, label: 'SNACKS', icon: Gift },
-    { id: 'combo-offers' as const, label: 'COMBOS', icon: Tag },
-    { id: 'member-exclusive' as const, label: 'MEMBER EXCLUSIVE', icon: Users },
+    // Pizza-focused deals (use meal-deals category)
+    { id: 'meal-deals' as const, label: 'PIZZA', icon: Pizza },
+    // Meal combo offers
+    { id: 'combo-offers' as const, label: 'MEAL DEALS', icon: Tag },
+    // Coffee-specific daily specials
+    { id: 'daily-specials' as const, label: 'COFFEE', icon: Coffee },
+    // General drinks / weekly promos
+    { id: 'weekly-promotions' as const, label: 'DRINKS', icon: Zap },
   ];
 
-  const filteredDeals = selectedCategory === 'all' 
-    ? getAllDeals() 
-    : selectedCategory === 'member-exclusive'
-    ? getAllDeals().filter(d => d.featured)
-    : getDealsByCategory(selectedCategory);
+  const filteredDeals =
+    selectedCategory === 'all'
+      ? getAllDeals()
+      : getDealsByCategory(selectedCategory);
 
   return (
     <div className="min-h-screen bg-white">
@@ -180,31 +182,49 @@ export default function DealsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all"
+                transition={{ duration: 0.5, delay: index * 0.08 }}
+                className="bg-white/95 rounded-2xl overflow-hidden border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                style={{ borderColor: '#FF6B35' }}
               >
+                {/* Image */}
                 <div className="relative w-full aspect-video overflow-hidden">
                   <Image
                     src={deal.image}
                     alt={deal.title}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform duration-500 hover:scale-105"
                   />
-                  <button className="absolute top-3 right-3 bg-white/90 hover:bg-white text-secondary px-3 py-2 rounded-lg text-xs font-bold transition-all min-h-[36px] min-w-[80px]">
-                    Save deal
-                  </button>
+                  {/* Save badge */}
+                  <div className="absolute top-3 right-3">
+                    <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-white/90 text-xs font-semibold text-gray-800 shadow-sm">
+                      Save deal
+                    </span>
+                  </div>
                 </div>
-                <div className="p-6">
-                  <p className="text-gray-600 mb-4 leading-relaxed">
+                {/* Content */}
+                <div className="p-4 sm:p-5">
+                  <div className="flex flex-col gap-2.5">
+                  <h3 className="text-base sm:text-lg md:text-xl font-black text-secondary">
+                    {deal.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
                     {deal.description}
                   </p>
-                  <Link
-                    href={`/deals/${deal.id}`}
-                    className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-bold text-sm transition-all hover:scale-105 w-full justify-center min-h-[44px]"
-                    style={{ backgroundColor: '#FF6B35' }}
-                  >
-                    View Detail
-                  </Link>
+                  <div className="mt-1 flex items-center justify-between gap-2">
+                    {deal.savings && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-primary text-xs font-semibold">
+                        {deal.savings}
+                      </span>
+                    )}
+                    <Link
+                      href={`/deals/${deal.id}`}
+                      className="ml-auto inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
+                    >
+                      View Detail
+                      <ArrowRight size={16} />
+                    </Link>
+                  </div>
+                  </div>
                 </div>
               </motion.div>
             ))}

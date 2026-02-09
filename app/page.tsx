@@ -1,13 +1,13 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Coffee, ShoppingBag, IceCream, ShoppingCart, Package, UtensilsCrossed, MapPin, ArrowRight, Gift, Star, TrendingUp, Zap, Smartphone, Instagram, Facebook, Twitter, ChevronLeft, ChevronRight, Search, Clock } from 'lucide-react';
+import { Coffee, ShoppingBag, IceCream, ShoppingCart, Package, UtensilsCrossed, MapPin, ArrowRight, Gift, Star, TrendingUp, Zap, Smartphone, Instagram, Facebook, Twitter, ChevronLeft, ChevronRight, ChevronDown, Search, Clock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getHomepagePromos, getFeaturedDeals } from '@/lib/dealsData';
 import { products } from '@/lib/productData';
 import { blogs } from '@/lib/blogData';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -67,6 +67,27 @@ export default function Home() {
       ? promoSlides[(featuredPromoIndex + 1) % promoSlides.length]
       : currentPromo;
 
+  // Rotating promo for top promo card section (auto-advances every 8 seconds)
+  const rotatingPromo =
+    promoSlides.length > 0
+      ? promoSlides[currentPromoSlide % promoSlides.length]
+      : undefined;
+
+  // Blog carousel active index (for scroll indicators)
+  const [blogIndex, setBlogIndex] = useState(0);
+  const blogScrollRef = useRef<HTMLDivElement | null>(null);
+
+  const handleBlogScroll = () => {
+    const el = blogScrollRef.current;
+    if (!el) return;
+    const firstChild = el.firstElementChild as HTMLElement | null;
+    if (!firstChild) return;
+
+    const cardWidth = firstChild.clientWidth || 1;
+    const index = Math.round(el.scrollLeft / cardWidth);
+    setBlogIndex(Math.max(0, Math.min(index, blogs.slice(0, 4).length - 1)));
+  };
+
   const goToNextFeaturedPromo = () => {
     if (promoSlides.length === 0) return;
     setFeaturedPromoIndex((prev) => (prev + 1) % promoSlides.length);
@@ -105,6 +126,17 @@ export default function Home() {
   const prevPromoSlide = () => {
     setCurrentPromoSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length);
   };
+
+  // Auto-advance rotating promo card every 8 seconds
+  useEffect(() => {
+    if (promoSlides.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCurrentPromoSlide((prev) => (prev + 1) % promoSlides.length);
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [promoSlides.length]);
 
   const productCategories = [
     {
@@ -161,84 +193,98 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Three Colored Cards Section - Full-width, touching hero and screen edges */}
+      {/* Loyalty + Current Promos Section - 7-Eleven style two-up cards */}
       <section className="bg-white">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
-          {/* Green Card */}
-                      <motion.div
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+          {/* LaMa Loyalty Card - Solid Green */}
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="relative overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]"
-            style={{ backgroundColor: '#2E7D32' }}
+            className="relative overflow-hidden border-2 border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]"
+            style={{
+              background:
+                'linear-gradient(135deg, #2E7D32 0%, #2E7D32 40%, #2E7D32 100%)',
+            }}
           >
             <Link
-              href="/deals"
-              className="block p-6 sm:p-8 md:p-10 min-h-[260px] sm:min-h-[320px] md:min-h-[360px] flex flex-col justify-center items-center text-center"
+              href="/rewards"
+              className="relative block p-8 sm:p-10 md:p-12 min-h-[260px] sm:min-h-[320px] md:min-h-[360px] flex flex-col justify-center items-center text-center"
             >
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-3 sm:mb-4">
-                Coffee Deals
+              <div className="mb-4 sm:mb-5 flex items-center gap-3 text-white">
+                <Star className="w-8 h-8 sm:w-10 sm:h-10 text-white drop-shadow-md" />
+                <span className="uppercase tracking-[0.2em] text-xs sm:text-sm font-semibold">
+                  LaMa Loyalty
+                </span>
+              </div>
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-3 sm:mb-4">
+                Earn Every Stop
               </h3>
-              <p className="text-white/90 text-sm sm:text-base mb-4 sm:mb-6">
-                Fresh brews and specialty drinks
+              <p
+                className="text-white text-sm sm:text-base md:text-lg max-w-md mx-auto mb-5 sm:mb-6"
+                style={{ color: '#FFFFFF' }}
+              >
+                Join LaMa Loyalty to collect points on every purchase and unlock
+                exclusive member-only rewards.
               </p>
-              <span className="text-white font-bold text-sm sm:text-base uppercase tracking-wide">
-                View Deals →
+              <span className="inline-flex items-center gap-2 text-white font-bold text-sm sm:text-base uppercase tracking-wide">
+                Join Rewards
+                <ArrowRight size={18} />
               </span>
             </Link>
           </motion.div>
 
-          {/* Black Card */}
+          {/* Current Promos Card - Auto-rotating every 8 seconds */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="relative overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]"
-            style={{ backgroundColor: '#1A1A1A' }}
+            className="relative overflow-hidden border-2 border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] bg-[#1A1A1A]"
           >
-                          <Link
-              href="/products"
-              className="block p-6 sm:p-8 md:p-10 min-h-[260px] sm:min-h-[320px] md:min-h-[360px] flex flex-col justify-center items-center text-center"
-            >
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-3 sm:mb-4">
-                Fresh Food
-              </h3>
-              <p className="text-white/90 text-sm sm:text-base mb-4 sm:mb-6">
-                Hot meals made fresh daily
-              </p>
-              <span className="text-white font-bold text-sm sm:text-base uppercase tracking-wide">
-                Explore Menu →
-              </span>
-            </Link>
-          </motion.div>
+            {/* Background promo image */}
+            {rotatingPromo && (
+              <Image
+                src={rotatingPromo.image}
+                alt={rotatingPromo.title}
+                fill
+                className="object-cover opacity-70"
+              />
+            )}
 
-          {/* Orange Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="relative overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]"
-                            style={{ backgroundColor: '#FF6B35' }}
-                          >
+            {/* Dark overlay for readability (lighter so image shows through more) */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/55 to-black/70" />
+
             <Link
-              href="/rewards"
-              className="block p-6 sm:p-8 md:p-10 min-h-[260px] sm:min-h-[320px] md:min-h-[360px] flex flex-col justify-center items-center text-center"
+              href="/deals"
+              className="relative block p-8 sm:p-10 md:p-12 min-h-[260px] sm:min-h-[320px] md:min-h-[360px] flex flex-col justify-center items-center text-center text-white"
             >
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-3 sm:mb-4">
-                Rewards
-              </h3>
-              <p className="text-white/90 text-sm sm:text-base mb-4 sm:mb-6">
-                Earn points on every purchase
+              <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-white/70 mb-3">
+                Current Promos
               </p>
-              <span className="text-white font-bold text-sm sm:text-base uppercase tracking-wide">
-                Join Now →
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black mb-3 sm:mb-4">
+                {rotatingPromo?.title || 'Today’s Best Deals'}
+              </h3>
+              <div className="rounded-lg px-4 py-3 max-w-md mx-auto mb-5 sm:mb-6">
+                <p
+                  className="text-white text-sm sm:text-base md:text-lg leading-relaxed line-clamp-3"
+                  style={{ color: '#FFFFFF' }}
+                >
+                  {rotatingPromo?.description ||
+                    'Check out limited-time offers on coffee, fresh food, snacks, and more.'}
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-2 text-white font-bold text-sm sm:text-base uppercase tracking-wide">
+                View All Promos
+                <ArrowRight size={18} />
+              </span>
+              <span className="mt-3 text-[11px] sm:text-xs text-white/50">
+                Promos auto-updating every 8 seconds
               </span>
             </Link>
           </motion.div>
-                        </div>
+        </div>
       </section>
 
       {/* OLD CURRENT PROMO SECTION - Hidden but preserved for future use */}
@@ -437,103 +483,165 @@ export default function Home() {
         </div>
       {/* END OLD CURRENT PROMO SECTION */}
 
-      {/* Split Promo Slider Section - Below Hiring (Concha y Toro style) */}
-      {promoSlides.length > 0 && (
-        <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#FAFAF5] relative">
-          {/* Title */}
-          <div className="max-w-7xl mx-auto mb-12 sm:mb-16 md:mb-20">
-            <h2 className="section-title-large text-secondary text-center mb-4 sm:mb-6">
-              Current Promos
-            </h2>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto text-center px-4">
-              Great deals happening now. Save more on your favorites every day.
-            </p>
-          </div>
+      {/* Current Promos – 4‑Card Mosaic Section */}
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#FAFAF5]">
+        <div className="max-w-7xl mx-auto mb-10 sm:mb-14 md:mb-16">
+          <h2 className="section-title-large text-secondary text-center mb-4 sm:mb-6">
+            Current Promos
+          </h2>
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto text-center px-4">
+            Big, bold offers on your favorites – pizza, hot coffee, cold drinks, and more.
+          </p>
+        </div>
 
-          {/* Navigation arrows positioned from screen edges - parallel alignment */}
-          <button
-            onClick={goToPrevFeaturedPromo}
-            className="absolute left-4 sm:left-6 lg:left-8 top-1/2 -translate-y-1/2 z-40 inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#1A1A1A] text-white hover:bg-black transition-colors"
-            aria-label="Previous featured promo"
-          >
-            <ChevronLeft size={24} />
-          </button>
-          
-          <button
-            onClick={goToNextFeaturedPromo}
-            className="absolute right-4 sm:right-6 lg:right-8 top-1/2 -translate-y-1/2 z-40 inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#1A1A1A] text-white hover:bg-black transition-colors"
-            aria-label="Next featured promo"
-          >
-            <ChevronRight size={24} />
-          </button>
-
-          <div className="max-w-7xl mx-auto relative flex items-center">
-            {/* Small card (left side) */}
-          <motion.div
+        <div className="max-w-7xl mx-auto">
+          {/* Outer wrapper keeps overall rectangular shape with tighter gaps */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
+            {/* LEFT COLUMN – BIG PIZZA CARD (spans 2 rows on desktop) */}
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="relative w-[280px] sm:w-[320px] md:w-[360px] lg:w-[400px] bg-white overflow-hidden shadow-xl flex flex-col z-30 flex-shrink-0"
+              transition={{ duration: 0.6 }}
+              className="relative md:row-span-2 overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01]"
+              style={{ minHeight: '520px' }}
             >
-              <div className="relative w-full h-[300px] sm:h-[360px] md:h-[420px] overflow-hidden">
-            <Image
-                  src={heroImages[(featuredPromoIndex + 1) % heroImages.length]}
-                  alt={nextPromo.title}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-4 sm:p-5 md:p-6 flex flex-col">
-                <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.18em] text-gray-500 mb-2">
-                  Next Promo
-                </p>
-                <h3 className="text-base sm:text-lg md:text-xl font-bold text-secondary">
-                  {nextPromo.title}
-                </h3>
-              </div>
+              <Link href="/deals">
+                <div className="relative w-full h-[320px] sm:h-[420px] md:h-full">
+                  <Image
+                    src="/photos/food2.jpg" // Pizza image
+                    alt="Pizza Deals"
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                  <div className="absolute inset-x-6 bottom-8 text-left">
+                    <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-white/80 mb-2">
+                      Pizza
+                    </p>
+                    <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-2">
+                      Hot, cheesy slices
+                    </h3>
+                    <p
+                      className="text-white/90 text-sm sm:text-base max-w-sm"
+                      style={{ color: '#FFFFFF' }}
+                    >
+                      Grab a fresh‑from‑the‑oven slice or a whole pie for your crew.
+                    </p>
+                  </div>
+                </div>
+              </Link>
             </motion.div>
 
-            {/* Large background image card (right side, starts after small card) */}
-            <motion.div
-              key={currentPromo.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="relative ml-[-40px] sm:ml-[-50px] md:ml-[-60px] lg:ml-[-70px] flex-1 flex flex-col"
-            >
-              <div className="relative w-full h-[400px] sm:h-[480px] md:h-[560px] lg:h-[620px] overflow-hidden">
-                <Image
-                  src={heroImages[featuredPromoIndex % heroImages.length]}
-                  alt={currentPromo.title}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              
-              {/* View Promo Button - Below the image */}
-              <div className="p-4 sm:p-6 bg-white flex justify-end">
-                <Link
-                  href="/deals"
-                  className="inline-flex items-center justify-center px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg bg-[#FF6B35] text-sm sm:text-base font-bold uppercase tracking-wide hover:bg-[#E55A2B] transition-colors text-white"
+            {/* RIGHT COLUMN – STACKED CARDS */}
+            <div className="md:col-span-2 flex flex-col gap-3 sm:gap-4 lg:gap-5">
+              {/* ROW 1 – TWO CARDS: ¢.99 COFFEE + DRINKS */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-5">
+                {/* ¢.99 COFFEE */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.05 }}
+                  className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01]"
                 >
-                  View Promo
-                  <ArrowRight size={18} className="ml-2" />
-                </Link>
+                  <Link href="/deals">
+                    <div className="relative w-full h-[230px] sm:h-[250px] md:h-[260px] lg:h-[270px]">
+                      <Image
+                        src="/photos/food1.jpg" // Coffee image
+                        alt="¢.99 Coffee"
+                        fill
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                      <div className="absolute inset-x-5 bottom-6 text-left">
+                        <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-white/80 mb-1">
+                          ¢.99 Coffee
+                        </p>
+                        <h3 className="text-2xl sm:text-3xl font-black text-white">
+                          Hot brews, tiny price
+                        </h3>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+
+                {/* DRINKS */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                  className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01]"
+                >
+                  <Link href="/deals">
+                    <div className="relative w-full h-[230px] sm:h-[250px] md:h-[260px] lg:h-[270px] bg-[#000000]">
+                      <Image
+                        src="/photos/monster.jpg" // Drinks image
+                        alt="Drinks"
+                        fill
+                        className="object-cover opacity-80"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-transparent" />
+                      <div className="absolute inset-x-5 bottom-6 text-left">
+                        <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-white/80 mb-1">
+                          Drinks
+                        </p>
+                        <h3 className="text-2xl sm:text-3xl font-black text-white">
+                          Ice‑cold refreshment
+                        </h3>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
               </div>
-          </motion.div>
+
+              {/* ROW 2 – WIDE MEAL DEAL CARD */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.15 }}
+                className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01]"
+              >
+                <Link href="/deals">
+                  <div className="relative w-full h-[230px] sm:h-[250px] md:h-[260px] lg:h-[270px] bg-[#FF6B35]">
+                    <Image
+                      src="/photos/hotdog.jpg" // Meal deal image
+                      alt="Meal Deal"
+                      fill
+                      className="object-cover opacity-90"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
+                    <div className="absolute inset-y-8 left-6 sm:left-8 right-6 flex flex-col justify-center text-left">
+                      <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-white/85 mb-2">
+                        Meal Deal
+                      </p>
+                      <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-2">
+                        Combo meals made easy
+                      </h3>
+                      <p
+                        className="text-white/90 text-sm sm:text-base max-w-md"
+                        style={{ color: '#FFFFFF' }}
+                      >
+                        Mix pizza, drinks, and snacks into one easy, money‑saving combo.
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* Hiring Banner - Orange Color */}
-      <section className="py-6 md:py-8 px-6" style={{ backgroundColor: '#1A1A1A' }}>
+      <section className="py-6 md:py-8 px-6" style={{ backgroundColor: '#FF6B35' }}>
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <h3 className="hiring-banner text-white">We're Hiring!</h3>
-              <p className="text-base md:text-lg text-white/90">Employees can save 15¢/gal.</p>
+              <ChevronDown size={24} className="text-white" />
             </div>
             <Link
               href="/careers"
@@ -649,77 +757,80 @@ export default function Home() {
 
         {/* Blog Cards Carousel - Full Width with Overflow */}
         <div className="relative w-full overflow-hidden">
-          <div 
+          <div
+            ref={blogScrollRef}
+            onScroll={handleBlogScroll}
             className="overflow-x-auto scrollbar-hide pb-4"
-            style={{ 
-              scrollbarWidth: 'none', 
+            style={{
+              scrollbarWidth: 'none',
               msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch'
+              WebkitOverflowScrolling: 'touch',
             }}
           >
             <div className="flex gap-6 sm:gap-8 w-max pl-4 sm:pl-6 pr-[calc(85vw-100px)] sm:pr-[calc(500px-100px)] md:pr-[calc(600px-120px)] lg:pr-[calc(700px-150px)]">
-              {blogs.slice(0, 4).map((blog, index) => {
-                // Calculate reading time (approximate: 200 words per minute)
-                const wordCount = blog.content.replace(/<[^>]*>/g, '').split(/\s+/).length;
-                const readingTime = Math.ceil(wordCount / 200);
-                
-                // Use different placeholder images for each blog post
-                const placeholderImages = [
-                  '/photos/store1.jpg', // Store/retail
-                  '/photos/food1.jpg', // Coffee/food
-                  '/photos/lama.jpg', // Community
-                  '/photos/food2.jpg', // Snacks
-                ];
-                
-                // Try to use blog image if it's a full URL, otherwise use placeholder
-                const imageSrc = blog.image.startsWith('http') 
-                  ? blog.image 
-                  : placeholderImages[index] || placeholderImages[0];
-                
-                return (
-                  <motion.div
-                    key={blog.id}
-                    initial={{ opacity: index < 3 ? 1 : 0, x: index < 3 ? 0 : 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, margin: '-200px' }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className="flex-shrink-0 w-[85vw] sm:w-[500px] md:w-[600px] lg:w-[700px]"
+              {blogs.slice(0, 4).map((blog, index) => (
+                <motion.div
+                  key={blog.id}
+                  initial={{ opacity: index < 3 ? 1 : 0, x: index < 3 ? 0 : 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: '-200px' }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="flex-shrink-0 w-[85vw] sm:w-[500px] md:w-[600px] lg:w-[700px]"
+                >
+                  <Link
+                    href={`/media/blog/${blog.slug}`}
+                    className="block bg-white rounded-xl overflow-hidden border-2 border-gray-100 hover:shadow-xl hover:border-primary transition-all duration-300 group h-full"
                   >
-                      <Link
-                        href={`/media/blog/${blog.slug}`}
-                        className="block bg-white rounded-xl overflow-hidden border-2 border-gray-100 hover:shadow-xl hover:border-primary transition-all duration-300 group h-full"
-                      >
-                        {/* Image Section */}
-                        <div className="relative w-full h-[400px] sm:h-[450px] md:h-[500px] lg:h-[550px] overflow-hidden bg-gray-200">
-                          <Image
-                            src={imageSrc}
-                            alt={blog.title}
-                            fill
-                            className="object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 sm:p-6">
-                            <div className="flex items-center gap-2 text-white text-xs sm:text-sm mb-2">
-                              <Clock size={14} />
-                              <span>{readingTime} min</span>
-                            </div>
-                            <h3 className="text-base sm:text-lg md:text-xl font-black text-white line-clamp-2">
-                              {blog.title}
-                            </h3>
-                            <div className="mt-3 sm:mt-4">
-                              <span className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg font-bold text-xs sm:text-sm transition-all duration-300">
-                                Read More
-                                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                              </span>
-                            </div>
-                          </div>
+                    {/* Image Section */}
+                    <div className="relative w-full h-[400px] sm:h-[450px] md:h-[500px] lg:h-[550px] overflow-hidden bg-gray-200">
+                      <Image
+                        src={
+                          blog.image && blog.image.startsWith('http')
+                            ? blog.image
+                            : '/photos/store1.jpg'
+                        }
+                        alt={blog.title}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 sm:p-6">
+                        <div className="flex items-center gap-2 text-white text-xs sm:text-sm mb-2">
+                          <Clock size={14} />
+                          <span>1 min</span>
                         </div>
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </div>
+                        <h3 className="text-base sm:text-lg md:text-xl font-black text-white line-clamp-2">
+                          {blog.title}
+                        </h3>
+                        <div className="mt-3 sm:mt-4">
+                          <span className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg font-bold text-xs sm:text-sm transition-all duration-300">
+                            Read More
+                            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
             </div>
           </div>
+        </div>
+
+        {/* Scroll hint indicators under cards */}
+        <div className="mt-4 sm:mt-6 flex justify-center gap-2 sm:gap-3">
+          {[0, 1, 2, 3].map((i) => (
+            <span
+              key={i}
+              className={`inline-block rounded-full ${
+                i === blogIndex ? 'w-10' : 'w-4'
+              } h-[3px] sm:h-1`}
+              style={{
+                backgroundColor: '#FF6B35',
+                opacity: i === blogIndex ? 1 : 0.35,
+              }}
+            />
+          ))}
+        </div>
       </section>
 
       {/* Store Locator Section */}

@@ -1,37 +1,47 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Plus, Trash2, Edit2, X, Check, Eye, Star, AlertCircle, Info, LogOut, Search, Filter, Grid, List, TrendingUp, Tag, Calendar, MapPin, Store as StoreIcon, Phone, Clock } from 'lucide-react';
+import { Save, Plus, Trash2, Edit2, X, Check, Eye, Star, AlertCircle, Info, LogOut, Search, Filter, Grid, List, TrendingUp, Tag, Calendar, MapPin, Store as StoreIcon, Phone, Clock, LayoutDashboard, FileText, Settings, Menu, X as XIcon } from 'lucide-react';
 import { deals, type Deal } from '@/lib/dealsData';
 import { stores, type Store } from '@/lib/storeData';
 import Image from 'next/image';
 
-// Helper function to get where a promo appears
+// Helper function to explain where a promo appears across the site
 const getPromoLocations = (promo: Deal): string[] => {
   const locations: string[] = [];
-  
+
+  const prettyCategory = promo.category
+    .replace('-', ' ')
+    .replace(/\b\w/g, (l) => l.toUpperCase());
+
+  // Homepage placements
   if (promo.featured) {
-    locations.push('Featured Deals Carousel');
-    locations.push('Homepage Promo Cards');
+    locations.push('Homepage → Current Promos sections');
   }
-  
-  locations.push('Deals Page (All Deals Grid)');
-  locations.push(`Deals Page (${promo.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} Category)`);
-  locations.push('Deal Detail Pages (More Deals Section)');
-  
+
+  // Deals page – always shows in the grid and its category
+  locations.push('Deals page → All Deals grid');
+  locations.push(`Deals page → ${prettyCategory} tab`);
+
+  // Deals page featured carousel (top of Deals page)
   if (promo.featured) {
-    locations.push('Services Page (Featured Carousel)');
-    locations.push('Other Pages (Featured Carousel)');
+    locations.push('Deals page → Featured promo carousel');
   }
-  
+
+  // Deal detail page – related / More Deals section
+  locations.push('Deal detail page → "More Deals" related section');
+
   return locations;
 };
 
 export default function AdminPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<'promos' | 'stores'>('promos');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   
   // Promos state
   const [allDeals, setAllDeals] = useState<Deal[]>([]);
@@ -320,60 +330,123 @@ export default function AdminPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top Navigation Bar */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-black text-secondary">Admin Dashboard</h1>
-              <p className="text-sm text-gray-500">Manage promos and store locations</p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors"
-            >
-              <LogOut size={18} />
-              Logout
-            </button>
-          </div>
-          
-          {/* Tabs */}
-          <div className="flex gap-2 border-b border-gray-200">
-            <button
-              onClick={() => setActiveTab('promos')}
-              className={`px-6 py-3 font-bold transition-colors border-b-2 ${
-                activeTab === 'promos'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
-              }`}
-              style={activeTab === 'promos' ? { borderColor: '#FF6B35', color: '#FF6B35' } : {}}
-            >
-              <div className="flex items-center gap-2">
-                <Tag size={18} />
-                Promos
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('stores')}
-              className={`px-6 py-3 font-bold transition-colors border-b-2 ${
-                activeTab === 'stores'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
-              }`}
-              style={activeTab === 'stores' ? { borderColor: '#FF6B35', color: '#FF6B35' } : {}}
-            >
-              <div className="flex items-center gap-2">
-                <StoreIcon size={18} />
-                Store Locations
-              </div>
-            </button>
-          </div>
-        </div>
-      </header>
+  const sidebarItems = [
+    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, active: pathname === '/admin' },
+    { href: '/admin#promos', label: 'Promos & Deals', icon: Tag, active: pathname === '/admin' && activeTab === 'promos' },
+    { href: '/admin#stores', label: 'Store Locations', icon: StoreIcon, active: pathname === '/admin' && activeTab === 'stores' },
+    { href: '/admin/blog', label: 'Blog Posts', icon: FileText, active: pathname?.startsWith('/admin/blog') },
+  ];
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+  return (
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} fixed left-0 top-0 h-full z-40 transition-all duration-300 flex flex-col`} style={{ backgroundColor: '#1A1A1A' }}>
+        {/* Sidebar Header */}
+        <div className="p-6 border-b border-gray-700 flex items-center justify-between">
+          {sidebarOpen && (
+            <div>
+              <h2 className="text-xl font-black text-white">Admin</h2>
+              <p className="text-xs text-white/60">Dashboard</p>
+            </div>
+          )}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
+          >
+            {sidebarOpen ? <XIcon size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
+
+        {/* Navigation Links */}
+        <nav className="flex-1 p-4 space-y-2">
+          {sidebarItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = item.active;
+            
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={(e) => {
+                  if (item.href.includes('#')) {
+                    e.preventDefault();
+                    const tab = item.href.split('#')[1];
+                    setActiveTab(tab as 'promos' | 'stores');
+                  }
+                }}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-all ${
+                  isActive
+                    ? 'bg-primary/20 text-primary'
+                    : 'text-white/80 hover:bg-white/10 hover:text-white'
+                }`}
+                style={isActive ? { color: '#FF6B35' } : {}}
+              >
+                <Icon size={20} />
+                {sidebarOpen && <span>{item.label}</span>}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Logout Button */}
+        <div className="p-4 border-t border-gray-700">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all"
+          >
+            <LogOut size={20} />
+            {sidebarOpen && <span>Logout</span>}
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
+        {/* Top Navigation Bar */}
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-2xl font-black text-secondary">Admin Dashboard</h1>
+                <p className="text-sm text-gray-500">Manage promos and store locations</p>
+              </div>
+            </div>
+            
+            {/* Tabs */}
+            <div className="flex gap-2 border-b border-gray-200">
+              <button
+                onClick={() => setActiveTab('promos')}
+                className={`px-6 py-3 font-bold transition-colors border-b-2 ${
+                  activeTab === 'promos'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+                style={activeTab === 'promos' ? { borderColor: '#FF6B35', color: '#FF6B35' } : {}}
+              >
+                <div className="flex items-center gap-2">
+                  <Tag size={18} />
+                  Promos
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('stores')}
+                className={`px-6 py-3 font-bold transition-colors border-b-2 ${
+                  activeTab === 'stores'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+                style={activeTab === 'stores' ? { borderColor: '#FF6B35', color: '#FF6B35' } : {}}
+              >
+                <div className="flex items-center gap-2">
+                  <StoreIcon size={18} />
+                  Store Locations
+                </div>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Promos Tab Content */}
         {activeTab === 'promos' && (
           <>
@@ -736,7 +809,7 @@ export default function AdminPage() {
                             <div>
                               <span className="font-bold text-gray-900">Featured Promo</span>
                               <p className="text-sm text-gray-600">
-                                Featured promos appear in carousels across the website
+                                Featured promos appear in the Deals page featured carousel and homepage Current Promos sections
                               </p>
                             </div>
                           </label>
@@ -1235,6 +1308,7 @@ export default function AdminPage() {
             )}
           </>
         )}
+        </div>
       </div>
     </div>
   );
