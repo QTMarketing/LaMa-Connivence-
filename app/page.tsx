@@ -865,7 +865,7 @@ export default function Home() {
             transition={{ duration: 0.6 }}
           >
             {/* Heading */}
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 sm:mb-6">
+            <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-4 sm:mb-6">
               Find Your Nearest
               <br />
               <span className="text-white">LaMa Convenience Store</span>

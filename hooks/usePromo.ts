@@ -14,12 +14,11 @@ const defaultPromo: Deal = {
   featured: true,
 };
 
+// IMPORTANT: For React/Next hydration to work, the initial state **must**
+// be the same on the server and the client. We therefore always start with
+// an empty list here and load the real promos in a client-side effect.
 function getInitialFeaturedDeals(): Deal[] {
-  // During SSR/build, return empty array - will be populated in useEffect
-  if (typeof window === 'undefined') {
-    return [];
-  }
-  return getFeaturedDeals();
+  return [];
 }
 
 export function usePromo() {

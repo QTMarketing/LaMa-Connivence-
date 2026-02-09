@@ -89,7 +89,7 @@ export default function ServicesPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section - Full Width Image with Text Overlay */}
-      <section className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
+      <section className="relative w-full min-h-[360px] sm:h-[420px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
         <div className="absolute inset-0">
           <Image
             src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=1080&fit=crop"
@@ -101,14 +101,14 @@ export default function ServicesPage() {
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
         {/* Container for Title and Glass Banner */}
-        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-6">
+        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center text-white max-w-4xl mb-6 sm:mb-6 md:mb-8"
+            className="text-center text-white max-w-4xl mb-4 sm:mb-6 md:mb-8"
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black">
               Services
             </h1>
           </motion.div>
@@ -118,12 +118,12 @@ export default function ServicesPage() {
       </section>
 
       {/* Category Filters */}
-      <section className="py-8 px-6 bg-white border-b border-gray-200">
+      <section className="py-8 px-4 sm:px-6 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto">
-          <nav className="flex flex-wrap gap-3 md:gap-4 justify-center">
+          <nav className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 md:gap-4 justify-center">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`px-4 sm:px-6 py-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-2 min-h-[44px] ${
+              className={`w-full sm:w-auto px-4 sm:px-6 py-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 min-h-[44px] ${
                 selectedCategory === 'all'
                   ? 'bg-primary text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
@@ -134,7 +134,7 @@ export default function ServicesPage() {
             </button>
             <button
               onClick={() => setSelectedCategory('convenience')}
-              className={`px-4 sm:px-6 py-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-2 min-h-[44px] ${
+              className={`w-full sm:w-auto px-4 sm:px-6 py-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 min-h-[44px] ${
                 selectedCategory === 'convenience'
                   ? 'bg-primary text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
@@ -149,7 +149,7 @@ export default function ServicesPage() {
       </section>
 
       {/* Services List */}
-      <section className="py-12 md:py-16 px-6 bg-white">
+      <section className="py-8 sm:py-12 md:py-16 px-4 sm:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="space-y-8 md:space-y-12">
             {filteredServices.map((service, index) => (
@@ -205,7 +205,7 @@ export default function ServicesPage() {
             transition={{ duration: 0.6 }}
             className="mb-12"
           >
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4">
+            <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-4">
               The star of <span className="italic">YOUR DEALS</span>
             </h2>
             <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl">

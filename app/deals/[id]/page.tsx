@@ -81,7 +81,7 @@ export default function DealDetailPage({ params }: DealDetailPageProps) {
             </div>
 
             {/* Title */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-secondary mb-4">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-secondary mb-4">
               {deal.title}
             </h1>
 
@@ -147,7 +147,7 @@ export default function DealDetailPage({ params }: DealDetailPageProps) {
       </section>
 
       {/* Deal Details Section */}
-      <section className="px-6 mb-12 md:mb-16">
+      <section className="px-4 sm:px-6 mb-12 md:mb-16">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -197,7 +197,7 @@ export default function DealDetailPage({ params }: DealDetailPageProps) {
 
       {/* Related Deals Section */}
       {relatedDeals.length > 0 && (
-        <section className="py-12 md:py-16 px-6 bg-gray-50">
+        <section className="py-8 sm:py-12 md:py-16 px-4 sm:px-6 bg-gray-50">
           <div className="max-w-7xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}

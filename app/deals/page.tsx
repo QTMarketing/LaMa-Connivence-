@@ -33,7 +33,7 @@ export default function DealsPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section - Full Width Image with Text Overlay */}
-      <section className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
+      <section className="relative w-full min-h-[360px] sm:h-[420px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
         <div className="absolute inset-0">
           <Image
             src="https://images.unsplash.com/photo-1551218808-94e220e084d2?w=1920&h=1080&fit=crop"
@@ -45,14 +45,14 @@ export default function DealsPage() {
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
         {/* Container for Title and Glass Banner */}
-        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-6">
+        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="text-center text-white max-w-4xl mb-6 sm:mb-6 md:mb-8"
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black">
               Deals
             </h1>
           </motion.div>
@@ -91,22 +91,22 @@ export default function DealsPage() {
                       />
                     </div>
                     <div>
-                      <h2 className="text-3xl md:text-4xl font-black text-secondary mb-4">
+                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-secondary mb-4">
                         {currentPromo.title}
                       </h2>
-                      <p className="text-lg text-gray-600 mb-6 leading-relaxed">
+                      <p className="text-base sm:text-lg text-gray-600 mb-6 leading-relaxed">
                         {currentPromo.description}
                       </p>
                       <div className="mb-6">
                         <Link
                           href="/stores"
-                          className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-bold transition-all hover:scale-105 min-h-[44px]"
+                          className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-bold transition-all hover:scale-105 min-h-[44px] text-sm sm:text-base"
                           style={{ backgroundColor: '#FF6B35' }}
                         >
                           Find a Store
                         </Link>
                       </div>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-xs sm:text-sm text-gray-500">
                         *Valid at participating locations through Sunday. While supplies last.
                       </p>
                     </div>
@@ -147,16 +147,16 @@ export default function DealsPage() {
       )}
 
       {/* Category Filters */}
-      <section className="py-8 px-6 bg-white border-b border-gray-200">
+      <section className="py-8 px-4 sm:px-6 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto">
-          <nav className="flex flex-wrap gap-3 md:gap-4 justify-center">
+          <nav className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 md:gap-4 justify-center">
             {categories.map((category) => {
               const Icon = category.icon;
               return (
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`px-4 sm:px-6 py-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-2 min-h-[44px] ${
+                  className={`w-full sm:w-auto px-4 sm:px-6 py-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 min-h-[44px] ${
                     selectedCategory === category.id
                       ? 'bg-primary text-white'
                       : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
@@ -173,9 +173,9 @@ export default function DealsPage() {
       </section>
 
       {/* Deals Grid */}
-      <section className="py-12 md:py-16 px-6" style={{ backgroundColor: '#FAFAF5' }}>
+      <section className="py-8 sm:py-12 md:py-16 px-4 sm:px-6" style={{ backgroundColor: '#FAFAF5' }}>
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {filteredDeals.map((deal: Deal, index: number) => (
               <motion.div
                 key={deal.id}
@@ -202,7 +202,7 @@ export default function DealsPage() {
                   </div>
                 </div>
                 {/* Content */}
-                <div className="p-4 sm:p-5">
+                <div className="p-3 sm:p-4 md:p-5">
                   <div className="flex flex-col gap-2.5">
                   <h3 className="text-base sm:text-lg md:text-xl font-black text-secondary">
                     {deal.title}
@@ -210,15 +210,15 @@ export default function DealsPage() {
                   <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
                     {deal.description}
                   </p>
-                  <div className="mt-1 flex items-center justify-between gap-2">
+                  <div className="mt-1 flex items-center justify-between gap-2 flex-wrap">
                     {deal.savings && (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-primary text-xs font-semibold">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-primary text-xs font-semibold whitespace-nowrap">
                         {deal.savings}
                       </span>
                     )}
                     <Link
                       href={`/deals/${deal.id}`}
-                      className="ml-auto inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
+                      className="ml-auto inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-dark transition-colors whitespace-nowrap"
                     >
                       View Detail
                       <ArrowRight size={16} />

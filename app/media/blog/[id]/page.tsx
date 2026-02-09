@@ -36,7 +36,7 @@ export default function BlogDetailPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
+      <section className="relative w-full min-h-[360px] sm:h-[420px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
         <div className="absolute inset-0">
           <Image
             src={blog.image.startsWith('http') ? blog.image : `https://images.unsplash.com/photo-1455390582262-044cdead277a?w=1920&h=1080&fit=crop`}
@@ -47,7 +47,7 @@ export default function BlogDetailPage() {
           />
           <div className="absolute inset-0 bg-black/60"></div>
         </div>
-        <div className="relative z-40 h-full flex items-end justify-center pb-12 px-6">
+        <div className="relative z-40 h-full flex items-end justify-center pb-12 px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -57,7 +57,7 @@ export default function BlogDetailPage() {
             <div className="inline-block bg-white/20 backdrop-blur-sm border-2 border-white/30 rounded-2xl px-6 py-2 mb-4">
               <span className="text-sm font-bold uppercase tracking-wide">News</span>
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-4">
               {blog.title}
             </h1>
             <div className="flex items-center justify-center gap-6 text-sm md:text-base">
@@ -75,7 +75,7 @@ export default function BlogDetailPage() {
       </section>
 
       {/* Blog Content Section */}
-      <section className="py-12 md:py-16 px-6 bg-white">
+      <section className="py-8 sm:py-12 md:py-16 px-4 sm:px-6 bg-white">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

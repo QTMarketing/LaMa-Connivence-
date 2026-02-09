@@ -40,7 +40,7 @@ export default function MediaPage() {
           >
             <div className="flex items-center gap-3">
               <BookOpen className="w-8 h-8 text-primary" style={{ color: '#FF6B35' }} />
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-secondary">
+              <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-secondary">
                 Blog
               </h2>
             </div>
@@ -113,7 +113,7 @@ export default function MediaPage() {
           >
             <div className="flex items-center gap-3 mb-4">
               <Newspaper className="w-8 h-8 text-primary" style={{ color: '#FF6B35' }} />
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-secondary">
+              <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-secondary">
                 Press Room
               </h2>
             </div>
