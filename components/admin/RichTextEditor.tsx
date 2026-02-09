@@ -21,7 +21,7 @@ import BlockMenu from './BlockMenu';
 import EditorBlockMenu from './EditorBlockMenu';
 import { PageBuilderBlock } from '@/lib/pageBuilderStorage';
 import { Editor } from '@tiptap/react';
-import type { Node as ProseMirrorNode } from '@tiptap/core';
+import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 
 interface RichTextEditorProps {
   content: string;
