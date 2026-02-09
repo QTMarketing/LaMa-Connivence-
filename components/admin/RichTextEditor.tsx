@@ -376,8 +376,9 @@ export default function RichTextEditor({ content, onChange, placeholder = 'Type 
         });
 
         if (imageNode && imagePos >= 0) {
-          const currentSrc = imageNode.attrs.src || '';
-          const currentAlt = imageNode.attrs.alt || '';
+          const nodeWithAttrs = imageNode as ProseMirrorNode & { attrs: { src?: string; alt?: string } };
+          const currentSrc = nodeWithAttrs.attrs?.src || '';
+          const currentAlt = nodeWithAttrs.attrs?.alt || '';
           
           // Open image modal with current values
           setShowImageModal(true);
