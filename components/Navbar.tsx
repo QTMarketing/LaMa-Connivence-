@@ -162,8 +162,8 @@ export default function Navbar() {
               <Image
                 src="/Lama.png"
                 alt="LaMa"
-                width={56}
-                height={56}
+                width={72}
+                height={72}
                 className="object-contain"
                 priority
               />
@@ -318,10 +318,13 @@ export default function Navbar() {
           <div className="flex items-center justify-center gap-3">
             <Link
               href="/stores"
-              className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full text-[14px] font-semibold bg-black text-white hover:bg-gray-900 transition-colors"
-              style={{ fontFamily: 'var(--font-inter), sans-serif' }}
+              className="hidden sm:inline-flex items-center gap-2 px-6 py-3 rounded-full text-base font-semibold text-white hover:opacity-90 transition-all"
+              style={{ 
+                fontFamily: 'var(--font-inter), sans-serif',
+                backgroundColor: '#FF6B35'
+              }}
             >
-              <MapPin size={16} />
+              <MapPin size={18} />
               Find a Store
             </Link>
 

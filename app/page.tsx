@@ -58,6 +58,13 @@ export default function Home() {
     '/photos/hotdog.jpg',
   ];
 
+  // Hero banner rotation - food.jpg and hot.jpg from foo folder
+  const heroBanners = [
+    '/foo/food.jpg',
+    '/foo/hot.jpg',
+  ];
+  const [currentHeroBanner, setCurrentHeroBanner] = useState(0);
+
   // Featured promo slider (Concha y Toro style)
   const [featuredPromoIndex, setFeaturedPromoIndex] = useState(0);
 
@@ -107,7 +114,14 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [heroSlides.length]);
 
-  // Hero section is static - no auto-advance needed
+  // Auto-advance hero banners every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHeroBanner((prev) => (prev + 1) % heroBanners.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [heroBanners.length]);
 
   // Manual navigation functions for hero
   const nextSlide = () => {
@@ -180,35 +194,46 @@ export default function Home() {
   return (
     <>
     <div className="min-h-screen bg-white">
-      {/* Hero Banner Section - Static hotdog image */}
+      {/* Hero Banner Section - Rotating food.jpg and hotdog.jpg */}
       <section className="relative pt-20 pb-0 overflow-hidden">
         <div className="relative w-full h-[calc(100vh-80px)] min-h-[500px]">
-          <Image
-            src="/photos/hotdog.jpg"
-            alt="Hero banner"
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
+                <AnimatePresence mode="wait">
+                      <motion.div
+              key={currentHeroBanner}
+              initial={{ opacity: currentHeroBanner === 0 ? 1 : 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="absolute inset-0"
+            >
+                          <Image
+                src={heroBanners[currentHeroBanner]}
+                alt="Hero banner"
+                            fill
+                            className="object-cover"
+                priority={currentHeroBanner === 0}
+                          />
+                      </motion.div>
+                </AnimatePresence>
+                </div>
       </section>
 
       {/* Loyalty + Current Promos Section - 7-Eleven style two-up cards */}
       <section className="bg-white">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-          {/* LaMa Loyalty Card - Solid Green */}
+          {/* LaMa Loyalty Card - Primary Orange */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
             className="relative overflow-hidden border-2 border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]"
-            style={{
+          style={{ 
               background:
-                'linear-gradient(135deg, #2E7D32 0%, #2E7D32 40%, #2E7D32 100%)',
+                'linear-gradient(135deg, #FF6B35 0%, #FF6B35 40%, #FF6B35 100%)',
             }}
           >
-            <Link
+              <Link
               href="/rewards"
               className="relative block p-8 sm:p-10 md:p-12 min-h-[260px] sm:min-h-[320px] md:min-h-[360px] flex flex-col justify-center items-center text-center"
             >
@@ -217,7 +242,7 @@ export default function Home() {
                 <span className="uppercase tracking-[0.2em] text-xs sm:text-sm font-semibold">
                   LaMa Loyalty
                 </span>
-              </div>
+            </div>
               <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-3 sm:mb-4">
                 Earn Every Stop
               </h3>
@@ -245,7 +270,7 @@ export default function Home() {
           >
             {/* Background promo image */}
             {rotatingPromo && (
-              <Image
+                        <Image
                 src={rotatingPromo.image}
                 alt={rotatingPromo.title}
                 fill
@@ -260,12 +285,18 @@ export default function Home() {
               href="/deals"
               className="relative block p-8 sm:p-10 md:p-12 min-h-[260px] sm:min-h-[320px] md:min-h-[360px] flex flex-col justify-center items-center text-center text-white"
             >
-              <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-white/70 mb-3">
+              <p 
+                className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-white mb-3"
+                style={{ color: '#FFFFFF' }}
+              >
                 Current Promos
               </p>
-              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black mb-3 sm:mb-4">
-                {rotatingPromo?.title || 'Today’s Best Deals'}
-              </h3>
+              <h3 
+                className="text-3xl sm:text-4xl md:text-5xl font-black mb-3 sm:mb-4"
+                style={{ color: '#FFFFFF' }}
+              >
+                {rotatingPromo?.title || "Today's Best Deals"}
+                        </h3>
               <div className="rounded-lg px-4 py-3 max-w-md mx-auto mb-5 sm:mb-6">
                 <p
                   className="text-white text-sm sm:text-base md:text-lg leading-relaxed line-clamp-3"
@@ -274,7 +305,7 @@ export default function Home() {
                   {rotatingPromo?.description ||
                     'Check out limited-time offers on coffee, fresh food, snacks, and more.'}
                 </p>
-              </div>
+                      </div>
               <span className="inline-flex items-center gap-2 text-white font-bold text-sm sm:text-base uppercase tracking-wide">
                 View All Promos
                 <ArrowRight size={18} />
@@ -282,8 +313,8 @@ export default function Home() {
               <span className="mt-3 text-[11px] sm:text-xs text-white/50">
                 Promos auto-updating every 8 seconds
               </span>
-            </Link>
-          </motion.div>
+                      </Link>
+                    </motion.div>
         </div>
       </section>
 
@@ -320,7 +351,7 @@ export default function Home() {
               <Link href="/deals" className="block flex-1 flex flex-col">
                 {/* Large Image - Increased Height with Label Inside */}
                 <div className="relative w-full flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[400px] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
-                          <Image
+                  <Image
                     src={getHomepagePromos()[0]?.image || 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop'}
                     alt={getHomepagePromos()[0]?.title || 'Promo'}
                     fill
@@ -338,11 +369,11 @@ export default function Home() {
                       <span className="font-black text-sm sm:text-base md:text-lg lg:text-xl uppercase tracking-wide">
                         {getHomepagePromos()[0]?.title || 'Meal Deals'}
                       </span>
-                        </div>
+                    </div>
                   </div>
                 </div>
               </Link>
-                      </motion.div>
+            </motion.div>
 
             {/* Middle Column - Single Large Image (Wider) */}
             <motion.div
@@ -373,9 +404,9 @@ export default function Home() {
                       <span className="font-black text-sm sm:text-base md:text-lg lg:text-xl uppercase tracking-wide">
                         {getHomepagePromos()[1]?.title || 'Food Specials'}
                       </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
             </Link>
             </motion.div>
 
@@ -401,7 +432,7 @@ export default function Home() {
                   <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-10">
                     <div 
                       className="px-4 sm:px-6 py-2 sm:py-3 rounded-md shadow-lg"
-          style={{ 
+                      style={{ 
                         backgroundColor: '#FF6B35',
                         color: '#FFFFFF'
                       }}
@@ -409,9 +440,9 @@ export default function Home() {
                       <span className="font-black text-sm sm:text-base md:text-lg lg:text-xl uppercase tracking-wide">
                         {getHomepagePromos()[2]?.title || 'Weekly Promotions'}
                       </span>
-            </div>
-            </div>
-            </div>
+                    </div>
+                  </div>
+                </div>
               </Link>
 
               {/* Bottom Image in Right Column - Label Inside */}
@@ -441,8 +472,8 @@ export default function Home() {
                 </div>
             </Link>
           </motion.div>
-              </div>
-              
+        </div>
+
           {/* Button Links Below - Matching Card Column Widths Above */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
             {['Coffee Deals', 'Food Specials', 'Combo Offers'].map((buttonText, index) => {
@@ -464,7 +495,7 @@ export default function Home() {
                   transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
                   className={colSpans[index]}
                 >
-              <Link
+                  <Link
                     href="/deals"
                     className="block w-full px-8 py-6 rounded-lg font-black text-xl md:text-2xl uppercase tracking-wide text-center transition-all duration-300 hover:scale-105 hover:shadow-xl"
                     style={{ 
@@ -473,7 +504,7 @@ export default function Home() {
                     }}
                   >
                     {buttonText}
-            </Link>
+                  </Link>
               </motion.div>
               );
             })}
@@ -509,17 +540,17 @@ export default function Home() {
               <Link href="/deals">
                 <div className="relative w-full h-[320px] sm:h-[420px] md:h-full">
                   <Image
-                    src="/photos/food2.jpg" // Pizza image
+                    src="/foo/pizza.jpg" // Pizza image
                     alt="Pizza Deals"
                     fill
                     className="object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
                   <div className="absolute inset-x-6 bottom-8 text-left">
-                    <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-white/80 mb-2">
+                    <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] mb-2" style={{ color: '#FFFFFF' }}>
                       Pizza
                     </p>
-                    <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-2">
+                    <h3 className="text-3xl sm:text-4xl md:text-5xl font-black mb-2" style={{ color: '#FFFFFF' }}>
                       Hot, cheesy slices
                     </h3>
                     <p
@@ -548,17 +579,17 @@ export default function Home() {
                   <Link href="/deals">
                     <div className="relative w-full h-[230px] sm:h-[250px] md:h-[260px] lg:h-[270px]">
                       <Image
-                        src="/photos/food1.jpg" // Coffee image
-                        alt="¢.99 Coffee"
+                        src="/foo/coffee.jpg" // Coffee image
+                        alt="Coffee"
                         fill
                         className="object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
                       <div className="absolute inset-x-5 bottom-6 text-left">
-                        <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-white/80 mb-1">
-                          ¢.99 Coffee
+                        <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] mb-1" style={{ color: '#FFFFFF' }}>
+                          Coffee
                         </p>
-                        <h3 className="text-2xl sm:text-3xl font-black text-white">
+                        <h3 className="text-2xl sm:text-3xl font-black" style={{ color: '#FFFFFF' }}>
                           Hot brews, tiny price
                         </h3>
                       </div>
@@ -577,17 +608,17 @@ export default function Home() {
                   <Link href="/deals">
                     <div className="relative w-full h-[230px] sm:h-[250px] md:h-[260px] lg:h-[270px] bg-[#000000]">
                       <Image
-                        src="/photos/monster.jpg" // Drinks image
+                        src="/foo/drink.jpg" // Drinks image
                         alt="Drinks"
                         fill
                         className="object-cover opacity-80"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
                       <div className="absolute inset-x-5 bottom-6 text-left">
-                        <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-white/80 mb-1">
+                        <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] mb-1" style={{ color: '#FFFFFF' }}>
                           Drinks
                         </p>
-                        <h3 className="text-2xl sm:text-3xl font-black text-white">
+                        <h3 className="text-2xl sm:text-3xl font-black" style={{ color: '#FFFFFF' }}>
                           Ice‑cold refreshment
                         </h3>
                       </div>
@@ -607,17 +638,17 @@ export default function Home() {
                 <Link href="/deals">
                   <div className="relative w-full h-[230px] sm:h-[250px] md:h-[260px] lg:h-[270px] bg-[#FF6B35]">
                     <Image
-                      src="/photos/hotdog.jpg" // Meal deal image
+                      src="/foo/burger.jpg" // Meal deal image
                       alt="Meal Deal"
                       fill
                       className="object-cover opacity-90"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
                     <div className="absolute inset-y-8 left-6 sm:left-8 right-6 flex flex-col justify-center text-left">
-                      <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-white/85 mb-2">
+                      <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] mb-2" style={{ color: '#FFFFFF' }}>
                         Meal Deal
                       </p>
-                      <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-2">
+                      <h3 className="text-2xl sm:text-3xl md:text-4xl font-black mb-2" style={{ color: '#FFFFFF' }}>
                         Combo meals made easy
                       </h3>
                       <p
