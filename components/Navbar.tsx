@@ -149,7 +149,7 @@ export default function Navbar() {
             : 'bg-white border-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
+        <div className="relative w-full flex items-center justify-between px-6 sm:px-8 md:px-12 lg:px-16 py-3">
           {/* Left: Logo with animation */}
           <Link href="/" className="flex items-center justify-center gap-2 group/logo">
             <motion.div
@@ -172,13 +172,20 @@ export default function Navbar() {
 
           {/* Center: Desktop nav with 7-Eleven scale typography */}
           {/* 7-Eleven Scale: 22-24px, Archivo Narrow, Medium (500), Title Case, -0.02em tracking */}
-          <nav className="hidden lg:flex items-center justify-center gap-7 xl:gap-9">
+          <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center justify-center gap-7 xl:gap-9 select-none">
             <Link
-              href="/about"
-              className="nav-link-premium relative text-[22px] xl:text-[24px] font-semibold tracking-[-0.02em] text-[#1A1A1A] transition-colors duration-300"
-              style={{ fontFamily: 'var(--font-archivo-narrow), sans-serif' }}
+              href="/deals"
+              className="nav-link-premium relative text-[22px] xl:text-[24px] font-bold tracking-[0.01em] text-[#1A1A1A] transition-colors duration-300"
+              style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}
             >
-              About
+              Deals
+            </Link>
+            <Link
+              href="/drinks"
+              className="nav-link-premium relative text-[22px] xl:text-[24px] font-bold tracking-[0.01em] text-[#1A1A1A] transition-colors duration-300"
+              style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}
+            >
+              Drinks
             </Link>
 
             {/* Services Mega-Menu */}
@@ -190,8 +197,8 @@ export default function Navbar() {
             >
               <button
                 type="button"
-                className="nav-link-premium relative flex items-center gap-1.5 text-[22px] xl:text-[24px] font-semibold tracking-[-0.02em] text-[#1A1A1A] transition-colors duration-300"
-                style={{ fontFamily: 'var(--font-archivo-narrow), sans-serif' }}
+                className="nav-link-premium relative flex items-center gap-1.5 text-[22px] xl:text-[24px] font-bold tracking-[0.01em] text-[#1A1A1A] transition-colors duration-300 select-none"
+                style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}
               >
                 Services
                 <ChevronDown
@@ -206,27 +213,19 @@ export default function Navbar() {
               <AnimatePresence>
                 {servicesDropdownOpen && (
                   <>
-                    {/* Overlay */}
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="fixed inset-0 bg-black/20 z-[999]"
-                      onClick={() => setServicesDropdownOpen(false)}
-                    />
-                    
                     {/* Mega-Menu Container */}
                     <motion.div
-                      initial={{ opacity: 0, y: 10 }}
+                      initial={{ opacity: 0, y: 0 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
+                      exit={{ opacity: 0, y: 0 }}
                       transition={{ 
-                        duration: 0.3, 
+                        duration: 0.2, 
                         ease: [0.16, 1, 0.3, 1] // Apple-style cubic-bezier
                       }}
-                      className="fixed top-full left-0 right-0 w-full bg-white border-t border-gray-200 shadow-[0_10px_30px_rgba(0,0,0,0.05)] z-[1000]"
-                      style={{ top: `${navbarRef.current?.offsetHeight || 72}px` }}
+                      className="fixed left-0 right-0 w-full bg-white shadow-[0_10px_30px_rgba(0,0,0,0.05)] z-[1000]"
+                      style={{
+                        top: `${navbarRef.current ? navbarRef.current.offsetHeight : navbarHeight}px`
+                      }}
                       onMouseEnter={handleMouseEnter}
                       onMouseLeave={handleMouseLeave}
                     >
@@ -286,42 +285,29 @@ export default function Navbar() {
             </div>
 
             <Link
-              href="/deals"
-              className="nav-link-premium relative text-[22px] xl:text-[24px] font-semibold tracking-[-0.02em] text-[#1A1A1A] transition-colors duration-300"
-              style={{ fontFamily: 'var(--font-archivo-narrow), sans-serif' }}
-            >
-              Deals
-            </Link>
-            <Link
               href="/rewards"
-              className="nav-link-premium relative text-[22px] xl:text-[24px] font-semibold tracking-[-0.02em] text-[#1A1A1A] transition-colors duration-300"
-              style={{ fontFamily: 'var(--font-archivo-narrow), sans-serif' }}
+              className="nav-link-premium relative text-[22px] xl:text-[24px] font-bold tracking-[0.01em] text-[#1A1A1A] transition-colors duration-300"
+              style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}
             >
               Rewards
             </Link>
             <span 
-              className="nav-link-premium relative text-[22px] xl:text-[24px] font-semibold tracking-[-0.02em] text-[#1A1A1A] cursor-default"
-              style={{ fontFamily: 'var(--font-archivo-narrow), sans-serif' }}
+              className="nav-link-premium relative text-[22px] xl:text-[24px] font-bold tracking-[0.01em] text-[#1A1A1A] cursor-default"
+              style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}
             >
               Delivery
             </span>
-            <Link
-              href="/media/blog"
-              className="nav-link-premium relative text-[22px] xl:text-[24px] font-semibold tracking-[-0.02em] text-[#1A1A1A] transition-colors duration-300"
-              style={{ fontFamily: 'var(--font-archivo-narrow), sans-serif' }}
-            >
-              Blog
-            </Link>
           </nav>
 
           {/* Right: Find a Store + mobile menu */}
           <div className="flex items-center justify-center gap-3">
             <Link
               href="/stores"
-              className="hidden sm:inline-flex items-center gap-2 px-6 py-3 rounded-full text-base font-semibold text-white hover:opacity-90 transition-all"
+              className="hidden sm:inline-flex items-center gap-2 px-6 py-3 rounded text-base font-semibold text-white hover:opacity-90 transition-all"
               style={{ 
                 fontFamily: 'var(--font-inter), sans-serif',
-                backgroundColor: '#FF6B35'
+                backgroundColor: '#FF6B35',
+                borderRadius: '4px'
               }}
             >
               <MapPin size={18} />
@@ -378,8 +364,8 @@ export default function Navbar() {
               {/* Mobile menu content */}
               <div className="px-6 py-6 flex flex-col gap-2">
                 {[
-                  { href: '/about', label: 'About' },
                   { href: '/deals', label: 'Deals' },
+                  { href: '/drinks', label: 'Drinks' },
                   { href: '/rewards', label: 'Rewards' },
                 ].map((link, index) => (
                   <motion.div
@@ -390,7 +376,7 @@ export default function Navbar() {
                   >
                     <Link
                       href={link.href}
-                      className="nav-link-premium-mobile relative text-[16px] font-semibold tracking-[0.01em] text-[#1A1A1A] py-4 block transition-colors duration-300"
+                      className="nav-link-premium-mobile relative text-[16px] font-bold tracking-[0.01em] text-[#1A1A1A] py-4 block transition-colors duration-300"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       {link.label}
@@ -403,7 +389,7 @@ export default function Navbar() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: 0.3 }}
                 >
-                  <span className="nav-link-premium-mobile relative text-[16px] font-semibold tracking-[0.01em] text-[#1A1A1A] py-4 block cursor-default">
+                  <span className="nav-link-premium-mobile relative text-[16px] font-bold tracking-[0.01em] text-[#1A1A1A] py-4 block cursor-default">
                     Delivery
                   </span>
                 </motion.div>
@@ -416,7 +402,7 @@ export default function Navbar() {
                 >
                   <Link
                     href="/services"
-                    className="nav-link-premium-mobile relative text-[16px] font-semibold tracking-[0.01em] text-[#1A1A1A] py-4 block transition-colors duration-300"
+                    className="nav-link-premium-mobile relative text-[16px] font-bold tracking-[0.01em] text-[#1A1A1A] py-4 block transition-colors duration-300"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Services
@@ -439,20 +425,6 @@ export default function Navbar() {
                       </motion.div>
                     ))}
                   </div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: 0.5 }}
-                >
-                  <Link
-                    href="/media/blog"
-                    className="nav-link-premium-mobile relative text-[16px] font-semibold tracking-[0.01em] text-[#1A1A1A] py-4 block transition-colors duration-300"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Blog
-                  </Link>
                 </motion.div>
 
                 <motion.div

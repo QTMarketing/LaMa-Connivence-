@@ -11,7 +11,6 @@ import { useState, useEffect, useRef } from 'react';
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [currentPromoSlide, setCurrentPromoSlide] = useState(0);
 
   // Hero slides data - Complete banners with both text and images
   const heroSlides = [
@@ -58,12 +57,6 @@ export default function Home() {
     '/photos/hotdog.jpg',
   ];
 
-  // Hero banner rotation - food.jpg and hot.jpg from foo folder
-  const heroBanners = [
-    '/foo/food.jpg',
-    '/foo/hot.jpg',
-  ];
-  const [currentHeroBanner, setCurrentHeroBanner] = useState(0);
 
   // Featured promo slider (Concha y Toro style)
   const [featuredPromoIndex, setFeaturedPromoIndex] = useState(0);
@@ -74,11 +67,6 @@ export default function Home() {
       ? promoSlides[(featuredPromoIndex + 1) % promoSlides.length]
       : currentPromo;
 
-  // Rotating promo for top promo card section (auto-advances every 8 seconds)
-  const rotatingPromo =
-    promoSlides.length > 0
-      ? promoSlides[currentPromoSlide % promoSlides.length]
-      : undefined;
 
   // Blog carousel active index (for scroll indicators)
   const [blogIndex, setBlogIndex] = useState(0);
@@ -114,14 +102,6 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [heroSlides.length]);
 
-  // Auto-advance hero banners every 5 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentHeroBanner((prev) => (prev + 1) % heroBanners.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [heroBanners.length]);
 
   // Manual navigation functions for hero
   const nextSlide = () => {
@@ -131,26 +111,6 @@ export default function Home() {
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
   };
-
-  // Manual navigation functions for hero images
-  const nextPromoSlide = () => {
-    setCurrentPromoSlide((prev) => (prev + 1) % heroImages.length);
-  };
-
-  const prevPromoSlide = () => {
-    setCurrentPromoSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length);
-  };
-
-  // Auto-advance rotating promo card every 8 seconds
-  useEffect(() => {
-    if (promoSlides.length === 0) return;
-
-    const interval = setInterval(() => {
-      setCurrentPromoSlide((prev) => (prev + 1) % promoSlides.length);
-    }, 8000);
-
-    return () => clearInterval(interval);
-  }, [promoSlides.length]);
 
   const productCategories = [
     {
@@ -194,73 +154,103 @@ export default function Home() {
   return (
     <>
     <div className="min-h-screen bg-white">
-      {/* Hero Banner Section - Rotating food.jpg and hotdog.jpg */}
+      {/* Hero Banner Section - Static coke2.jpg image */}
       <section className="relative pt-20 pb-0 overflow-hidden">
         <div className="relative w-full h-[calc(100vh-80px)] min-h-[500px]">
-                <AnimatePresence mode="wait">
-                      <motion.div
-              key={currentHeroBanner}
-              initial={{ opacity: currentHeroBanner === 0 ? 1 : 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              className="absolute inset-0"
-            >
-                          <Image
-                src={heroBanners[currentHeroBanner]}
-                alt="Hero banner"
-                            fill
-                            className="object-cover"
-                priority={currentHeroBanner === 0}
-                          />
-                      </motion.div>
-                </AnimatePresence>
-                </div>
+          <Image
+            src="/foo/bet.jpg"
+            alt="Hero banner"
+            fill
+            className="object-cover"
+            priority
+          />
+          
+          {/* Content Overlay */}
+          <div className="hero-section absolute inset-0 flex items-center px-6 sm:px-8 md:px-12 lg:px-16">
+            {/* Left Side - Title, Description and Button */}
+            <div className="flex flex-col gap-4 sm:gap-5 md:gap-6 max-w-3xl z-10">
+              <h1 
+                className="font-black text-white leading-tight whitespace-nowrap"
+                style={{ 
+                  fontSize: 'clamp(4rem, 8vw, 7rem) !important',
+                }}
+              >
+                Fuel Up Fast.
+              </h1>
+              <p
+                className="font-bold text-white"
+                style={{ 
+                  color: '#FFFFFF',
+                  fontSize: 'clamp(1rem, 2vw, 1.5rem) !important',
+                  opacity: 0.8,
+                }}
+              >
+                Fresh hot dogs and crispy taquitos,<br />
+                hot and ready to fuel your day
+              </p>
+              <Link
+                href="/deals"
+                className="inline-block px-10 py-4 bg-[#FF6B35] text-white font-bold text-lg sm:text-xl md:text-2xl rounded hover:bg-[#E55A2B] transition-colors duration-300 w-fit"
+                style={{ borderRadius: '4px' }}
+              >
+                Order Now
+              </Link>
+            </div>
+
+            {/* Price - Bottom Right, closer to food */}
+            <div className="absolute bottom-8 right-6 sm:bottom-12 sm:right-8 md:bottom-16 md:right-12 lg:bottom-20 lg:right-16 z-10">
+              <div
+                className="inline-flex w-fit px-5 sm:px-6 md:px-7 py-2.5 sm:py-3 rounded-md border"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(20,20,20,0.7) 0%, rgba(8,8,8,0.82) 100%)',
+                  borderColor: 'rgba(255, 215, 0, 0.35)',
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.35)',
+                }}
+              >
+                <span
+                  className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black leading-none"
+                  style={{
+                    color: '#FFD700',
+                    textShadow: '0 0 6px rgba(255, 215, 0, 0.25)',
+                    WebkitTextStroke: '0.5px rgba(108, 72, 0, 0.3)',
+                  }}
+                >
+                  $4
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Loyalty + Current Promos Section - 7-Eleven style two-up cards */}
       <section className="bg-white">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-          {/* LaMa Loyalty Card - Primary Orange */}
+          {/* LaMa Loyalty Card - Coke Image */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="relative overflow-hidden border-2 border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]"
-          style={{ 
-              background:
-                'linear-gradient(135deg, #FF6B35 0%, #FF6B35 40%, #FF6B35 100%)',
-            }}
+            className="relative overflow-hidden border-2 border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] bg-[#1A1A1A]"
           >
+            {/* Background coke image */}
+            <Image
+              src="/foo/coke.jpg"
+              alt="Coke"
+              fill
+              className="object-cover"
+            />
+
               <Link
               href="/rewards"
               className="relative block p-8 sm:p-10 md:p-12 min-h-[260px] sm:min-h-[320px] md:min-h-[360px] flex flex-col justify-center items-center text-center"
             >
-              <div className="mb-4 sm:mb-5 flex items-center gap-3 text-white">
-                <Star className="w-8 h-8 sm:w-10 sm:h-10 text-white drop-shadow-md" />
-                <span className="uppercase tracking-[0.2em] text-xs sm:text-sm font-semibold">
-                  LaMa Loyalty
-                </span>
-            </div>
-              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-3 sm:mb-4">
-                Earn Every Stop
-              </h3>
-              <p
-                className="text-white text-sm sm:text-base md:text-lg max-w-md mx-auto mb-5 sm:mb-6"
-                style={{ color: '#FFFFFF' }}
-              >
-                Join LaMa Loyalty to collect points on every purchase and unlock
-                exclusive member-only rewards.
-              </p>
-              <span className="inline-flex items-center gap-2 text-white font-bold text-sm sm:text-base uppercase tracking-wide">
-                Join Rewards
-                <ArrowRight size={18} />
-              </span>
+              {/* Graphics-only card - no text */}
             </Link>
           </motion.div>
 
-          {/* Current Promos Card - Auto-rotating every 8 seconds */}
+          {/* Current Promos Card - Static cola1 image */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -268,52 +258,20 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="relative overflow-hidden border-2 border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] bg-[#1A1A1A]"
           >
-            {/* Background promo image */}
-            {rotatingPromo && (
-                        <Image
-                src={rotatingPromo.image}
-                alt={rotatingPromo.title}
-                fill
-                className="object-cover opacity-70"
-              />
-            )}
-
-            {/* Dark overlay for readability (lighter so image shows through more) */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/55 to-black/70" />
+            {/* Background cola1 image */}
+            <Image
+              src="/foo/cola1.jpg"
+              alt="Cola"
+              fill
+              className="object-cover"
+            />
 
             <Link
               href="/deals"
               className="relative block p-8 sm:p-10 md:p-12 min-h-[260px] sm:min-h-[320px] md:min-h-[360px] flex flex-col justify-center items-center text-center text-white"
             >
-              <p 
-                className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-white mb-3"
-                style={{ color: '#FFFFFF' }}
-              >
-                Current Promos
-              </p>
-              <h3 
-                className="text-3xl sm:text-4xl md:text-5xl font-black mb-3 sm:mb-4"
-                style={{ color: '#FFFFFF' }}
-              >
-                {rotatingPromo?.title || "Today's Best Deals"}
-                        </h3>
-              <div className="rounded-lg px-4 py-3 max-w-md mx-auto mb-5 sm:mb-6">
-                <p
-                  className="text-white text-sm sm:text-base md:text-lg leading-relaxed line-clamp-3"
-                  style={{ color: '#FFFFFF' }}
-                >
-                  {rotatingPromo?.description ||
-                    'Check out limited-time offers on coffee, fresh food, snacks, and more.'}
-                </p>
-                      </div>
-              <span className="inline-flex items-center gap-2 text-white font-bold text-sm sm:text-base uppercase tracking-wide">
-                View All Promos
-                <ArrowRight size={18} />
-              </span>
-              <span className="mt-3 text-[11px] sm:text-xs text-white/50">
-                Promos auto-updating every 8 seconds
-              </span>
-                      </Link>
+              {/* Graphics-only card - no text */}
+            </Link>
                     </motion.div>
         </div>
       </section>
@@ -550,15 +508,9 @@ export default function Home() {
                     <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] mb-2" style={{ color: '#FFFFFF' }}>
                       Pizza
                     </p>
-                    <h3 className="text-3xl sm:text-4xl md:text-5xl font-black mb-2" style={{ color: '#FFFFFF' }}>
+                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-black mb-2" style={{ color: '#FFFFFF' }}>
                       Hot, cheesy slices
                     </h3>
-                    <p
-                      className="text-white/90 text-sm sm:text-base max-w-sm"
-                      style={{ color: '#FFFFFF' }}
-                    >
-                      Grab a fresh‑from‑the‑oven slice or a whole pie for your crew.
-                    </p>
                   </div>
                 </div>
               </Link>
@@ -589,7 +541,7 @@ export default function Home() {
                         <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] mb-1" style={{ color: '#FFFFFF' }}>
                           Coffee
                         </p>
-                        <h3 className="text-2xl sm:text-3xl font-black" style={{ color: '#FFFFFF' }}>
+                        <h3 className="text-xl sm:text-2xl font-black" style={{ color: '#FFFFFF' }}>
                           Hot brews, tiny price
                         </h3>
                       </div>
@@ -618,7 +570,7 @@ export default function Home() {
                         <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] mb-1" style={{ color: '#FFFFFF' }}>
                           Drinks
                         </p>
-                        <h3 className="text-2xl sm:text-3xl font-black" style={{ color: '#FFFFFF' }}>
+                        <h3 className="text-xl sm:text-2xl font-black" style={{ color: '#FFFFFF' }}>
                           Ice‑cold refreshment
                         </h3>
                       </div>
@@ -643,20 +595,14 @@ export default function Home() {
                       fill
                       className="object-cover opacity-90"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
-                    <div className="absolute inset-y-8 left-6 sm:left-8 right-6 flex flex-col justify-center text-left">
-                      <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] mb-2" style={{ color: '#FFFFFF' }}>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+                    <div className="absolute inset-x-5 sm:inset-x-6 bottom-6 text-left">
+                      <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] mb-1" style={{ color: '#FFFFFF' }}>
                         Meal Deal
                       </p>
-                      <h3 className="text-2xl sm:text-3xl md:text-4xl font-black mb-2" style={{ color: '#FFFFFF' }}>
+                      <h3 className="text-xl sm:text-2xl md:text-3xl font-black" style={{ color: '#FFFFFF' }}>
                         Combo meals made easy
                       </h3>
-                      <p
-                        className="text-white/90 text-sm sm:text-base max-w-md"
-                        style={{ color: '#FFFFFF' }}
-                      >
-                        Mix pizza, drinks, and snacks into one easy, money‑saving combo.
-                      </p>
                     </div>
                   </div>
                 </Link>

@@ -4,57 +4,35 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getAllDeals, getDealsByCategory, type Deal } from '@/lib/dealsData';
-import { Tag, Coffee, Zap, Pizza, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import GlassBanner from '@/components/GlassBanner';
+import { getAllDrinks, getDrinksByCategory, type Drink } from '@/lib/drinksData';
 import { usePromo } from '@/hooks/usePromo';
+import { Tag, Search, ShoppingBag, Percent, Calendar, ArrowRight } from 'lucide-react';
+import GlassBanner from '@/components/GlassBanner';
 
-export default function DealsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<'all' | Deal['category']>('all');
-  const [currentPage, setCurrentPage] = useState(0);
+export default function DrinksPage() {
+  const [selectedCategory, setSelectedCategory] = useState<'all' | Drink['category']>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const { currentPromo, currentIndex, totalPromos, goToPromo, featuredDeals } = usePromo();
 
-  const categories: Array<{ id: 'all' | Deal['category']; label: string; icon: typeof Tag }> = [
-    { id: 'all' as const, label: 'ALL DEALS', icon: Tag },
-    // Pizza-focused deals (use meal-deals category)
-    { id: 'meal-deals' as const, label: 'PIZZA', icon: Pizza },
-    // Meal combo offers
-    { id: 'combo-offers' as const, label: 'MEAL DEALS', icon: Tag },
-    // Coffee-specific daily specials
-    { id: 'daily-specials' as const, label: 'COFFEE', icon: Coffee },
-    // General drinks / weekly promos
-    { id: 'weekly-promotions' as const, label: 'DRINKS', icon: Zap },
+  const categories: Array<{ id: 'all' | Drink['category']; label: string; icon: typeof Tag }> = [
+    { id: 'all' as const, label: 'ALL DRINKS', icon: Tag },
+    { id: 'buy-2-save' as const, label: 'BUY 2 & SAVE', icon: ShoppingBag },
+    { id: 'discounted' as const, label: 'DISCOUNTED', icon: Percent },
+    { id: 'seasonal' as const, label: 'SEASONAL', icon: Calendar },
   ];
 
-  const filteredDeals =
+  let filteredDrinks =
     selectedCategory === 'all'
-      ? getAllDeals()
-      : getDealsByCategory(selectedCategory);
+      ? getAllDrinks()
+      : getDrinksByCategory(selectedCategory);
 
-  // Pagination: 6 deals per page (2 rows of 3)
-  const dealsPerPage = 6;
-  const totalPages = Math.ceil(filteredDeals.length / dealsPerPage);
-  const startIndex = currentPage * dealsPerPage;
-  const endIndex = startIndex + dealsPerPage;
-  const currentDeals = filteredDeals.slice(startIndex, endIndex);
-
-  // Reset to first page when category changes
-  const handleCategoryChange = (category: 'all' | Deal['category']) => {
-    setSelectedCategory(category);
-    setCurrentPage(0);
-  };
-
-  const goToNextPage = () => {
-    if (currentPage < totalPages - 1) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const goToPrevPage = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
+  // Apply search filter
+  if (searchQuery) {
+    filteredDrinks = filteredDrinks.filter(drink =>
+      drink.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      drink.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -62,8 +40,8 @@ export default function DealsPage() {
       <section className="relative w-full min-h-[360px] sm:h-[420px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
         <div className="absolute inset-0">
           <Image
-            src="https://images.unsplash.com/photo-1551218808-94e220e084d2?w=1920&h=1080&fit=crop"
-            alt="Deals Hero"
+            src="https://images.unsplash.com/photo-1554866585-cd94860890b7?w=1920&h=1080&fit=crop"
+            alt="Drinks Hero"
             fill
             className="object-cover"
             priority
@@ -79,7 +57,7 @@ export default function DealsPage() {
             className="text-center text-white max-w-4xl mb-6 sm:mb-6 md:mb-8"
           >
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black">
-              Deals
+              Drinks
             </h1>
           </motion.div>
           {/* Glass Banner - Floating Inside Hero */}
@@ -87,7 +65,7 @@ export default function DealsPage() {
         </div>
       </section>
 
-      {/* Featured Deal Section */}
+      {/* Featured Drink Promo Section */}
       {currentPromo && featuredDeals.length > 0 && (
         <section className="py-6 px-4 sm:px-6 bg-white">
           <div className="max-w-7xl mx-auto">
@@ -105,7 +83,7 @@ export default function DealsPage() {
                     initial={{ opacity: 0, x: 30 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -30 }}
-                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                    transition={{ duration: 0.5, ease: 'easeInOut' }}
                     className="grid md:grid-cols-2 gap-4 md:gap-6 items-center"
                   >
                     <div className="relative w-full aspect-[4/3] md:aspect-[3/2] rounded overflow-hidden">
@@ -172,39 +150,71 @@ export default function DealsPage() {
         </section>
       )}
 
-      {/* Category Filters */}
+      {/* Category Filters and Search */}
       <section className="py-8 px-4 sm:px-6 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto">
-          <nav className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 md:gap-4 justify-center">
-            {categories.map((category) => {
-              const Icon = category.icon;
-              return (
-                <button
-                  key={category.id}
-                  onClick={() => handleCategoryChange(category.id)}
-                  className={`w-full sm:w-auto px-4 sm:px-6 py-3 rounded text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 min-h-[44px] ${
-                    selectedCategory === category.id
-                      ? 'bg-primary text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-                  }`}
-                  style={selectedCategory === category.id ? { backgroundColor: '#FF6B35' } : {}}
-                >
-                  <Icon size={18} />
-                  {category.label}
-                </button>
-              );
-            })}
-          </nav>
+          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
+            {/* Category Filters */}
+            <nav className="flex flex-wrap gap-3 md:gap-4 justify-center flex-1">
+              {categories.map((category) => {
+                const Icon = category.icon;
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`px-4 sm:px-6 py-3 rounded text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 min-h-[44px] ${
+                      selectedCategory === category.id
+                        ? 'bg-primary text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                    }`}
+                    style={selectedCategory === category.id ? { backgroundColor: '#FF6B35' } : {}}
+                  >
+                    <Icon size={18} />
+                    {category.label}
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Search Bar */}
+            <div className="flex items-center gap-2 w-full md:w-auto md:min-w-[350px]">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search for a specific drink..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      // Search is already handled by the filter, this is just for UX
+                    }
+                  }}
+                  className="w-full pl-10 pr-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+              <button
+                onClick={() => {
+                  // Search is already handled by the filter state
+                }}
+                className="px-4 py-3 rounded bg-primary text-white font-bold transition-all hover:scale-105 min-h-[44px] flex items-center justify-center"
+                style={{ backgroundColor: '#FF6B35' }}
+                aria-label="Search"
+              >
+                <Search size={20} />
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Deals Grid */}
+      {/* Drinks Grid */}
       <section className="py-8 sm:py-12 md:py-16 px-4 sm:px-6" style={{ backgroundColor: '#FAFAF5' }}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 deals-grid">
-            {currentDeals.map((deal: Deal, index: number) => (
+            {filteredDrinks.slice(0, 6).map((drink: Drink, index: number) => (
               <motion.div
-                key={deal.id}
+                key={drink.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -215,8 +225,8 @@ export default function DealsPage() {
                 {/* Image */}
                 <div className="relative w-full aspect-video overflow-hidden">
                   <Image
-                    src={deal.image}
-                    alt={deal.title}
+                    src={drink.image}
+                    alt={drink.title}
                     fill
                     className="object-cover transition-transform duration-500 hover:scale-105"
                   />
@@ -230,93 +240,39 @@ export default function DealsPage() {
                 {/* Content */}
                 <div className="p-3 sm:p-4 md:p-5">
                   <div className="flex flex-col gap-2.5">
-                  <h3 className="text-[11px] sm:text-[13px] md:text-[15px] font-black text-secondary">
-                    {deal.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
-                    {deal.description}
-                  </p>
-                  <div className="mt-1 flex items-center justify-between gap-2 flex-wrap">
-                    {deal.savings && (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-primary text-xs font-semibold whitespace-nowrap">
-                        {deal.savings}
-                      </span>
-                    )}
-                    <Link
-                      href={`/deals/${deal.id}`}
-                      className="ml-auto inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-dark transition-colors whitespace-nowrap"
-                    >
-                      View Detail
-                      <ArrowRight size={16} />
-                    </Link>
-                  </div>
+                    <h3 className="text-[11px] sm:text-[13px] md:text-[15px] font-black text-secondary">
+                      {drink.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
+                      {drink.description}
+                    </p>
+                    <div className="mt-1 flex items-center justify-between gap-2 flex-wrap">
+                      {drink.savings && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-primary text-xs font-semibold whitespace-nowrap">
+                          {drink.savings}
+                        </span>
+                      )}
+                      <Link
+                        href={`/drinks/${drink.id}`}
+                        className="ml-auto inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-dark transition-colors whitespace-nowrap"
+                      >
+                        View Detail
+                        <ArrowRight size={16} />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </motion.div>
             ))}
           </div>
 
-          {filteredDeals.length === 0 && (
+          {filteredDrinks.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-600 text-lg">No deals found in this category.</p>
-            </div>
-          )}
-
-          {/* Pagination Controls */}
-          {filteredDeals.length > dealsPerPage && (
-            <div className="mt-8 flex items-center justify-center gap-4">
-              <button
-                onClick={goToPrevPage}
-                disabled={currentPage === 0}
-                className={`flex items-center gap-2 px-4 py-2 rounded font-bold transition-all ${
-                  currentPage === 0
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-primary text-white hover:scale-105'
-                }`}
-                style={currentPage > 0 ? { backgroundColor: '#FF6B35' } : {}}
-                aria-label="Previous page"
-              >
-                <ChevronLeft size={20} />
-                Previous
-              </button>
-              
-              <div className="flex items-center gap-2">
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentPage(i)}
-                    className={`w-10 h-10 rounded font-bold transition-all ${
-                      currentPage === i
-                        ? 'bg-primary text-white'
-                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                    }`}
-                    style={currentPage === i ? { backgroundColor: '#FF6B35' } : {}}
-                    aria-label={`Go to page ${i + 1}`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
-
-              <button
-                onClick={goToNextPage}
-                disabled={currentPage === totalPages - 1}
-                className={`flex items-center gap-2 px-4 py-2 rounded font-bold transition-all ${
-                  currentPage === totalPages - 1
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-primary text-white hover:scale-105'
-                }`}
-                style={currentPage < totalPages - 1 ? { backgroundColor: '#FF6B35' } : {}}
-                aria-label="Next page"
-              >
-                Next
-                <ChevronRight size={20} />
-              </button>
+              <p className="text-gray-600 text-lg">No drinks found. Try adjusting your search or filters.</p>
             </div>
           )}
         </div>
       </section>
-
     </div>
   );
 }

@@ -84,10 +84,10 @@ html {
 
 /* 7-Eleven Scale Navbar Links */
 .nav-link-premium {
-  font-family: var(--font-archivo-narrow), sans-serif;
+  font-family: var(--font-rajdhani), sans-serif;
   font-size: 22px;
-  font-weight: 600; /* Semibold weight for bolder appearance */
-  letter-spacing: -0.02em; /* Tighter tracking for large text */
+  font-weight: 700; /* Bold weight for stronger appearance */
+  letter-spacing: 0.01em; /* Slightly positive tracking for Rajdhani */
   line-height: 1.2; /* Consistent line-height for vertical alignment */
   display: flex;
   align-items: center;
@@ -127,6 +127,19 @@ html {
 
 .nav-link-premium:hover {
   color: #FF6B35;
+}
+
+/* Prevent accidental text selection in navbar links/buttons */
+.nav-link-premium,
+.nav-link-premium-mobile,
+.nav-link-premium * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Mobile Nav Link - Rajdhani Font */
+.nav-link-premium-mobile {
+  font-family: var(--font-rajdhani), sans-serif;
 }
 
 /* Mobile Nav Link Underline */
@@ -190,57 +203,23 @@ html {
    UNIFIED BRAND TYPOGRAPHY - 7-ELEVEN LOOK
    ============================================ */
 
-/* 1. GLOBAL HEADLINES - ALL h1, h2, h3 automatically use Archivo Narrow */
+/* 1. GLOBAL HEADLINES - ALL h1, h2, h3 use Rajdhani (matching navbar) */
+/* Font-size removed - let Tailwind classes control size per component */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-archivo-narrow), sans-serif !important;
+  font-family: var(--font-rajdhani), sans-serif !important;
   text-transform: none; /* Title Case */
   letter-spacing: -0.02em;
   line-height: 1.1; /* Tighter for condensed headlines */
   font-weight: 700; /* Bold default */
 }
 
-/* Large Hero Titles - Big and Clean */
-h1 {
-  font-size: 48px;
-  font-weight: 800;
-  line-height: 1.1;
+/* Hero section - override global h1 and p font-size to allow Tailwind classes */
+.hero-section h1 {
+  font-size: inherit !important;
 }
 
-h2 {
-  font-size: 40px;
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-h3 {
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-/* Responsive Headline Sizes */
-@media (min-width: 640px) {
-  h1 {
-    font-size: 56px;
-  }
-  h2 {
-    font-size: 48px;
-  }
-  h3 {
-    font-size: 36px;
-  }
-}
-
-@media (min-width: 1024px) {
-  h1 {
-    font-size: 64px;
-  }
-  h2 {
-    font-size: 56px;
-  }
-  h3 {
-    font-size: 40px;
-  }
+.hero-section p {
+  font-size: inherit !important;
 }
 
 /* Deal Card Titles - Override font size for specific cards only */
@@ -261,6 +240,24 @@ h3 {
   .deal-card-title h3,
   .promo-card-title h3 {
     font-size: 20px !important; /* md breakpoint */
+  }
+}
+
+/* Deals Grid - Override h3 font size for deal cards */
+.deals-grid h3 {
+  font-size: 24px !important;
+  line-height: 1.5 !important;
+}
+
+@media (min-width: 640px) {
+  .deals-grid h3 {
+    font-size: 26px !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .deals-grid h3 {
+    font-size: 28px !important;
   }
 }
 
@@ -298,7 +295,7 @@ a:not(.nav-link-premium):not(.nav-link-premium-mobile) {
 .rewards-title {
   font-size: 48px;
   font-weight: 800;
-  font-family: var(--font-archivo-narrow), sans-serif;
+  font-family: var(--font-rajdhani), sans-serif;
   letter-spacing: -0.02em;
   line-height: 1.1;
 }
@@ -318,7 +315,7 @@ a:not(.nav-link-premium):not(.nav-link-premium-mobile) {
 .hiring-banner {
   font-size: 24px;
   font-weight: 700;
-  font-family: var(--font-archivo-narrow), sans-serif;
+  font-family: var(--font-rajdhani), sans-serif;
   letter-spacing: -0.02em;
   line-height: 1.1;
 }
@@ -331,7 +328,7 @@ a:not(.nav-link-premium):not(.nav-link-premium-mobile) {
 
 /* Section Title Class for Consistent Styling */
 .section-title-large {
-  font-family: var(--font-archivo-narrow), sans-serif;
+  font-family: var(--font-rajdhani), sans-serif;
   font-size: 40px;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -350,19 +347,19 @@ a:not(.nav-link-premium):not(.nav-link-premium-mobile) {
   }
 }
 
-/* Footer logo - keep as Archivo Narrow */
+/* Footer logo - use Rajdhani for consistency */
 footer h1, footer h2, footer .logo-text {
-  font-family: var(--font-archivo-narrow), sans-serif;
+  font-family: var(--font-rajdhani), sans-serif;
 }
 
 /* Glass Banner titles */
 .glass-banner h2 {
-  font-family: var(--font-archivo-narrow), sans-serif;
+  font-family: var(--font-inter), sans-serif !important;
 }
 
 /* Category labels and filters */
 .category-label, .filter-label {
-  font-family: var(--font-archivo-narrow), sans-serif;
+  font-family: var(--font-rajdhani), sans-serif;
   font-weight: 700;
   letter-spacing: -0.02em;
 }

@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Plus, Trash2, Edit2, X, Check, Eye, Star, AlertCircle, Info, LogOut, Search, Filter, Grid, List, TrendingUp, Tag, Calendar, MapPin, Store as StoreIcon, Phone, Clock, LayoutDashboard, FileText, Settings, Menu, X as XIcon } from 'lucide-react';
+import { Save, Plus, Trash2, Edit2, X, Check, Eye, Star, AlertCircle, Info, LogOut, Search, Filter, Grid, List, TrendingUp, Tag, Calendar, MapPin, Store as StoreIcon, Phone, Clock, LayoutDashboard, FileText, Settings, Menu, X as XIcon, ShoppingBag, Percent } from 'lucide-react';
 import { deals, type Deal } from '@/lib/dealsData';
 import { stores, type Store } from '@/lib/storeData';
+import { drinks, type Drink } from '@/lib/drinksData';
 import Image from 'next/image';
 
 // Helper function to explain where a promo appears across the site
@@ -40,7 +41,7 @@ const getPromoLocations = (promo: Deal): string[] => {
 export default function AdminPage() {
   const router = useRouter();
   const pathname = usePathname();
-  const [activeTab, setActiveTab] = useState<'promos' | 'stores'>('promos');
+  const [activeTab, setActiveTab] = useState<'promos' | 'stores' | 'drinks'>('promos');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
   // Promos state
@@ -59,6 +60,15 @@ export default function AdminPage() {
   const [isAddingNewStore, setIsAddingNewStore] = useState(false);
   const [storeSearchQuery, setStoreSearchQuery] = useState('');
   
+  // Drinks state
+  const [allDrinks, setAllDrinks] = useState<Drink[]>([]);
+  const [editingDrinkId, setEditingDrinkId] = useState<number | null>(null);
+  const [editingDrink, setEditingDrink] = useState<Partial<Drink>>({});
+  const [isAddingNewDrink, setIsAddingNewDrink] = useState(false);
+  const [drinkSearchQuery, setDrinkSearchQuery] = useState('');
+  const [drinkFilter, setDrinkFilter] = useState<'all' | 'featured' | Drink['category']>('all');
+  const [drinkViewMode, setDrinkViewMode] = useState<'grid' | 'list'>('grid');
+  
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [newDeal, setNewDeal] = useState<Partial<Deal>>({
     title: '',
@@ -76,6 +86,16 @@ export default function AdminPage() {
     lng: 0,
     phone: '',
     hours: '',
+  });
+  const [newDrink, setNewDrink] = useState<Partial<Drink>>({
+    title: '',
+    description: '',
+    image: '',
+    category: 'buy-2-save',
+    savings: '',
+    featured: false,
+    expirationDate: '',
+    price: '',
   });
 
   useEffect(() => {
@@ -113,6 +133,20 @@ export default function AdminPage() {
     } else {
       setAllStores(stores);
       localStorage.setItem('adminAllStores', JSON.stringify(stores));
+    }
+
+    // Load all drinks from localStorage or use default drinks
+    const savedDrinks = localStorage.getItem('adminAllDrinks');
+    if (savedDrinks) {
+      try {
+        setAllDrinks(JSON.parse(savedDrinks));
+      } catch {
+        setAllDrinks(drinks);
+        localStorage.setItem('adminAllDrinks', JSON.stringify(drinks));
+      }
+    } else {
+      setAllDrinks(drinks);
+      localStorage.setItem('adminAllDrinks', JSON.stringify(drinks));
     }
   }, [router]);
 
@@ -277,6 +311,91 @@ export default function AdminPage() {
     }
   };
 
+  // Drinks management functions
+  const saveDrinks = (updatedDrinks: Drink[]) => {
+    setAllDrinks(updatedDrinks);
+    localStorage.setItem('adminAllDrinks', JSON.stringify(updatedDrinks));
+    window.dispatchEvent(new Event('drinksUpdated'));
+  };
+
+  const handleEditDrink = (drink: Drink) => {
+    setEditingDrinkId(drink.id);
+    setEditingDrink({ ...drink });
+    setIsAddingNewDrink(false);
+  };
+
+  const handleSaveDrink = () => {
+    if (editingDrinkId) {
+      const updated = allDrinks.map(d => 
+        d.id === editingDrinkId ? { ...d, ...editingDrink } as Drink : d
+      );
+      saveDrinks(updated);
+      setEditingDrinkId(null);
+      setEditingDrink({});
+    }
+  };
+
+  const handleCancelDrink = () => {
+    setEditingDrinkId(null);
+    setEditingDrink({});
+    setIsAddingNewDrink(false);
+    setNewDrink({
+      title: '',
+      description: '',
+      image: '',
+      category: 'buy-2-save',
+      savings: '',
+      featured: false,
+      expirationDate: '',
+      price: '',
+    });
+  };
+
+  const handleAddDrink = () => {
+    if (!newDrink.title || !newDrink.description || !newDrink.image || !newDrink.savings) {
+      alert('Please fill in all required fields (Title, Description, Image URL, and Savings)');
+      return;
+    }
+    
+    const newId = allDrinks.length > 0 ? Math.max(...allDrinks.map(d => d.id)) + 1 : 1;
+    const drinkToAdd: Drink = {
+      id: newId,
+      title: newDrink.title || '',
+      description: newDrink.description || '',
+      image: newDrink.image || '',
+      category: newDrink.category || 'buy-2-save',
+      savings: newDrink.savings || '',
+      expirationDate: newDrink.expirationDate || undefined,
+      featured: newDrink.featured || false,
+      price: newDrink.price || undefined,
+    };
+    saveDrinks([...allDrinks, drinkToAdd]);
+    setIsAddingNewDrink(false);
+    setNewDrink({
+      title: '',
+      description: '',
+      image: '',
+      category: 'buy-2-save',
+      savings: '',
+      featured: false,
+      expirationDate: '',
+      price: '',
+    });
+  };
+
+  const handleDeleteDrink = (id: number) => {
+    if (confirm('Are you sure you want to delete this drink? This action cannot be undone.')) {
+      saveDrinks(allDrinks.filter(d => d.id !== id));
+    }
+  };
+
+  const toggleDrinkFeatured = (id: number) => {
+    const updated = allDrinks.map(d => 
+      d.id === id ? { ...d, featured: !d.featured } as Drink : d
+    );
+    saveDrinks(updated);
+  };
+
   // Filter and search deals
   let filteredDeals = filter === 'all' 
     ? allDeals 
@@ -318,6 +437,21 @@ export default function AdminPage() {
       )
     : allStores;
 
+  // Filter and search drinks
+  let filteredDrinks = drinkFilter === 'all' 
+    ? allDrinks 
+    : drinkFilter === 'featured'
+    ? allDrinks.filter(d => d.featured)
+    : allDrinks.filter(d => d.category === drinkFilter);
+
+  if (drinkSearchQuery) {
+    filteredDrinks = filteredDrinks.filter(drink =>
+      drink.title.toLowerCase().includes(drinkSearchQuery.toLowerCase()) ||
+      drink.description.toLowerCase().includes(drinkSearchQuery.toLowerCase()) ||
+      drink.category.toLowerCase().includes(drinkSearchQuery.toLowerCase())
+    );
+  }
+
   // Show loading or nothing while checking auth
   if (!isAuthenticated) {
     return (
@@ -333,6 +467,7 @@ export default function AdminPage() {
   const sidebarItems = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, active: pathname === '/admin' },
     { href: '/admin#promos', label: 'Promos & Deals', icon: Tag, active: pathname === '/admin' && activeTab === 'promos' },
+    { href: '/admin#drinks', label: 'Drinks', icon: TrendingUp, active: pathname === '/admin' && activeTab === 'drinks' },
     { href: '/admin#stores', label: 'Store Locations', icon: StoreIcon, active: pathname === '/admin' && activeTab === 'stores' },
     { href: '/admin/blog', label: 'Blog Posts', icon: FileText, active: pathname?.startsWith('/admin/blog') },
   ];
@@ -371,7 +506,7 @@ export default function AdminPage() {
                   if (item.href.includes('#')) {
                     e.preventDefault();
                     const tab = item.href.split('#')[1];
-                    setActiveTab(tab as 'promos' | 'stores');
+                    setActiveTab(tab as 'promos' | 'stores' | 'drinks');
                   }
                 }}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-all ${
@@ -426,6 +561,20 @@ export default function AdminPage() {
                 <div className="flex items-center gap-2">
                   <Tag size={18} />
                   Promos
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('drinks')}
+                className={`px-6 py-3 font-bold transition-colors border-b-2 ${
+                  activeTab === 'drinks'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+                style={activeTab === 'drinks' ? { borderColor: '#FF6B35', color: '#FF6B35' } : {}}
+              >
+                <div className="flex items-center gap-2">
+                  <TrendingUp size={18} />
+                  Drinks
                 </div>
               </button>
               <button
@@ -1303,6 +1452,460 @@ export default function AdminPage() {
                   {storeSearchQuery 
                     ? `No stores found matching "${storeSearchQuery}"` 
                     : 'No stores yet. Add your first store!'}
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Drinks Tab Content */}
+        {activeTab === 'drinks' && (
+          <>
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Total Drinks</p>
+                    <p className="text-3xl font-black text-secondary">{allDrinks.length}</p>
+                  </div>
+                  <div className="bg-primary/10 p-3 rounded-lg">
+                    <TrendingUp className="text-primary" size={24} />
+                  </div>
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Featured</p>
+                    <p className="text-3xl font-black text-secondary">{allDrinks.filter(d => d.featured).length}</p>
+                  </div>
+                  <div className="bg-primary/10 p-3 rounded-lg">
+                    <Star className="text-primary" size={24} />
+                  </div>
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Buy 2 & Save</p>
+                    <p className="text-3xl font-black text-secondary">{allDrinks.filter(d => d.category === 'buy-2-save').length}</p>
+                  </div>
+                  <div className="bg-primary/10 p-3 rounded-lg">
+                    <ShoppingBag className="text-primary" size={24} />
+                  </div>
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Categories</p>
+                    <p className="text-3xl font-black text-secondary">{new Set(allDrinks.map(d => d.category)).size}</p>
+                  </div>
+                  <div className="bg-primary/10 p-3 rounded-lg">
+                    <Tag className="text-primary" size={24} />
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Search and Filter Bar */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border-2 border-gray-200">
+              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="flex-1 w-full md:w-auto">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <input
+                      type="text"
+                      placeholder="Search drinks..."
+                      value={drinkSearchQuery}
+                      onChange={(e) => setDrinkSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <select
+                    value={drinkFilter}
+                    onChange={(e) => setDrinkFilter(e.target.value as 'all' | 'featured' | Drink['category'])}
+                    className="px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary font-bold"
+                  >
+                    <option value="all">All Drinks</option>
+                    <option value="featured">Featured</option>
+                    <option value="buy-2-save">Buy 2 & Save</option>
+                    <option value="discounted">Discounted</option>
+                    <option value="seasonal">Seasonal</option>
+                  </select>
+                  <div className="flex gap-2 bg-gray-100 p-1 rounded-lg">
+                    <button
+                      onClick={() => setDrinkViewMode('grid')}
+                      className={`p-2 rounded transition-all ${drinkViewMode === 'grid' ? 'bg-white shadow-sm' : ''}`}
+                    >
+                      <Grid size={20} />
+                    </button>
+                    <button
+                      onClick={() => setDrinkViewMode('list')}
+                      className={`p-2 rounded transition-all ${drinkViewMode === 'list' ? 'bg-white shadow-sm' : ''}`}
+                    >
+                      <List size={20} />
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setIsAddingNewDrink(true)}
+                    className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-bold transition-all hover:scale-105"
+                    style={{ backgroundColor: '#FF6B35' }}
+                  >
+                    <Plus size={20} />
+                    Add Drink
+                  </button>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mt-4">
+                Showing <strong>{filteredDrinks.length}</strong> of <strong>{allDrinks.length}</strong> drinks
+              </p>
+            </div>
+
+            {/* Add New Drink Form */}
+            <AnimatePresence>
+              {isAddingNewDrink && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="bg-white rounded-2xl shadow-lg p-8 mb-8 border-2 border-primary"
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-black text-secondary">Add New Drink</h2>
+                    <button
+                      onClick={handleCancelDrink}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <X size={24} />
+                    </button>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Title *</label>
+                      <input
+                        type="text"
+                        value={newDrink.title || ''}
+                        onChange={(e) => setNewDrink({ ...newDrink, title: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                        placeholder="e.g., Coca-Cola 2-Pack Deal"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Category *</label>
+                      <select
+                        value={newDrink.category || 'buy-2-save'}
+                        onChange={(e) => setNewDrink({ ...newDrink, category: e.target.value as Drink['category'] })}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                      >
+                        <option value="buy-2-save">Buy 2 & Save</option>
+                        <option value="discounted">Discounted</option>
+                        <option value="seasonal">Seasonal</option>
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Description *</label>
+                      <textarea
+                        value={newDrink.description || ''}
+                        onChange={(e) => setNewDrink({ ...newDrink, description: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                        rows={3}
+                        placeholder="Describe the drink deal..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Image URL *</label>
+                      <input
+                        type="text"
+                        value={newDrink.image || ''}
+                        onChange={(e) => setNewDrink({ ...newDrink, image: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                        placeholder="https://..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Savings *</label>
+                      <input
+                        type="text"
+                        value={newDrink.savings || ''}
+                        onChange={(e) => setNewDrink({ ...newDrink, savings: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                        placeholder="e.g., Save $1.50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Price (Optional)</label>
+                      <input
+                        type="text"
+                        value={newDrink.price || ''}
+                        onChange={(e) => setNewDrink({ ...newDrink, price: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                        placeholder="e.g., $4.99"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Expiration Date (Optional)</label>
+                      <input
+                        type="date"
+                        value={newDrink.expirationDate || ''}
+                        onChange={(e) => setNewDrink({ ...newDrink, expirationDate: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="flex items-center gap-3 cursor-pointer p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={newDrink.featured || false}
+                          onChange={(e) => setNewDrink({ ...newDrink, featured: e.target.checked })}
+                          className="w-5 h-5 text-primary rounded focus:ring-primary"
+                        />
+                        <div>
+                          <span className="font-bold text-gray-900">Featured Drink</span>
+                          <p className="text-sm text-gray-600">
+                            Featured drinks appear prominently on the Drinks page
+                          </p>
+                        </div>
+                      </label>
+                    </div>
+                    <div className="md:col-span-2 flex gap-4">
+                      <button
+                        onClick={handleAddDrink}
+                        className="flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-lg font-bold transition-all hover:scale-105"
+                        style={{ backgroundColor: '#FF6B35' }}
+                      >
+                        <Plus size={20} />
+                        Add Drink
+                      </button>
+                      <button
+                        onClick={handleCancelDrink}
+                        className="flex items-center gap-2 bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-bold transition-all hover:bg-gray-300"
+                      >
+                        <X size={20} />
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Drinks Grid/List */}
+            {filteredDrinks.length > 0 ? (
+              <div className={drinkViewMode === 'grid' ? 'grid grid-cols-1 lg:grid-cols-2 gap-6' : 'space-y-4'}>
+                {filteredDrinks.map((drink) => (
+                  <motion.div
+                    key={drink.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white border-2 rounded-xl overflow-hidden transition-all hover:shadow-lg border-gray-200"
+                  >
+                    {editingDrinkId === drink.id ? (
+                      <div className="p-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Title</label>
+                            <input
+                              type="text"
+                              value={editingDrink.title ?? drink.title}
+                              onChange={(e) => setEditingDrink({ ...editingDrink, title: e.target.value })}
+                              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Category</label>
+                            <select
+                              value={editingDrink.category ?? drink.category}
+                              onChange={(e) => setEditingDrink({ ...editingDrink, category: e.target.value as Drink['category'] })}
+                              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                            >
+                              <option value="buy-2-save">Buy 2 & Save</option>
+                              <option value="discounted">Discounted</option>
+                              <option value="seasonal">Seasonal</option>
+                            </select>
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
+                            <textarea
+                              value={editingDrink.description ?? drink.description}
+                              onChange={(e) => setEditingDrink({ ...editingDrink, description: e.target.value })}
+                              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                              rows={3}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Image URL</label>
+                            <input
+                              type="text"
+                              value={editingDrink.image ?? drink.image}
+                              onChange={(e) => setEditingDrink({ ...editingDrink, image: e.target.value })}
+                              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Savings</label>
+                            <input
+                              type="text"
+                              value={editingDrink.savings ?? drink.savings}
+                              onChange={(e) => setEditingDrink({ ...editingDrink, savings: e.target.value })}
+                              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Price (Optional)</label>
+                            <input
+                              type="text"
+                              value={editingDrink.price ?? drink.price ?? ''}
+                              onChange={(e) => setEditingDrink({ ...editingDrink, price: e.target.value })}
+                              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Expiration Date</label>
+                            <input
+                              type="date"
+                              value={editingDrink.expirationDate ?? drink.expirationDate ?? ''}
+                              onChange={(e) => setEditingDrink({ ...editingDrink, expirationDate: e.target.value })}
+                              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="flex items-center gap-3 cursor-pointer p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={editingDrink.featured ?? drink.featured}
+                                onChange={(e) => setEditingDrink({ ...editingDrink, featured: e.target.checked })}
+                                className="w-5 h-5 text-primary rounded focus:ring-primary"
+                              />
+                              <div>
+                                <span className="font-bold text-gray-900">Featured Drink</span>
+                                <p className="text-sm text-gray-600">
+                                  Featured drinks appear prominently on the Drinks page
+                                </p>
+                              </div>
+                            </label>
+                          </div>
+                          <div className="md:col-span-2 flex gap-4">
+                            <button
+                              onClick={handleSaveDrink}
+                              className="flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-lg font-bold transition-all hover:scale-105"
+                              style={{ backgroundColor: '#FF6B35' }}
+                            >
+                              <Save size={20} />
+                              Save Changes
+                            </button>
+                            <button
+                              onClick={handleCancelDrink}
+                              className="flex items-center gap-2 bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-bold transition-all hover:bg-gray-300"
+                            >
+                              <X size={20} />
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={drinkViewMode === 'grid' ? 'p-6' : 'p-6 flex gap-6'}>
+                        <div className={`relative ${drinkViewMode === 'grid' ? 'w-full aspect-video mb-4' : 'w-48 h-48 flex-shrink-0'} rounded-lg overflow-hidden bg-gray-100`}>
+                          <Image
+                            src={drink.image}
+                            alt={drink.title}
+                            fill
+                            className="object-cover"
+                          />
+                          {drink.featured && (
+                            <div className="absolute top-3 right-3 bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5">
+                              <Star size={12} fill="currentColor" />
+                              FEATURED
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <h3 className="text-xl font-black text-secondary mb-1">{drink.title}</h3>
+                              <span className="inline-block px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-lg mb-2">
+                                {drink.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              </span>
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => toggleDrinkFeatured(drink.id)}
+                                className={`p-2 rounded-lg transition-all ${
+                                  drink.featured ? 'bg-primary/20 text-primary' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                                title={drink.featured ? 'Remove from featured' : 'Mark as featured'}
+                              >
+                                <Star size={18} fill={drink.featured ? 'currentColor' : 'none'} />
+                              </button>
+                              <button
+                                onClick={() => handleEditDrink(drink)}
+                                className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-all"
+                                title="Edit drink"
+                              >
+                                <Edit2 size={18} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteDrink(drink.id)}
+                                className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-all"
+                                title="Delete drink"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-gray-600 mb-3 line-clamp-2">{drink.description}</p>
+                          <div className="flex items-center gap-4 text-sm">
+                            {drink.savings && (
+                              <span className="px-3 py-1 bg-orange-100 text-primary font-bold rounded-lg">
+                                {drink.savings}
+                              </span>
+                            )}
+                            {drink.price && (
+                              <span className="text-gray-700 font-semibold">{drink.price}</span>
+                            )}
+                            {drink.expirationDate && (
+                              <span className="text-gray-500 flex items-center gap-1">
+                                <Calendar size={14} />
+                                Expires: {new Date(drink.expirationDate).toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+                <AlertCircle className="mx-auto text-gray-400 mb-4" size={48} />
+                <p className="text-gray-600 text-lg">
+                  {drinkSearchQuery 
+                    ? `No drinks found matching "${drinkSearchQuery}"` 
+                    : 'No drinks yet. Add your first drink!'}
                 </p>
               </div>
             )}
