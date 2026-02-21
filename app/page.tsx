@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getHomepagePromos, getFeaturedDeals } from '@/lib/dealsData';
 import { products } from '@/lib/productData';
-import { blogs } from '@/lib/blogData';
+import { getAllBlogs } from '@/lib/blogHelpers';
 import { useState, useEffect, useRef } from 'react';
 import { DealCountdownBadge } from '@/components/DealCountdownBadge';
 
@@ -72,6 +72,7 @@ export default function Home() {
   // Blog carousel active index (for scroll indicators)
   const [blogIndex, setBlogIndex] = useState(0);
   const blogScrollRef = useRef<HTMLDivElement | null>(null);
+  const blogs = getAllBlogs();
 
   const handleBlogScroll = () => {
     const el = blogScrollRef.current;
@@ -744,14 +745,17 @@ export default function Home() {
                     {/* Image Section */}
                     <div className="relative w-full h-[400px] sm:h-[450px] md:h-[500px] lg:h-[550px] overflow-hidden bg-gray-200">
                       <Image
-                        src={
-                          blog.image && blog.image.startsWith('http')
-                            ? blog.image
-                            : '/photos/store1.jpg'
-                        }
+                        src={blog.image || '/photos/store1.jpg'}
                         alt={blog.title}
                         fill
                         className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        onError={(e) => {
+                          // Fallback to placeholder if image fails to load
+                          const target = e.target as HTMLImageElement;
+                          if (target.src !== '/photos/store1.jpg') {
+                            target.src = '/photos/store1.jpg';
+                          }
+                        }}
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 sm:p-6">
                         <div className="flex items-center gap-2 text-white typography-caption mb-2">

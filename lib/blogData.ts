@@ -14,7 +14,7 @@ export const blogs = [
       </ul>
       <p>We can't wait to serve you and become a part of this vibrant community. See you there!</p>
     `,
-        image: "/blog-store.png",
+        image: "/photos/store1.jpg",
         date: "Nov 20, 2025",
         author: "LaMa Team"
     },
@@ -29,7 +29,7 @@ export const blogs = [
       <p>Our baristas are trained to brew every cup with care, ensuring you get the perfect start to your day. We use a precise water-to-coffee ratio and control the temperature to extract the optimal flavor profile.</p>
       <p>Stop by and taste the difference for yourself!</p>
     `,
-        image: "/hero-coffee-donut.png",
+        image: "/photos/food1.jpg",
         date: "Nov 18, 2025",
         author: "Head Barista"
     },
@@ -43,7 +43,7 @@ export const blogs = [
       <p>A portion of every sale goes directly to these causes. We are also organizing volunteer days for our staff and customers to get involved.</p>
       <p>Together, we can make a real difference.</p>
     `,
-        image: "/blog-store.png",
+        image: "/photos/store1.jpg",
         date: "Nov 15, 2025",
         author: "Community Outreach"
     },
@@ -61,7 +61,7 @@ export const blogs = [
       </ul>
       <p>Whether you're craving something salty or sweet, we have something for everyone. Stop by today to try them out!</p>
     `,
-        image: "/promo-chips.png",
+        image: "/photos/food2.jpg",
         date: "Nov 10, 2025",
         author: "Product Team"
     }
