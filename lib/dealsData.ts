@@ -5,10 +5,19 @@ export interface Deal {
   image: string;
   category: 'meal-deals' | 'daily-specials' | 'weekly-promotions' | 'combo-offers';
   savings: string;
+  /**
+   * Scheduled end date for this deal (used for timers / messaging)
+   */
   expirationDate?: string;
   featured?: boolean;
   displayName?: string; // Custom display name for homepage promo cards (for admin editing)
   homepageOrder?: number; // Order position on homepage (1-4 for the 4 promo slots)
+  /**
+   * Optional pricing meta used on the Deals page
+   */
+  price?: number;          // Discounted price (e.g. 4.99)
+  originalPrice?: number;  // Original / crossed‑out price
+  stockLeft?: number;      // Remaining stock hint for urgency
 }
 
 export const deals: Deal[] = [
@@ -24,6 +33,9 @@ export const deals: Deal[] = [
     featured: true,
     displayName: 'MEAL DEALS', // Custom name for homepage card
     homepageOrder: 1, // Position 1 (left column)
+    price: 5.99,
+    originalPrice: 7.99,
+    stockLeft: 18,
   },
   {
     id: 2,
@@ -35,6 +47,9 @@ export const deals: Deal[] = [
     featured: true,
     displayName: 'MEAL DEALS', // Custom name for homepage card
     homepageOrder: 2, // Position 2 (middle column - wider)
+    price: 6.99,
+    originalPrice: 8.49,
+    stockLeft: 12,
   },
   {
     id: 3,
@@ -46,6 +61,9 @@ export const deals: Deal[] = [
     featured: true,
     displayName: 'MEAL DEALS', // Custom name for homepage card
     homepageOrder: 3, // Position 3 (right column - top)
+    price: 4.99,
+    originalPrice: 5.99,
+    stockLeft: 32,
   },
   
   // Daily Specials
@@ -89,6 +107,8 @@ export const deals: Deal[] = [
     savings: '$5 Off',
     expirationDate: '2024-12-31',
     featured: false,
+    price: 0,
+    originalPrice: 0,
   },
   {
     id: 8,

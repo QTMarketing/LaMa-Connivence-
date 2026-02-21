@@ -39,6 +39,7 @@ export const drinks: Drink[] = [
     category: 'buy-2-save',
     savings: '20% Off',
     featured: false,
+    price: '$6.49',
   },
   {
     id: 4,
@@ -58,6 +59,7 @@ export const drinks: Drink[] = [
     category: 'discounted',
     savings: '25% Off',
     featured: false,
+    price: '$3.49',
   },
   {
     id: 6,
@@ -67,6 +69,7 @@ export const drinks: Drink[] = [
     category: 'discounted',
     savings: '15% Off',
     featured: false,
+    price: '$1.49',
   },
   {
     id: 7,
@@ -77,6 +80,7 @@ export const drinks: Drink[] = [
     savings: 'New Arrival',
     featured: true,
     expirationDate: '2024-12-31',
+    price: '$3.99',
   },
   {
     id: 8,
@@ -87,6 +91,7 @@ export const drinks: Drink[] = [
     savings: 'Seasonal',
     featured: true,
     expirationDate: '2024-11-30',
+    price: '$4.49',
   },
   {
     id: 9,
@@ -97,6 +102,7 @@ export const drinks: Drink[] = [
     savings: 'Limited Time',
     featured: false,
     expirationDate: '2024-02-28',
+    price: '$3.49',
   },
 ];
 

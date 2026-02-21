@@ -144,9 +144,9 @@ export default function BlogEditor({ blogId, isNew: isNewProp }: BlogEditorProps
         router.push('/admin/blog');
       }
     } catch (error) {
-      console.error('Error saving blog:', error);
       setSavedStatus('unsaved');
-      alert('Error saving post. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Error saving post: ${errorMessage}. Please try again.`);
     } finally {
       setIsSaving(false);
     }

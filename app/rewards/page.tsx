@@ -1,185 +1,296 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowRight, Gift, Star, TrendingUp, Zap, Smartphone, Download, Check } from 'lucide-react';
+import { ArrowRight, Gift, Star, TrendingUp, Zap, Smartphone, CheckCircle2, Clock, Users, Award, DollarSign, Coffee, ShoppingBag, Download, QrCode, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import GlassBanner from '@/components/GlassBanner';
 
 export default function RewardsPage() {
   const benefits = [
     {
       icon: Star,
-      title: "Earn Points",
-      description: "Get points on every purchase. 1 point for every dollar spent."
+      title: "Earn Points on Every Purchase",
+      description: "Get 1 point for every dollar spent. Points add up fast with bonus offers and special promotions.",
+      color: "text-yellow-500"
     },
     {
       icon: Gift,
-      title: "Exclusive Deals",
-      description: "Access member-only promotions and special offers."
+      title: "Redeem for Free Items",
+      description: "Use your points to get free food, drinks, snacks, and more from our rewards menu.",
+      color: "text-primary"
     },
     {
       icon: TrendingUp,
-      title: "Redeem Rewards",
-      description: "Use your points for discounts, free items, and more."
+      title: "Exclusive Member Deals",
+      description: "Access special discounts, bonus points offers, and member-only promotions.",
+      color: "text-green-500"
     },
     {
       icon: Zap,
-      title: "Fast Checkout",
-      description: "Skip the line with quick mobile checkout options."
+      title: "Fast & Easy Checkout",
+      description: "Scan your app at checkout to earn points instantly. No cards needed.",
+      color: "text-blue-500"
     }
   ];
 
-  const steps = [
+  const howItWorks = [
     {
-      number: "1",
-      title: "Download the App",
-      description: "Get the LaMa mobile app from the App Store or Google Play. It's free and easy to set up."
+      step: 1,
+      title: "Sign Up Free",
+      description: "Download the app or sign up online. It takes less than a minute to get started.",
+      icon: Download
     },
     {
-      number: "2",
-      title: "Sign Up & Join",
-      description: "Create your free account in seconds. Just enter your email and you're ready to start earning."
-    },
-    {
-      number: "3",
+      step: 2,
       title: "Shop & Earn",
-      description: "Every time you shop at LaMa, scan your app or enter your phone number to earn points automatically."
+      description: "Make purchases at any Lama location. Scan your app at checkout to earn points automatically.",
+      icon: QrCode
     },
     {
-      number: "4",
-      title: "Redeem & Save",
-      description: "Use your points for discounts, free items, or save them up for bigger rewards. Your choice!"
+      step: 3,
+      title: "Redeem Rewards",
+      description: "Browse our rewards menu and redeem your points for free items whenever you're ready.",
+      icon: Gift
+    },
+    {
+      step: 4,
+      title: "Enjoy Benefits",
+      description: "Get exclusive deals, bonus points, and special offers sent directly to your app.",
+      icon: Sparkles
     }
   ];
 
-  const features = [
-    "Track your points balance in real-time",
-    "Get personalized deals and offers",
-    "Order ahead and skip the line",
-    "Find stores near you with GPS",
-    "View your purchase history",
-    "Get notified about new deals and promotions"
+  const rewardsMenu = [
+    { name: "Free Coffee", points: 50, icon: Coffee },
+    { name: "Free Slurpee", points: 75, icon: Coffee },
+    { name: "Free Snack", points: 100, icon: ShoppingBag },
+    { name: "Free Meal", points: 200, icon: Gift },
+    { name: "$5 Off Purchase", points: 500, icon: DollarSign },
+    { name: "$10 Off Purchase", points: 1000, icon: DollarSign },
   ];
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section - Full Width Image with Text Overlay */}
+      {/* Hero Section */}
       <section className="relative w-full min-h-[360px] sm:h-[420px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
         <div className="absolute inset-0">
           <Image
             src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=1080&fit=crop"
-            alt="Rewards Hero"
+            alt="Lama Rewards Hero"
             fill
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="absolute inset-0 bg-black/40"></div>
         </div>
-        {/* Container for Title and Glass Banner */}
-        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-4 sm:px-6">
+        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-4 md:px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center text-white max-w-4xl mb-4 sm:mb-6 md:mb-8"
+            className="text-center text-white max-w-4xl"
           >
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black">
-              Rewards
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring" }}
+              className="inline-flex items-center justify-center w-20 h-20 md:w-24 md:h-24 bg-primary rounded-md mb-6"
+            >
+              <Gift className="text-white" size={48} />
+            </motion.div>
+            <h1 className="typography-h1 mb-4 text-white">
+              Lama Rewards
             </h1>
+            <p className="typography-body-lg mb-8 opacity-85 max-w-2xl mx-auto text-white">
+              Join millions of members earning points on every purchase. Get free food, exclusive deals, and special rewards.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link
+                href="/rewards/dashboard"
+                className="btn-primary inline-flex items-center gap-2 text-lg px-8 py-4"
+              >
+                Join Now - It's Free
+                <ArrowRight size={20} />
+              </Link>
+              <Link
+                href="/stores"
+                className="btn-secondary bg-white/10 border-white/20 text-white hover:bg-white/20 inline-flex items-center gap-2 text-lg px-8 py-4"
+              >
+                Find a Store
+              </Link>
+            </div>
+            <div className="mt-8 flex items-center justify-center gap-6 text-sm md:text-base text-white">
+              <div className="flex items-center gap-2">
+                <Users size={20} className="text-white" />
+                <span className="text-white">2M+ Members</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Award size={20} className="text-white" />
+                <span className="text-white">Free to Join</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock size={20} className="text-white" />
+                <span className="text-white">Instant Rewards</span>
+              </div>
+            </div>
           </motion.div>
-          {/* Glass Banner - Floating Inside Hero */}
-          <GlassBanner />
         </div>
       </section>
 
-      {/* Benefits Grid */}
-      <section className="py-12 md:py-16 lg:py-20 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {benefits.map((benefit, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100 hover:shadow-lg hover:border-primary transition-all text-center"
-              >
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4" style={{ backgroundColor: 'rgba(255, 107, 53, 0.1)' }}>
-                  <benefit.icon className="text-primary" size={32} style={{ color: '#FF6B35' }} />
-                </div>
-                <h3 className="text-xl font-black mb-3 text-secondary">
-                  {benefit.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {benefit.description}
-                </p>
-              </motion.div>
-            ))}
+      {/* Benefits Section */}
+      <section className="section bg-white">
+        <div className="container-standard">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <h2 className="typography-h2 text-secondary mb-4">
+              Why Join Lama Rewards?
+            </h2>
+            <p className="typography-body-lg text-gray-600 max-w-2xl mx-auto">
+              Get more value from every visit with our comprehensive rewards program designed for your convenience.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            {benefits.map((benefit, index) => {
+              const Icon = benefit.icon;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="bg-gray-50 rounded-md p-6 md:p-8 text-center border border-gray-100 hover:shadow-lg transition-all duration-300"
+                >
+                  <div className={`inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-md mb-4`}>
+                    <Icon className={benefit.color} size={32} />
+                  </div>
+                  <h3 className="typography-h4 text-secondary mb-3">
+                    {benefit.title}
+                  </h3>
+                  <p className="typography-body text-gray-600">
+                    {benefit.description}
+                  </p>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Mobile App Showcase */}
-      <section className="py-12 md:py-16 lg:py-20 px-6 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
+      {/* How It Works Section */}
+      <section className="section bg-gray-50">
+        <div className="container-standard">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <h2 className="typography-h2 text-secondary mb-4">
+              How It Works
+            </h2>
+            <p className="typography-body-lg text-gray-600 max-w-2xl mx-auto">
+              Getting started is easy. Follow these simple steps to start earning rewards today.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            {howItWorks.map((step, index) => {
+              const StepIcon = step.icon;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="relative"
+                >
+                  <div className="bg-white rounded-md p-6 md:p-8 border border-gray-200 hover:shadow-lg transition-all duration-300 h-full">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="flex-shrink-0 w-12 h-12 bg-primary rounded-md flex items-center justify-center text-white font-bold typography-h3">
+                        {step.step}
+                      </div>
+                      <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-md flex items-center justify-center">
+                        <StepIcon className="text-primary" size={24} />
+                      </div>
+                    </div>
+                    <h3 className="typography-h4 text-secondary mb-3">
+                      {step.title}
+                    </h3>
+                    <p className="typography-body text-gray-600">
+                      {step.description}
+                    </p>
+                  </div>
+                  {index < howItWorks.length - 1 && (
+                    <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gray-300 transform -translate-y-1/2">
+                      <ArrowRight className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 text-gray-400" size={16} />
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Points System Section */}
+      <section className="section bg-white">
+        <div className="container-standard">
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="order-2 md:order-1"
             >
-              <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-secondary mb-6">
-                Download the LaMa App
+              <h2 className="typography-h2 text-secondary mb-4">
+                Earn Points, Get Rewards
               </h2>
-              <p className="text-lg text-gray-600 leading-relaxed mb-8">
-                Get the LaMa Rewards app on your phone and take your rewards experience everywhere you go. Track points, find deals, order ahead, and more - all from your mobile device.
+              <p className="typography-body-lg text-gray-600 mb-6">
+                Our simple points system makes it easy to earn and redeem rewards. The more you shop, the more you save.
               </p>
-              
-              {/* App Features */}
-              <div className="space-y-3 mb-8">
-                {features.map((feature, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" style={{ color: '#FF6B35' }} />
-                    <span className="text-gray-700">{feature}</span>
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <CheckCircle2 className="text-primary flex-shrink-0 mt-1" size={24} />
+                  <div>
+                    <h4 className="typography-h4 text-secondary mb-1">1 Point = $1 Spent</h4>
+                    <p className="typography-body text-gray-600">Earn points on every purchase at any Lama location.</p>
                   </div>
-                ))}
-              </div>
-
-              {/* Download Buttons */}
-              <div className="flex flex-wrap gap-4">
-                <a
-                  href="#"
-                  className="inline-flex items-center gap-2 bg-secondary border-2 border-primary text-white px-6 py-3 rounded-lg font-bold transition-all hover:border-primary-dark"
-                  style={{ backgroundColor: '#1A1A1A', borderColor: '#FF6B35' }}
-                >
-                  <Download size={20} />
-                  App Store
-                </a>
-                <a
-                  href="#"
-                  className="inline-flex items-center gap-2 bg-secondary border-2 border-primary text-white px-6 py-3 rounded-lg font-bold transition-all hover:border-primary-dark"
-                  style={{ backgroundColor: '#1A1A1A', borderColor: '#FF6B35' }}
-                >
-                  <Download size={20} />
-                  Google Play
-                </a>
+                </div>
+                <div className="flex items-start gap-4">
+                  <CheckCircle2 className="text-primary flex-shrink-0 mt-1" size={24} />
+                  <div>
+                    <h4 className="typography-h4 text-secondary mb-1">Bonus Points Offers</h4>
+                    <p className="typography-body text-gray-600">Get extra points on select items and special promotions.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <CheckCircle2 className="text-primary flex-shrink-0 mt-1" size={24} />
+                  <div>
+                    <h4 className="typography-h4 text-secondary mb-1">Points Never Expire</h4>
+                    <p className="typography-body text-gray-600">Your points are yours to keep. Use them whenever you want.</p>
+                  </div>
+                </div>
               </div>
             </motion.div>
-            
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="order-1 md:order-2 relative h-64 md:h-96 rounded-xl overflow-hidden"
+              className="relative h-64 md:h-80 rounded-md overflow-hidden"
             >
               <Image
-                src="https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?w=800&h=800&fit=crop"
-                alt="LaMa Rewards Mobile App"
+                src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop"
+                alt="Points System"
                 fill
                 className="object-cover"
               />
@@ -188,129 +299,44 @@ export default function RewardsPage() {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-12 md:py-16 lg:py-20 px-6 bg-secondary" style={{ backgroundColor: '#1A1A1A' }}>
-        <div className="max-w-7xl mx-auto">
+      {/* Combined Beautiful Section */}
+      <section className="section bg-gray-50">
+        <div className="container-standard">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-12"
+            className="text-center max-w-3xl mx-auto"
           >
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-4">
-              How It Works
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-md mb-6">
+              <Smartphone className="text-primary" size={32} />
+            </div>
+            <h2 className="typography-h2 text-secondary mb-4">
+              Get Started with Lama Rewards
             </h2>
-            <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              Getting started with LaMa Rewards is simple. Follow these easy steps to start earning and saving today.
+            <p className="typography-body-lg text-gray-600 mb-8">
+              Join Lama Rewards today and start earning points on every purchase. Download our app to manage your rewards, track your points, and access exclusive deals right from your phone. It's free to join and takes less than a minute.
             </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {steps.map((step, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-white/10 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-white/20"
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <button className="bg-secondary text-white px-8 py-4 rounded-md font-bold hover:bg-gray-800 transition-colors inline-flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
+                <Download size={20} />
+                App Store
+              </button>
+              <button className="bg-secondary text-white px-8 py-4 rounded-md font-bold hover:bg-gray-800 transition-colors inline-flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
+                <Download size={20} />
+                Google Play
+              </button>
+              <Link
+                href="/rewards/dashboard"
+                className="btn-primary inline-flex items-center gap-2 px-8 py-4"
               >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-black text-xl" style={{ backgroundColor: '#FF6B35' }}>
-                    {step.number}
-                  </div>
-                  <h3 className="text-xl font-black text-white">
-                    {step.title}
-                  </h3>
-                </div>
-                <p className="text-white/80 leading-relaxed">
-                  {step.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-center mt-12"
-          >
-            <Link
-              href="/rewards/dashboard"
-              className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-lg text-lg font-bold transition-colors"
-              style={{ backgroundColor: '#FF6B35' }}
-            >
-              Sign Up Now
-              <ArrowRight size={20} />
-            </Link>
+                Sign Up Now - It's Free
+                <ArrowRight size={20} />
+              </Link>
+            </div>
           </motion.div>
-        </div>
-      </section>
-
-      {/* Rewards Tiers */}
-      <section className="py-12 md:py-16 lg:py-20 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-secondary mb-4">
-              Rewards Tiers
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              The more you shop, the more you save. Unlock higher tiers and exclusive benefits.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-            {[
-              {
-                name: "Member",
-                points: "0-499",
-                benefits: ["Earn 1 point per dollar", "Basic member deals", "Birthday rewards"]
-              },
-              {
-                name: "VIP",
-                points: "500-1499",
-                benefits: ["Earn 1.5 points per dollar", "VIP exclusive deals", "Birthday rewards", "Priority customer support"]
-              },
-              {
-                name: "Elite",
-                points: "1500+",
-                benefits: ["Earn 2 points per dollar", "Elite exclusive deals", "Birthday rewards", "Priority support", "Early access to sales"]
-              }
-            ].map((tier, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className={`rounded-2xl p-6 md:p-8 border-2 ${
-                  index === 2 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-gray-200 bg-white'
-                }`}
-              >
-                <h3 className="text-2xl font-black text-secondary mb-2">{tier.name}</h3>
-                <p className="text-primary font-bold mb-6">{tier.points} Points</p>
-                <ul className="space-y-3">
-                  {tier.benefits.map((benefit, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" style={{ color: '#FF6B35' }} />
-                      <span className="text-gray-700">{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </section>
     </div>

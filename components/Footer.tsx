@@ -26,6 +26,7 @@ export default function Footer() {
     { href: '/media', label: 'Press Room' },
   ];
 
+  // TODO: Update with actual social media URLs before launch
   const socialLinks = [
     { href: 'https://instagram.com', icon: Instagram, label: 'Instagram' },
     { href: 'https://facebook.com', icon: Facebook, label: 'Facebook' },
@@ -33,10 +34,10 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="border-t border-gray-700 py-12 md:py-16 px-6" style={{ backgroundColor: '#1A1A1A' }}>
-      <div className="max-w-7xl mx-auto">
+    <footer className="border-t border-gray-700 section" style={{ backgroundColor: '#1A1A1A' }}>
+      <div className="container-standard">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 md:gap-12 mb-12">
           {/* Logo Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -50,7 +51,7 @@ export default function Footer() {
                 <span className="text-primary group-hover:opacity-80 transition-opacity duration-300" style={{ color: '#FF6B35' }}>LA</span>MA
               </span>
             </Link>
-            <p className="text-white/80 text-sm leading-relaxed mb-6">
+            <p className="typography-body-sm text-white/80 mb-6">
               Your neighborhood convenience store. Fresh food, cold drinks, and everything you need, right around the corner.
             </p>
             {/* Social Media Icons */}
@@ -83,7 +84,7 @@ export default function Footer() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.15 }}
           >
-            <h3 className="text-sm font-bold text-white uppercase tracking-wide mb-4">
+            <h3 className="typography-body-sm font-bold text-white uppercase tracking-wide mb-4">
               About
             </h3>
             <ul className="space-y-3">
@@ -97,7 +98,7 @@ export default function Footer() {
                 >
                   <Link
                     href={link.href}
-                    className="text-sm text-white/80 hover:text-primary transition-colors duration-300 inline-block group"
+                    className="typography-body-sm text-white/80 hover:text-primary transition-colors duration-300 inline-block group"
                   >
                     {link.label}
                     <span className="block w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
@@ -142,7 +143,7 @@ export default function Footer() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h3 className="text-sm font-bold text-white uppercase tracking-wide mb-4">
+            <h3 className="typography-body-sm font-bold text-white uppercase tracking-wide mb-4">
               Support
             </h3>
             <ul className="space-y-3">
@@ -156,7 +157,7 @@ export default function Footer() {
                 >
                   <Link
                     href={link.href}
-                    className="text-sm text-white/80 hover:text-primary transition-colors duration-300 inline-block group"
+                    className="typography-body-sm text-white/80 hover:text-primary transition-colors duration-300 inline-block group"
                   >
                     {link.label}
                     <span className="block w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
@@ -173,7 +174,7 @@ export default function Footer() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.25 }}
           >
-            <h3 className="text-sm font-bold text-white uppercase tracking-wide mb-4">
+            <h3 className="typography-body-sm font-bold text-white uppercase tracking-wide mb-4">
               Media
             </h3>
             <ul className="space-y-3">
@@ -187,7 +188,7 @@ export default function Footer() {
                 >
                   <Link
                     href={link.href}
-                    className="text-sm text-white/80 hover:text-primary transition-colors duration-300 inline-block group"
+                    className="typography-body-sm text-white/80 hover:text-primary transition-colors duration-300 inline-block group"
                   >
                     {link.label}
                     <span className="block w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
@@ -207,10 +208,10 @@ export default function Footer() {
             style={{ backgroundImage: 'none' }}
           >
             {/* Explicitly no logo image here */}
-            <h3 className="text-sm font-bold text-white uppercase tracking-wide mb-4">
+            <h3 className="typography-body-sm font-bold text-white uppercase tracking-wide mb-4">
               Subscribe to Newsletter
             </h3>
-            <p className="text-sm text-white/80 mb-4 leading-relaxed">
+            <p className="typography-body-sm text-white/80 mb-4">
               Stay updated with our latest deals, promotions, and store news.
             </p>
             <form 
@@ -223,13 +224,12 @@ export default function Footer() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-primary focus:outline-none transition-colors duration-300 text-sm"
+                className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-primary focus:outline-none transition-colors duration-300 typography-body"
                 required
               />
               <button
                 type="submit"
-                className="w-full bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-bold text-sm uppercase transition-all duration-300 hover:scale-105"
-                style={{ backgroundColor: '#FF6B35' }}
+                className="btn-primary w-full uppercase"
               >
                 Subscribe
               </button>
@@ -245,8 +245,8 @@ export default function Footer() {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="border-t border-gray-700 pt-8"
         >
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
-            <p className="text-white/60">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="typography-body-sm text-white/60">
               © {currentYear} LaMa™. All rights reserved.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
@@ -265,7 +265,7 @@ export default function Footer() {
                 >
                   <Link
                     href={link.href}
-                    className="text-white/60 hover:text-primary transition-colors duration-300 inline-block group"
+                    className="typography-body-sm text-white/60 hover:text-primary transition-colors duration-300 inline-block group"
                   >
                     {link.label}
                     <span className="block w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>

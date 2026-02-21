@@ -1,148 +1,101 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import { ArrowLeft, MapPin, Phone, Clock, Navigation } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getStoreById } from '@/lib/storeData';
+import { MapPin, Phone, Clock, ArrowLeft } from 'lucide-react';
 
-interface StoreDetailPageProps {
-  params: {
-    id: string;
-  };
-}
+type StoreDetailPageProps = {
+  params: { id: string };
+};
 
-export default function StoreDetailPage({ params }: StoreDetailPageProps) {
-  const store = getStoreById(parseInt(params.id));
-
-  if (!store) {
-    notFound();
+export default async function StoreDetailPage({ params }: StoreDetailPageProps) {
+  const id = Number(params.id);
+  if (Number.isNaN(id)) {
+    return notFound();
   }
 
-  const mapUrl = `https://www.google.com/maps?q=${store.lat},${store.lng}`;
+  const store = getStoreById(id);
+
+  if (!store) {
+    return notFound();
+  }
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="pt-32 pb-12 px-6 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto">
-          <Link 
-            href="/stores" 
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-primary transition-colors mb-6"
+      <section className="relative py-12 md:py-16 lg:py-20 bg-[#FAFAF5]">
+        <div className="container-standard px-4 md:px-6">
+          <Link
+            href="/stores"
+            className="inline-flex items-center gap-2 typography-body-sm font-semibold text-gray-600 hover:text-primary transition-colors mb-8"
           >
-            <ArrowLeft size={20} />
-            <span>Back to Stores</span>
+            <ArrowLeft size={16} />
+            Back to All Stores
           </Link>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-6">
-              <MapPin className="text-primary" size={32} />
-            </div>
-            <h1 className="text-5xl md:text-7xl font-black text-secondary mb-4">
-              {store.name}
-            </h1>
-          </motion.div>
-        </div>
-      </section>
 
-      {/* Store Details */}
-      <section className="py-12 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Store Information */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="space-y-8"
-            >
-              <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
-                <h2 className="text-3xl font-black text-secondary mb-6">
-                  Store Information
-                </h2>
-                
-                <div className="space-y-6">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                      <MapPin className="text-primary" size={24} />
-                    </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-start bg-white rounded-md shadow-lg overflow-hidden">
+            {/* Store Image/Map Placeholder */}
+            <div className="relative w-full aspect-video lg:aspect-[4/3] overflow-hidden rounded-md bg-gray-200">
+              <Image
+                src="https://images.unsplash.com/photo-1556740758-90de374c12ad?w=1920&h=1080&fit=crop"
+                alt={store.name}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+
+            {/* Store Content */}
+            <div className="p-6 md:p-8 flex flex-col justify-between h-full">
+              <div>
+                <h1 className="typography-h2 text-secondary mb-6">
+                  {store.name}
+                </h1>
+
+                <div className="space-y-4 mb-6">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="text-primary flex-shrink-0 mt-1" size={20} />
                     <div>
-                      <h3 className="text-lg font-bold text-secondary mb-1">Address</h3>
-                      <p className="text-gray-600">{store.address}</p>
+                      <p className="typography-body font-semibold text-gray-900 mb-1">Address</p>
+                      <p className="typography-body text-gray-700">{store.address}</p>
                     </div>
                   </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Phone className="text-primary" size={24} />
-                    </div>
+
+                  <div className="flex items-start gap-3">
+                    <Phone className="text-primary flex-shrink-0 mt-1" size={20} />
                     <div>
-                      <h3 className="text-lg font-bold text-secondary mb-1">Phone</h3>
-                      <a href={`tel:${store.phone}`} className="text-gray-600 hover:text-primary transition-colors">
-                        {store.phone}
-                      </a>
+                      <p className="typography-body font-semibold text-gray-900 mb-1">Phone</p>
+                      <p className="typography-body text-gray-700">{store.phone}</p>
                     </div>
                   </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Clock className="text-primary" size={24} />
-                    </div>
+
+                  <div className="flex items-start gap-3">
+                    <Clock className="text-primary flex-shrink-0 mt-1" size={20} />
                     <div>
-                      <h3 className="text-lg font-bold text-secondary mb-1">Hours</h3>
-                      <p className="text-gray-600">{store.hours}</p>
+                      <p className="typography-body font-semibold text-gray-900 mb-1">Hours</p>
+                      <p className="typography-body text-gray-700">{store.hours}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
-                <h2 className="text-2xl font-bold text-secondary mb-4">
-                  Available Services
-                </h2>
-                <ul className="space-y-2 text-gray-600">
-                  <li>• Fresh food and beverages</li>
-                  <li>• ATM services</li>
-                  <li>• Fuel (if applicable)</li>
-                  <li>• Lottery tickets</li>
-                  <li>• Money orders</li>
-                  <li>• Free Wi-Fi</li>
-                </ul>
+              <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${store.lat},${store.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary flex-1 justify-center"
+                >
+                  <MapPin size={18} />
+                  Get Directions
+                </a>
+                <Link
+                  href="/stores"
+                  className="btn-secondary flex-1 justify-center"
+                >
+                  Back to Stores
+                </Link>
               </div>
-
-              <a
-                href={mapUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold transition-colors w-full justify-center min-h-[44px]"
-              >
-                <Navigation size={20} />
-                Get Directions
-              </a>
-            </motion.div>
-
-            {/* Map Placeholder */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 h-[500px] relative"
-            >
-              <iframe
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-                src={`https://www.google.com/maps?q=${store.lat},${store.lng}&output=embed&zoom=15`}
-              />
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>

@@ -2,9 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { getFeaturedDeals, type Deal } from '@/lib/dealsData';
+import { getFeaturedDrinks, type Drink } from '@/lib/drinksData';
+
+// Union type for both Deal and Drink
+type PromoItem = Deal | Drink;
 
 // Default fallback promo
-const defaultPromo: Deal = {
+const defaultPromo: PromoItem = {
   id: 0,
   title: 'Join LaMa Convenience Rewards',
   description: 'Unlock exclusive member-only deals and earn points on every purchase!',
@@ -12,44 +16,54 @@ const defaultPromo: Deal = {
   category: 'meal-deals',
   savings: '',
   featured: true,
-};
+} as Deal;
 
 // IMPORTANT: For React/Next hydration to work, the initial state **must**
 // be the same on the server and the client. We therefore always start with
 // an empty list here and load the real promos in a client-side effect.
-function getInitialFeaturedDeals(): Deal[] {
+function getInitialFeaturedPromos(): PromoItem[] {
   return [];
 }
 
-export function usePromo() {
+export function usePromo(type: 'deals' | 'drinks' = 'deals') {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [featuredDeals, setFeaturedDeals] = useState<Deal[]>(getInitialFeaturedDeals());
+  const [featuredDeals, setFeaturedDeals] = useState<PromoItem[]>(getInitialFeaturedPromos());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Load featured deals
-    const loadFeaturedDeals = () => {
-      setFeaturedDeals(getFeaturedDeals());
+    // Load featured deals or drinks based on type
+    const loadFeaturedPromos = () => {
+      if (type === 'drinks') {
+        setFeaturedDeals(getFeaturedDrinks() as PromoItem[]);
+      } else {
+        setFeaturedDeals(getFeaturedDeals() as PromoItem[]);
+      }
     };
 
-    loadFeaturedDeals();
+    loadFeaturedPromos();
 
     // Listen for storage changes (when admin updates promos)
     const handleStorageChange = () => {
-      loadFeaturedDeals();
+      loadFeaturedPromos();
     };
 
     window.addEventListener('storage', handleStorageChange);
     // Also listen for custom events for same-tab updates
     window.addEventListener('promosUpdated', handleStorageChange);
     window.addEventListener('allDealsUpdated', handleStorageChange);
+    if (type === 'drinks') {
+      window.addEventListener('allDrinksUpdated', handleStorageChange);
+    }
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('promosUpdated', handleStorageChange);
       window.removeEventListener('allDealsUpdated', handleStorageChange);
+      if (type === 'drinks') {
+        window.removeEventListener('allDrinksUpdated', handleStorageChange);
+      }
     };
-  }, []);
+  }, [type]);
 
   useEffect(() => {
     if (featuredDeals.length > 1) {

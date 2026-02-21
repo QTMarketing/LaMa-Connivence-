@@ -1,260 +1,204 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import { ArrowLeft, MapPin, Clock, Tag } from 'lucide-react';
-import Link from 'next/link';
 import Image from 'next/image';
-import { useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { getDealById, getAllDeals } from '@/lib/dealsData';
+import { ArrowLeft, ShoppingBag, Truck } from 'lucide-react';
+import { DealCountdownBadge } from '@/components/DealCountdownBadge';
 
-interface DealDetailPageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
+type DealDetailPageProps = {
+  params: Promise<{ id: string }> | { id: string };
+};
 
-export default function DealDetailPage({ params }: DealDetailPageProps) {
-  const router = useRouter();
-  const { id } = use(params);
-  const dealId = parseInt(id);
-  const deal = getDealById(dealId);
-
-  useEffect(() => {
-    if (!deal) {
-      router.push('/deals');
-    }
-  }, [deal, router]);
-
-  if (!deal) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-secondary mb-4">Deal not found</h1>
-          <Link href="/deals" className="text-primary hover:underline">
-            Back to Deals
-          </Link>
-        </div>
-      </div>
-    );
+export default async function DealDetailPage({ params }: DealDetailPageProps) {
+  // Handle both Promise and direct params (for Next.js compatibility)
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const id = Number(resolvedParams.id);
+  if (Number.isNaN(id)) {
+    return notFound();
   }
 
-  // Get all other deals (excluding current deal)
-  const relatedDeals = getAllDeals()
-    .filter(d => d.id !== deal.id)
-    .slice(0, 6);
+  const deal = getDealById(id);
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return null;
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+  if (!deal) {
+    return notFound();
+  }
+
+  // Get related deals (same category, excluding current)
+  const relatedDeals = getAllDeals()
+    .filter(d => d.category === deal.category && d.id !== deal.id)
+    .slice(0, 4);
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="pt-32 pb-12 md:pb-16 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <Link 
-            href="/deals" 
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-primary transition-colors mb-6"
+      {/* Breadcrumb */}
+      <section className="bg-gray-50 border-b border-gray-200 pt-24 pb-4">
+        <div className="container-standard px-4 md:px-6">
+          <Link
+            href="/deals"
+            className="inline-flex items-center gap-2 typography-body-sm text-gray-600 hover:text-primary transition-colors"
           >
-            <ArrowLeft size={20} />
-            <span>Back to Deals</span>
+            <ArrowLeft size={16} />
+            Back to Deals
           </Link>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-8"
-          >
-            {/* Category Badge */}
-            <div className="mb-4">
-              <span className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wide">
-                <Tag size={16} />
-                {deal.category.replace('-', ' ')}
-              </span>
+        </div>
+      </section>
+
+      {/* Main Product Section */}
+      <section className="py-8 md:py-12">
+        <div className="container-standard px-4 md:px-6">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-start">
+            {/* Image Gallery - Left Side */}
+            <div className="space-y-4">
+              {/* Main Image */}
+              <div className="relative w-full aspect-square rounded-md overflow-hidden bg-gray-100">
+                <Image
+                  src={deal.image}
+                  alt={deal.title}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+                {/* Badge Overlay */}
+                {deal.savings && (
+                  <div className="absolute top-4 left-4">
+                    <span className="inline-flex items-center px-4 py-2 rounded-md bg-orange-500 text-white typography-body-sm font-bold shadow-lg">
+                      {deal.savings}
+                    </span>
+                  </div>
+                )}
+                {deal.expirationDate && (
+                  <div className="absolute top-4 right-4">
+                    <DealCountdownBadge target={deal.expirationDate} />
+                  </div>
+                )}
+              </div>
+
+              {/* Thumbnail Gallery */}
+              <div className="grid grid-cols-4 gap-2">
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="relative w-full aspect-square rounded-md overflow-hidden bg-gray-100 border-2 border-gray-200 hover:border-primary transition-colors cursor-pointer"
+                  >
+                    <Image
+                      src={deal.image}
+                      alt={`${deal.title} view ${i}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* Title */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-secondary mb-4">
-              {deal.title}
-            </h1>
+            {/* Product Info - Right Side */}
+            <div className="flex flex-col">
+              {/* Title */}
+              <h1 className="typography-h1 text-secondary mb-4">
+                {deal.title}
+              </h1>
 
-            {/* Description */}
-            <p className="text-xl text-gray-600 leading-relaxed max-w-3xl mb-6">
-              {deal.description}
-            </p>
+              {/* Description */}
+              <p className="typography-body-lg text-gray-700 mb-6 leading-relaxed">
+                {deal.description}
+              </p>
 
-            {/* Deal Info */}
-            <div className="flex flex-wrap items-center gap-6 mb-8">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-black text-primary" style={{ color: '#FF6B35' }}>
-                  {deal.savings}
-                </span>
-              </div>
-              {deal.expirationDate && (
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Clock size={18} />
-                  <span>Expires: {formatDate(deal.expirationDate)}</span>
+              {/* Price Section */}
+              {(deal.price || deal.originalPrice) && (
+                <div className="mb-6 p-6 bg-gray-50 rounded-md">
+                  <div className="flex items-baseline gap-4">
+                    {typeof deal.price === 'number' && (
+                      <span className="text-4xl md:text-5xl font-black text-primary">
+                        ${deal.price.toFixed(2)}
+                      </span>
+                    )}
+                    {typeof deal.originalPrice === 'number' && (
+                      <div className="flex flex-col">
+                        <span className="text-lg text-gray-400 line-through">
+                          ${deal.originalPrice.toFixed(2)}
+                        </span>
+                        <span className="text-sm text-green-600 font-bold mt-1">
+                          Save ${(deal.originalPrice - deal.price).toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
-            </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/stores"
-                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold text-sm sm:text-base uppercase transition-all duration-300 hover:scale-105 min-h-[44px]"
-                style={{ backgroundColor: '#FF6B35' }}
-              >
-                <MapPin size={20} />
-                Find a Store
-              </Link>
-              <Link
-                href="/deals"
-                className="inline-flex items-center gap-2 border-2 border-gray-300 hover:border-primary text-gray-900 hover:text-primary px-8 py-4 rounded-lg font-bold transition-all duration-300 hover:scale-105"
-              >
-                View All Deals
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Deal Image */}
-      <section className="px-6 mb-12 md:mb-16">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl"
-          >
-            <Image
-              src={deal.image}
-              alt={deal.title}
-              fill
-              className="object-cover"
-              priority
-            />
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Deal Details Section */}
-      <section className="px-4 sm:px-6 mb-12 md:mb-16">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="bg-gray-50 rounded-2xl p-8 md:p-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-black text-secondary mb-6">
-              Deal Details
-            </h2>
-            
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-xl font-bold text-secondary mb-2">What's Included</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {deal.description}
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-xl font-bold text-secondary mb-2">Savings</h3>
-                <p className="text-2xl font-black text-primary" style={{ color: '#FF6B35' }}>
-                  {deal.savings}
-                </p>
-              </div>
-
+              {/* Expiration Date */}
               {deal.expirationDate && (
-                <div>
-                  <h3 className="text-xl font-bold text-secondary mb-2">Valid Until</h3>
-                  <p className="text-gray-600">
-                    {formatDate(deal.expirationDate)}
+                <div className="mb-6">
+                  <p className="typography-body-sm text-gray-600">
+                    Valid until:{' '}
+                    <span className="font-semibold text-gray-900">
+                      {new Date(deal.expirationDate).toLocaleDateString('en-US', {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </span>
                   </p>
                 </div>
               )}
 
-              <div>
-                <h3 className="text-xl font-bold text-secondary mb-2">How to Redeem</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Visit any LaMa location and mention this deal at checkout. This offer cannot be combined with other promotions unless otherwise stated.
-                </p>
+              {/* Order Now Button - Primary CTA */}
+              <Link
+                href="/delivery"
+                className="w-full btn-primary flex items-center justify-center gap-3 py-4 text-lg font-bold mb-4 shadow-lg hover:shadow-xl transition-all"
+              >
+                <Truck size={24} />
+                Order Now
+              </Link>
+
+              {/* Secondary Actions */}
+              <div className="flex gap-3">
+                <Link
+                  href="/stores"
+                  className="flex-1 btn-secondary flex items-center justify-center gap-2 py-3"
+                >
+                  <ShoppingBag size={20} />
+                  Find a Store
+                </Link>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Related Deals Section */}
+      {/* You May Also Like Section */}
       {relatedDeals.length > 0 && (
-        <section className="py-8 sm:py-12 md:py-16 px-4 sm:px-6 bg-gray-50">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="mb-8"
-            >
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-secondary mb-4">
-                More Deals
-              </h2>
-              <p className="text-lg text-gray-600">
-                Check out these other great deals and promotions.
-              </p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {relatedDeals.map((relatedDeal, index) => (
-                <motion.div
+        <section className="py-12 bg-gray-50">
+          <div className="container-standard px-4 md:px-6">
+            <h2 className="typography-h2 text-secondary mb-8">You May Also Like</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              {relatedDeals.map((relatedDeal) => (
+                <Link
                   key={relatedDeal.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  href={`/deals/${relatedDeal.id}`}
+                  className="group"
                 >
-                  <Link
-                    href={`/deals/${relatedDeal.id}`}
-                    className="block bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg hover:border-primary transition-all duration-300 group"
-                  >
-                    <div className="relative w-full aspect-video overflow-hidden bg-gray-100">
+                  <div className="card overflow-hidden hover:shadow-xl transition-all">
+                    <div className="relative w-full aspect-square overflow-hidden rounded-md">
                       <Image
                         src={relatedDeal.image}
                         alt={relatedDeal.title}
                         fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     </div>
-                    <div className="p-6 bg-white">
-                      <h3 className="text-xl font-black text-secondary mb-2 group-hover:text-primary transition-colors duration-300">
+                    <div className="p-4">
+                      <h3 className="typography-h4 text-secondary line-clamp-2 mb-2">
                         {relatedDeal.title}
                       </h3>
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                        {relatedDeal.description}
-                      </p>
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                        <span className="text-base font-bold text-primary" style={{ color: '#FF6B35' }}>
-                          {relatedDeal.savings}
-                        </span>
-                        {relatedDeal.expirationDate && (
-                          <span className="text-xs text-gray-500">
-                            Expires: {new Date(relatedDeal.expirationDate).toLocaleDateString()}
-                          </span>
-                        )}
-                      </div>
+                      {relatedDeal.price && (
+                        <p className="text-xl font-black text-primary">
+                          ${relatedDeal.price.toFixed(2)}
+                        </p>
+                      )}
                     </div>
-                  </Link>
-                </motion.div>
+                  </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -263,4 +207,5 @@ export default function DealDetailPage({ params }: DealDetailPageProps) {
     </div>
   );
 }
+
 

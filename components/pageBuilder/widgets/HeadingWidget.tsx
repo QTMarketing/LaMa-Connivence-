@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { GripVertical, Settings, Trash2 } from 'lucide-react';
 import { PageBuilderBlock } from '@/lib/pageBuilderStorage';
 
@@ -81,7 +81,7 @@ export default function HeadingWidget({ block, isEditing, onUpdate, onDelete }: 
     );
   }
 
-  const HeadingTag = `h${level}` as keyof React.JSX.IntrinsicElements;
+  const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
   const style: React.CSSProperties = {
     color: block.styles?.textColor,
     fontSize: block.styles?.fontSize ? `${block.styles.fontSize}px` : undefined,

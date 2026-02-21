@@ -1,26 +1,21 @@
 import type { Metadata } from "next";
-import { Inter, Archivo_Narrow, Rajdhani } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import StoreLocatorWrapper from "@/components/StoreLocatorWrapper";
+import ConditionalLayout from "@/components/ConditionalLayout";
+import { Rajdhani, Inter } from "next/font/google";
+
+// Configure fonts and expose them as CSS variables for use in globals.css
+const rajdhani = Rajdhani({
+  // Valid Rajdhani weights: 300, 400, 500, 600, 700
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-rajdhani",
+});
 
 const inter = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
   variable: "--font-inter",
-});
-
-const archivoNarrow = Archivo_Narrow({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-archivo-narrow",
-});
-
-const rajdhani = Rajdhani({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-rajdhani",
 });
 
 export const metadata: Metadata = {
@@ -34,15 +29,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${archivoNarrow.variable} ${rajdhani.variable} font-sans`} style={{ fontFamily: 'var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-        <Navbar />
-        {children}
-        <StoreLocatorWrapper />
-        <Footer />
+    <html lang="en" className={`${rajdhani.variable} ${inter.variable}`}>
+      <body>
+        <ConditionalLayout>{children}</ConditionalLayout>
       </body>
     </html>
   );
 }
-
 

@@ -9,80 +9,41 @@ export interface Store {
 }
 
 export const stores: Store[] = [
-    {
-        id: 1,
-        name: "LaMa Downtown",
-        address: "123 Main St, Dallas, TX 75201",
-        lat: 32.7767,
-        lng: -96.7970,
-        phone: "(214) 555-0101",
-        hours: "24/7"
-    },
-    {
-        id: 2,
-        name: "LaMa North Park",
-        address: "8687 N Central Expy, Dallas, TX 75225",
-        lat: 32.8688,
-        lng: -96.7739,
-        phone: "(214) 555-0102",
-        hours: "6AM - 12AM"
-    },
-    {
-        id: 3,
-        name: "LaMa Fort Worth",
-        address: "400 Main St, Fort Worth, TX 76102",
-        lat: 32.7555,
-        lng: -97.3308,
-        phone: "(817) 555-0103",
-        hours: "24/7"
-    },
-    {
-        id: 4,
-        name: "LaMa Uptown",
-        address: "2400 McKinney Ave, Dallas, TX 75201",
-        lat: 32.8027,
-        lng: -96.8029,
-        phone: "(214) 555-0104",
-        hours: "24/7"
-    },
-    {
-        id: 5,
-        name: "LaMa Deep Ellum",
-        address: "2800 Commerce St, Dallas, TX 75226",
-        lat: 32.7814,
-        lng: -96.7836,
-        phone: "(214) 555-0105",
-        hours: "6AM - 2AM"
-    }
+  {
+    id: 1,
+    name: 'LaMa Downtown',
+    address: '123 Main Street, Downtown, CA 90210',
+    lat: 34.0522,
+    lng: -118.2437,
+    phone: '(555) 123-4567',
+    hours: 'Mon-Sun: 6:00 AM - 11:00 PM',
+  },
+  {
+    id: 2,
+    name: 'LaMa Westside',
+    address: '456 Ocean Avenue, Westside, CA 90210',
+    lat: 34.0522,
+    lng: -118.2437,
+    phone: '(555) 234-5678',
+    hours: 'Mon-Sun: 6:00 AM - 11:00 PM',
+  },
+  {
+    id: 3,
+    name: 'LaMa Eastside',
+    address: '789 Park Boulevard, Eastside, CA 90210',
+    lat: 34.0522,
+    lng: -118.2437,
+    phone: '(555) 345-6789',
+    hours: 'Mon-Sun: 6:00 AM - 11:00 PM',
+  },
 ];
 
-/**
- * Get all stores (reads from localStorage if available, otherwise uses static array)
- */
-export const getAllStores = (): Store[] => {
-  if (typeof window !== 'undefined') {
-    const savedStores = localStorage.getItem('adminAllStores');
-    if (savedStores) {
-      try {
-        return JSON.parse(savedStores);
-      } catch {
-        return stores; // Fallback to static
-      }
-    }
-  }
-  return stores; // Default to static array
-};
+// Helper function to get store by ID
+export function getStoreById(id: number): Store | undefined {
+  return stores.find(store => store.id === id);
+}
 
-/**
- * Get a single store by ID
- */
-export const getStoreById = (id: number): Store | undefined => {
-  return getAllStores().find(store => store.id === id);
-};
-
-
-
-
-
-
-
+// Helper function to get all stores
+export function getAllStores(): Store[] {
+  return stores;
+}

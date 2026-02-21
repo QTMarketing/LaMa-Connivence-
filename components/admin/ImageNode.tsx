@@ -1,21 +1,30 @@
 'use client';
 
-import { NodeViewWrapper, NodeViewContent, ReactNodeViewProps } from '@tiptap/react';
+import { NodeViewWrapper, NodeViewContent } from '@tiptap/react';
 import { Resizable } from 're-resizable';
 import { useState, useEffect } from 'react';
 import { AlignLeft, AlignCenter, AlignRight, Image as ImageIcon, X } from 'lucide-react';
 
-interface ImageAttrs {
-  src: string;
-  alt: string;
-  title: string;
-  width: string;
-  textAlign: 'left' | 'center' | 'right';
+interface ImageNodeProps {
+  node: {
+    attrs: {
+      src: string;
+      alt: string;
+      title: string;
+      width: string;
+      textAlign: 'left' | 'center' | 'right';
+    };
+  };
+  updateAttributes: (attrs: Partial<ImageNodeProps['node']['attrs']>) => void;
+  selected: boolean;
+  deleteNode: () => void;
+  extension: any;
+  getPos: () => number;
+  editor: any;
 }
 
-export default function ImageNode({ node, updateAttributes, selected, deleteNode, getPos, editor }: ReactNodeViewProps) {
-  const attrs = node.attrs as ImageAttrs;
-  const { src, alt, title, width, textAlign } = attrs;
+export default function ImageNode({ node, updateAttributes, selected, deleteNode, getPos, editor }: ImageNodeProps) {
+  const { src, alt, title, width, textAlign } = node.attrs;
   const [showAltModal, setShowAltModal] = useState(false);
   const [altText, setAltText] = useState(alt || '');
   const [titleText, setTitleText] = useState(title || '');
@@ -38,15 +47,15 @@ export default function ImageNode({ node, updateAttributes, selected, deleteNode
     const newWidth = ref.style.width;
     // Convert to percentage or pixel value
     const widthValue = newWidth.includes('%') ? newWidth : `${parseInt(newWidth)}px`;
-    updateAttributes({ width: widthValue } as Partial<ImageAttrs>);
+    updateAttributes({ width: widthValue });
   };
 
   const handleAlign = (align: 'left' | 'center' | 'right') => {
-    updateAttributes({ textAlign: align } as Partial<ImageAttrs>);
+    updateAttributes({ textAlign: align });
   };
 
   const handleAltTextSave = () => {
-    updateAttributes({ alt: altText, title: titleText } as Partial<ImageAttrs>);
+    updateAttributes({ alt: altText, title: titleText });
     setShowAltModal(false);
   };
 

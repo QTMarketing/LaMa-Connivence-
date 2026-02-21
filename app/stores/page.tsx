@@ -1,227 +1,313 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useState, useMemo, useEffect } from 'react';
-import { MapPin, Phone, Clock, ArrowRight, Search, X } from 'lucide-react';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { MapPin, Phone, Clock, Search, ArrowRight } from 'lucide-react';
 import { getAllStores, type Store } from '@/lib/storeData';
-import GlassBanner from '@/components/GlassBanner';
-import dynamic from 'next/dynamic';
-
-// Dynamically import the map component to avoid SSR issues
-const MapComponent = dynamic(() => import('@/components/StoreMap'), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-[500px] bg-gray-200 rounded-xl flex items-center justify-center">
-      <p className="text-gray-600">Loading map...</p>
-    </div>
-  ),
-});
+import { getStoreStatusBadge } from '@/lib/storeUtils';
 
 export default function StoresPage() {
-  const [searchCity, setSearchCity] = useState('');
-  const [selectedStore, setSelectedStore] = useState<number | null>(null);
-  // Initialize with empty array during SSR, populate in useEffect
-  const [allStores, setAllStores] = useState<Store[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [stores, setStores] = useState<Store[]>([]);
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
 
-  // Initialize stores and listen for updates
   useEffect(() => {
-    // Initialize stores on mount
-    setAllStores(getAllStores());
+    // Get search query from URL params
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get('search') || '';
+    setSearchQuery(query);
+
+    // Load stores
+    const allStores = getAllStores();
+    setStores(allStores);
     
-    const handleStoreUpdate = () => {
-      setAllStores(getAllStores());
-    };
-    window.addEventListener('storesUpdated', handleStoreUpdate);
-    return () => window.removeEventListener('storesUpdated', handleStoreUpdate);
+    // Set first store as selected by default for map
+    if (allStores.length > 0) {
+      setSelectedStore(allStores[0]);
+    }
   }, []);
 
-  // Extract city from address and filter stores
-  const filteredStores = useMemo(() => {
-    if (!searchCity.trim()) {
-      return allStores;
-    }
-    
-    const searchLower = searchCity.toLowerCase().trim();
-    return allStores.filter(store => {
-      // Extract city from address (format: "Address, City, State ZIP")
-      const addressParts = store.address.split(',');
-      if (addressParts.length >= 2) {
-        const city = addressParts[1].trim().toLowerCase();
-        return city.includes(searchLower);
-      }
-      return store.address.toLowerCase().includes(searchLower);
-    });
-  }, [searchCity, allStores]);
+  // Filter stores based on search query
+  const filteredStores = stores.filter((store) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      store.name.toLowerCase().includes(query) ||
+      store.address.toLowerCase().includes(query) ||
+      store.phone.includes(query)
+    );
+  });
 
-  // Calculate center of map based on filtered stores
-  const mapCenter = useMemo(() => {
-    if (filteredStores.length === 0) {
-      return { lat: 32.7767, lng: -96.7970 }; // Default to Dallas
+  // Update selected store when search results change
+  useEffect(() => {
+    if (filteredStores.length > 0) {
+      // If current selected store is not in filtered results, select first filtered store
+      const currentSelectedExists = selectedStore && filteredStores.find(s => s.id === selectedStore.id);
+      if (!currentSelectedExists) {
+        setSelectedStore(filteredStores[0]);
+      }
     }
-    
-    const avgLat = filteredStores.reduce((sum, store) => sum + store.lat, 0) / filteredStores.length;
-    const avgLng = filteredStores.reduce((sum, store) => sum + store.lng, 0) / filteredStores.length;
-    
-    return { lat: avgLat, lng: avgLng };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredStores]);
 
+  // Generate Google Maps embed URL using coordinates
+  // This uses the basic Google Maps embed (no API key required for basic embeds)
+  const getMapUrl = () => {
+    if (selectedStore) {
+      // Embed using coordinates - works without API key
+      return `https://www.google.com/maps?q=${selectedStore.lat},${selectedStore.lng}&hl=en&z=15&output=embed`;
+    }
+    if (stores.length > 0) {
+      // Show center of all stores if no store selected
+      const centerLat = stores.reduce((sum, s) => sum + s.lat, 0) / stores.length;
+      const centerLng = stores.reduce((sum, s) => sum + s.lng, 0) / stores.length;
+      return `https://www.google.com/maps?q=${centerLat},${centerLng}&hl=en&z=12&output=embed`;
+    }
+    return null;
+  };
+
+  // Fallback: Use Google Maps search URL if API key not available
+  const getMapSearchUrl = () => {
+    if (selectedStore) {
+      return `https://www.google.com/maps/search/?api=1&query=${selectedStore.lat},${selectedStore.lng}`;
+    }
+    if (stores.length > 0) {
+      const firstStore = stores[0];
+      return `https://www.google.com/maps/search/?api=1&query=${firstStore.lat},${firstStore.lng}`;
+    }
+    return '#';
+  };
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section - Full Width Image with Text Overlay */}
+    <div className="min-h-screen bg-white pb-20 md:pb-0">
+      {/* Hero Section */}
       <section className="relative w-full min-h-[360px] sm:h-[420px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
         <div className="absolute inset-0">
           <Image
-            src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=1080&fit=crop"
-            alt="Find a Store Hero"
+            src="https://images.unsplash.com/photo-1556740758-90de374c12ad?w=1920&h=1080&fit=crop"
+            alt="Find a Store"
             fill
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="absolute inset-0 bg-black/40"></div>
         </div>
-        {/* Container for Title and Glass Banner */}
-        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-4 sm:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center text-white max-w-4xl mb-4 sm:mb-6 md:mb-8"
-          >
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black">
-              Find a Store
-            </h1>
-          </motion.div>
-          {/* Glass Banner - Floating Inside Hero */}
-          <GlassBanner />
-        </div>
-      </section>
 
-      {/* Search and Map Section */}
-      <section className="py-12 px-6 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="mb-8"
-          >
-            <h2 className="text-3xl md:text-4xl font-black text-secondary mb-4 text-center">
-              Find Stores Near You
-            </h2>
-            <p className="text-gray-600 text-center mb-6">
-              Search by city name to see all LaMa Convenience locations on the map
-            </p>
-            
-            {/* City Search Input */}
-            <div className="max-w-md mx-auto mb-6">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="text"
-                  value={searchCity}
-                  onChange={(e) => setSearchCity(e.target.value)}
-                  placeholder="Enter city name (e.g., Dallas, Fort Worth)"
-                  className="w-full pl-12 pr-12 py-3 sm:py-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary text-base sm:text-lg min-h-[44px]"
-                />
-                {searchCity && (
-                  <button
-                    onClick={() => setSearchCity('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                  >
-                    <X size={20} />
-                  </button>
-                )}
-              </div>
-              {searchCity && (
-                <p className="text-sm text-gray-600 mt-2 text-center">
-                  Found <strong>{filteredStores.length}</strong> {filteredStores.length === 1 ? 'store' : 'stores'} in {searchCity}
-                </p>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Map Component */}
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 mb-8">
-            <MapComponent
-              stores={filteredStores}
-              center={mapCenter}
-              selectedStore={selectedStore}
-              onStoreSelect={setSelectedStore}
-            />
+        <div className="relative z-10 container-standard px-4 md:px-6 lg:px-8 h-full flex items-center">
+          <div className="max-w-4xl mx-auto text-center w-full">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <h1 className="typography-h1 text-white mb-4">
+                Find Your Nearest Store
+              </h1>
+              <p className="typography-body-lg text-white opacity-85 max-w-2xl mx-auto">
+                Visit one of our convenient locations to shop, grab a quick bite, or access our services.
+              </p>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Stores Grid */}
-      <section className="py-12 px-6">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-black text-secondary mb-8 text-center">
-            {searchCity ? `Stores in ${searchCity}` : 'All Locations'}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredStores.length > 0 ? (
-              filteredStores.map((store, index) => (
+      {/* Main Content Section - Two Column Layout */}
+      <section className="section bg-white">
+        <div className="container-standard">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-start">
+            {/* Left Column - Title, Description, Search */}
+            <div className="space-y-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+              >
+                <h2 className="typography-h2 text-secondary mb-4">
+                  Our Store Locations
+                </h2>
+                <p className="typography-body-lg text-gray-700 mb-6 leading-relaxed">
+                  Find the nearest LaMa convenience store to you. Search by store name, address, or city to quickly locate what you're looking for.
+                </p>
+              </motion.div>
+
+              {/* Search Bar */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="relative"
+              >
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search by store name, address, or city..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-12 pr-4 py-4 rounded-md bg-white border-2 border-gray-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-gray-900 placeholder-gray-500 typography-body font-medium transition-all duration-300"
+                  />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                </div>
+              </motion.div>
+
+              {/* Store Count */}
+              {filteredStores.length > 0 && (
                 <motion.div
-                  key={store.id}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4 }}
+                  className="pt-2"
+                >
+                  <p className="typography-body text-gray-600">
+                    <span className="font-semibold text-secondary">{filteredStores.length}</span>{' '}
+                    {filteredStores.length === 1 ? 'store' : 'stores'} found
+                  </p>
+                </motion.div>
+              )}
+
+              {/* Store List */}
+              {filteredStores.length === 0 ? (
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className={`bg-white rounded-2xl overflow-hidden border-2 transition-all hover:shadow-lg cursor-pointer ${
-                    selectedStore === store.id ? 'border-primary shadow-lg' : 'border-gray-100'
-                  }`}
-                  onClick={() => setSelectedStore(store.id)}
+                  className="text-center py-12"
                 >
-                  <div className="p-6">
-                    <h3 className="text-2xl font-bold text-secondary mb-4 hover:text-primary transition-colors">
-                      {store.name}
-                    </h3>
-                    
-                    <div className="space-y-3 mb-6">
-                      <div className="flex items-start gap-3">
-                        <MapPin className="text-primary flex-shrink-0 mt-1" size={20} />
-                        <p className="text-gray-600 text-sm">{store.address}</p>
-                      </div>
-                      
-                      <div className="flex items-start gap-3">
-                        <Phone className="text-primary flex-shrink-0 mt-1" size={20} />
-                        <a href={`tel:${store.phone}`} className="text-gray-600 text-sm hover:text-primary transition-colors">
-                          {store.phone}
-                        </a>
-                      </div>
-                      
-                      <div className="flex items-start gap-3">
-                        <Clock className="text-primary flex-shrink-0 mt-1" size={20} />
-                        <p className="text-gray-600 text-sm">{store.hours}</p>
-                      </div>
-                    </div>
-                    
-                    <Link
-                      href={`/stores/${store.id}`}
-                      className="inline-flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all group min-h-[44px]"
-                    >
-                      View Details
-                      <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </div>
+                  <p className="typography-body-lg text-gray-600 mb-4">
+                    No stores found matching your search.
+                  </p>
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="btn-secondary"
+                  >
+                    Clear Search
+                  </button>
                 </motion.div>
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <p className="text-gray-600 text-lg">
-                  No stores found in "{searchCity}". Try searching for a different city.
-                </p>
+              ) : (
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-hide overflow-x-visible">
+                  {filteredStores.map((store, index) => {
+                    const status = getStoreStatusBadge(store);
+                    return (
+                      <motion.div
+                        key={store.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.4, delay: index * 0.05 }}
+                        onClick={() => setSelectedStore(store)}
+                        className={`card p-5 cursor-pointer transition-all duration-300 relative ${
+                          selectedStore?.id === store.id
+                            ? 'border-2 border-primary shadow-lg'
+                            : 'border border-gray-200 hover:border-primary/50 hover:shadow-md'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <h3 className="typography-h3 text-secondary">
+                            {store.name}
+                          </h3>
+                          <span
+                            className="inline-flex items-center px-3 py-1 rounded-full typography-caption font-semibold flex-shrink-0 ml-2"
+                            style={{
+                              color: status.color,
+                              backgroundColor: status.bgColor,
+                            }}
+                          >
+                            {status.text}
+                          </span>
+                        </div>
+
+                        <div className="space-y-2 mb-4">
+                          <div className="flex items-start gap-2">
+                            <MapPin className="text-primary flex-shrink-0 mt-1" size={16} />
+                            <p className="typography-body-sm text-gray-700">{store.address}</p>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <Phone className="text-primary flex-shrink-0 mt-1" size={16} />
+                            <p className="typography-body-sm text-gray-700">{store.phone}</p>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <Clock className="text-primary flex-shrink-0 mt-1" size={16} />
+                            <p className="typography-body-sm text-gray-700">{store.hours}</p>
+                          </div>
+                        </div>
+
+                        <div 
+                          className="relative z-20 mt-4 pt-2 border-t border-gray-100" 
+                          onClick={(e) => e.stopPropagation()}
+                          onMouseEnter={(e) => e.stopPropagation()}
+                          onMouseLeave={(e) => e.stopPropagation()}
+                        >
+                          <Link
+                            href={`/stores/${store.id}`}
+                            className="inline-flex items-center gap-2 typography-body-sm font-semibold text-primary hover:text-primary-dark hover:underline transition-all duration-200"
+                            style={{ 
+                              pointerEvents: 'auto',
+                              position: 'relative',
+                              zIndex: 20
+                            }}
+                          >
+                            View Details
+                            <ArrowRight size={14} className="transition-transform duration-200 hover:translate-x-1" />
+                          </Link>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Right Column - Map */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="sticky top-24"
+            >
+              <div className="card overflow-hidden p-0 h-[600px] md:h-[700px] lg:h-[800px] relative bg-gray-100">
+                {/* Google Maps Embed */}
+                {getMapUrl() ? (
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    allowFullScreen
+                    referrerPolicy="no-referrer-when-downgrade"
+                    src={getMapUrl()}
+                    key={selectedStore?.id} // Force re-render when store changes
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 p-6">
+                    <MapPin size={48} className="text-gray-400 mb-4" />
+                    <p className="typography-body text-gray-600 mb-4 text-center">
+                      {selectedStore 
+                        ? `View ${selectedStore.name} on Google Maps`
+                        : 'Select a store to view on map'}
+                    </p>
+                    <a
+                      href={getMapSearchUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-primary"
+                    >
+                      <MapPin size={18} />
+                      Open in Google Maps
+                    </a>
+                    <p className="typography-caption text-gray-500 mt-4 text-center max-w-xs">
+                      Add your Google Maps API key to enable embedded maps
+                    </p>
+                  </div>
+                )}
               </div>
-            )}
+            </motion.div>
           </div>
         </div>
       </section>
     </div>
   );
 }
-
-
-
-

@@ -21,7 +21,6 @@ import BlockMenu from './BlockMenu';
 import EditorBlockMenu from './EditorBlockMenu';
 import { PageBuilderBlock } from '@/lib/pageBuilderStorage';
 import { Editor } from '@tiptap/react';
-import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 
 interface RichTextEditorProps {
   content: string;
@@ -348,7 +347,8 @@ export default function RichTextEditor({ content, onChange, placeholder = 'Type 
               setEditingWidget({ block: blockData, nodePos });
             }
           } catch (err) {
-            console.error('Error parsing widget data:', err);
+            // Silently handle widget parsing errors - invalid widget data
+            // Widget will not be editable but page will still function
           }
         }
         return;
@@ -364,7 +364,7 @@ export default function RichTextEditor({ content, onChange, placeholder = 'Type 
         const { $from } = selection;
         
         // Find image node at cursor
-        let imageNode: ProseMirrorNode | null = null;
+        let imageNode = null;
         let imagePos = -1;
         
         state.doc.nodesBetween(Math.max(0, $from.pos - 100), Math.min(state.doc.content.size, $from.pos + 100), (node, pos) => {
@@ -376,9 +376,8 @@ export default function RichTextEditor({ content, onChange, placeholder = 'Type 
         });
 
         if (imageNode && imagePos >= 0) {
-          const nodeWithAttrs = imageNode as ProseMirrorNode & { attrs: { src?: string; alt?: string } };
-          const currentSrc = nodeWithAttrs.attrs?.src || '';
-          const currentAlt = nodeWithAttrs.attrs?.alt || '';
+          const currentSrc = imageNode.attrs.src || '';
+          const currentAlt = imageNode.attrs.alt || '';
           
           // Open image modal with current values
           setShowImageModal(true);

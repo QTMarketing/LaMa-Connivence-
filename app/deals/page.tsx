@@ -1,13 +1,16 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAllDeals, getDealsByCategory, type Deal } from '@/lib/dealsData';
 import { Tag, Coffee, Zap, Pizza, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import GlassBanner from '@/components/GlassBanner';
 import { usePromo } from '@/hooks/usePromo';
+import { DealCountdown } from './DealCountdown';
+import { DealCountdownBadge } from '@/components/DealCountdownBadge';
+import SocialShare from '@/components/SocialShare';
 
 export default function DealsPage() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | Deal['category']>('all');
@@ -57,7 +60,7 @@ export default function DealsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pb-20 md:pb-0">
       {/* Hero Section - Full Width Image with Text Overlay */}
       <section className="relative w-full min-h-[360px] sm:h-[420px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
         <div className="absolute inset-0">
@@ -71,14 +74,14 @@ export default function DealsPage() {
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
         {/* Container for Title and Glass Banner */}
-        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-4 sm:px-6">
+        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-4 md:px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center text-white max-w-4xl mb-6 sm:mb-6 md:mb-8"
+            className="text-center text-white max-w-4xl mb-8"
           >
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black">
+            <h1 className="typography-h1 text-white">
               Deals
             </h1>
           </motion.div>
@@ -89,14 +92,14 @@ export default function DealsPage() {
 
       {/* Featured Deal Section */}
       {currentPromo && featuredDeals.length > 0 && (
-        <section className="py-6 px-4 sm:px-6 bg-white">
-          <div className="max-w-7xl mx-auto">
+        <section className="py-section-xs md:py-section-sm px-4 md:px-6 bg-white">
+          <div className="container-standard">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="bg-gray-50 rounded p-4 sm:p-5 md:p-6 lg:p-8"
+              className="bg-gray-50 rounded-lg p-6 md:p-8"
             >
               <div className="relative">
                 <AnimatePresence mode="wait">
@@ -106,9 +109,9 @@ export default function DealsPage() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -30 }}
                     transition={{ duration: 0.5, ease: "easeInOut" }}
-                    className="grid md:grid-cols-2 gap-4 md:gap-6 items-center"
+                    className="grid md:grid-cols-2 gap-6 md:gap-8 items-center"
                   >
-                    <div className="relative w-full aspect-[4/3] md:aspect-[3/2] rounded overflow-hidden">
+                    <div className="relative w-full aspect-[4/3] md:aspect-[3/2] rounded-lg overflow-hidden">
                       <Image
                         src={currentPromo.image}
                         alt={currentPromo.title}
@@ -117,22 +120,21 @@ export default function DealsPage() {
                       />
                     </div>
                     <div>
-                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-secondary mb-4">
+                      <h2 className="typography-h2 text-secondary mb-4">
                         {currentPromo.title}
                       </h2>
-                      <p className="text-base sm:text-lg text-gray-600 mb-6 leading-relaxed">
+                      <p className="typography-body-lg text-gray-600 mb-6">
                         {currentPromo.description}
                       </p>
                       <div className="mb-6">
                         <Link
                           href="/stores"
-                          className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded font-bold transition-all hover:scale-105 min-h-[44px] text-sm sm:text-base"
-                          style={{ backgroundColor: '#FF6B35' }}
+                          className="btn-primary"
                         >
                           Find a Store
                         </Link>
                       </div>
-                      <p className="text-xs sm:text-sm text-gray-500">
+                      <p className="typography-caption text-gray-500">
                         *Valid at participating locations through Sunday. While supplies last.
                       </p>
                     </div>
@@ -141,7 +143,7 @@ export default function DealsPage() {
 
                 {/* Dot Indicators */}
                 {totalPromos > 1 && (
-                  <div className="flex items-center justify-center gap-2.5 mt-8">
+                  <div className="flex items-center justify-center gap-3 mt-8">
                     {featuredDeals.map((_, index) => (
                       <button
                         key={index}
@@ -172,20 +174,20 @@ export default function DealsPage() {
         </section>
       )}
 
-      {/* Category Filters */}
-      <section className="py-8 px-4 sm:px-6 bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto">
-          <nav className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 md:gap-4 justify-center">
+      {/* Category Filters – sticky on scroll */}
+      <section className="py-4 md:py-5 px-4 md:px-6 bg-white border-b border-gray-200 sticky top-[72px] z-20">
+        <div className="container-standard">
+          <nav className="flex flex-wrap items-center justify-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide pb-2 md:pb-0 md:overflow-visible">
             {categories.map((category) => {
               const Icon = category.icon;
               return (
                 <button
                   key={category.id}
                   onClick={() => handleCategoryChange(category.id)}
-                  className={`w-full sm:w-auto px-4 sm:px-6 py-3 rounded text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 min-h-[44px] ${
+                  className={`inline-flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 rounded-md typography-body-sm font-semibold transition-all min-h-[44px] border ${
                     selectedCategory === category.id
-                      ? 'bg-primary text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                      ? 'bg-primary text-white border-transparent shadow-sm scale-[1.02]'
+                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
                   }`}
                   style={selectedCategory === category.id ? { backgroundColor: '#FF6B35' } : {}}
                 >
@@ -199,60 +201,117 @@ export default function DealsPage() {
       </section>
 
       {/* Deals Grid */}
-      <section className="py-8 sm:py-12 md:py-16 px-4 sm:px-6" style={{ backgroundColor: '#FAFAF5' }}>
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 deals-grid">
+      <section id="deals-grid" className="section" style={{ backgroundColor: '#FAFAF5' }}>
+        <div className="container-standard">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 deals-grid">
             {currentDeals.map((deal: Deal, index: number) => (
-              <motion.div
+              <Link
                 key={deal.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.08 }}
-                className="bg-white/95 rounded overflow-hidden border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                style={{ borderColor: '#FF6B35' }}
+                href={`/deals/${deal.id}`}
+                className="block"
               >
-                {/* Image */}
-                <div className="relative w-full aspect-video overflow-hidden">
-                  <Image
-                    src={deal.image}
-                    alt={deal.title}
-                    fill
-                    className="object-cover transition-transform duration-500 hover:scale-105"
-                  />
-                  {/* Save badge */}
-                  <div className="absolute top-3 right-3">
-                    <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-white/90 text-xs font-semibold text-gray-800 shadow-sm">
-                      Save deal
-                    </span>
-                  </div>
-                </div>
-                {/* Content */}
-                <div className="p-3 sm:p-4 md:p-5">
-                  <div className="flex flex-col gap-2.5">
-                  <h3 className="text-[11px] sm:text-[13px] md:text-[15px] font-black text-secondary">
-                    {deal.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
-                    {deal.description}
-                  </p>
-                  <div className="mt-1 flex items-center justify-between gap-2 flex-wrap">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  whileHover={{ y: -4, boxShadow: '0 18px 30px rgba(0,0,0,0.16)' }}
+                  className="card relative overflow-hidden group cursor-pointer"
+                >
+                  {/* Badges / urgency */}
+                  <div className="absolute z-10 top-3 left-3 flex flex-col gap-2">
                     {deal.savings && (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-primary text-xs font-semibold whitespace-nowrap">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-orange-500 text-white typography-caption font-semibold shadow">
                         {deal.savings}
                       </span>
                     )}
-                    <Link
-                      href={`/deals/${deal.id}`}
-                      className="ml-auto inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-dark transition-colors whitespace-nowrap"
-                    >
-                      View Detail
-                      <ArrowRight size={16} />
-                    </Link>
+                    {deal.expirationDate && (
+                      <DealCountdownBadge target={deal.expirationDate} compact />
+                    )}
                   </div>
+                  
+                  {/* Social Share - Top Right */}
+                  <div 
+                    className="absolute z-10 top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    <SocialShare 
+                      url={`/deals/${deal.id}`}
+                      title={deal.title}
+                      description={deal.description}
+                    />
                   </div>
-                </div>
-              </motion.div>
+
+                  {/* Image */}
+                  <div className="relative w-full aspect-video overflow-hidden rounded-md">
+                    <Image
+                      src={deal.image}
+                      alt={deal.title}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-4 md:p-6 flex flex-col gap-3">
+                    <h3 className="typography-h3 text-secondary">
+                      {deal.title}
+                    </h3>
+
+                    {/* Price row - Enhanced for sales */}
+                    {(deal.price || deal.originalPrice) && (
+                      <div className="flex items-baseline gap-3">
+                        {typeof deal.price === 'number' && (
+                          <span className="text-3xl md:text-4xl font-black text-primary">
+                            ${deal.price.toFixed(2)}
+                          </span>
+                        )}
+                        {typeof deal.originalPrice === 'number' && (
+                          <div className="flex flex-col">
+                            <span className="text-base md:text-lg text-gray-400 line-through">
+                              ${deal.originalPrice.toFixed(2)}
+                            </span>
+                            {typeof deal.price === 'number' && (
+                              <span className="text-xs text-green-600 font-semibold">
+                                Save ${(deal.originalPrice - deal.price).toFixed(2)}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <p className="typography-body-sm text-gray-600 line-clamp-2">
+                      {deal.description}
+                    </p>
+
+                    {/* Urgency indicators */}
+                    <div className="flex items-center justify-between mt-1 flex-wrap gap-2">
+                      {typeof deal.stockLeft === 'number' && deal.stockLeft < 20 && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-md bg-red-50 text-red-700 typography-caption font-semibold">
+                          ⚡ Only {deal.stockLeft} left!
+                        </span>
+                      )}
+                      {deal.expirationDate && (
+                        <span className="typography-caption text-gray-500">
+                          Valid until {new Date(deal.expirationDate).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between gap-3">
+                      <span className="btn-primary flex-1 justify-center text-center">
+                        Redeem Now
+                      </span>
+                      <span className="inline-flex items-center gap-2 typography-body-sm font-semibold text-primary whitespace-nowrap">
+                        Details
+                        <ArrowRight size={16} />
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+              </Link>
             ))}
           </div>
 
@@ -316,6 +375,16 @@ export default function DealsPage() {
           )}
         </div>
       </section>
+
+      {/* Sticky bottom CTA on mobile */}
+      <div className="fixed inset-x-0 bottom-0 z-30 bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between gap-3 md:hidden">
+        <span className="typography-body-sm font-semibold">
+          See today&apos;s hot deals
+        </span>
+        <a href="#deals-grid" className="btn-primary px-4 py-2">
+          View Deals
+        </a>
+      </div>
 
     </div>
   );

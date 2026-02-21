@@ -1446,7 +1446,7 @@ export default function AdminPage() {
             </div>
 
             {filteredStores.length === 0 && (
-              <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+              <div className="bg-white rounded-md shadow-lg p-12 text-center">
                 <AlertCircle className="mx-auto text-gray-400 mb-4" size={48} />
                 <p className="text-gray-600 text-lg">
                   {storeSearchQuery 
@@ -1466,7 +1466,7 @@ export default function AdminPage() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200"
+                className="bg-white rounded-md shadow-lg p-6 border-2 border-gray-200"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -1482,7 +1482,7 @@ export default function AdminPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200"
+                className="bg-white rounded-md shadow-lg p-6 border-2 border-gray-200"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -1498,7 +1498,7 @@ export default function AdminPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200"
+                className="bg-white rounded-md shadow-lg p-6 border-2 border-gray-200"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -1529,7 +1529,7 @@ export default function AdminPage() {
             </div>
 
             {/* Search and Filter Bar */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border-2 border-gray-200">
+            <div className="bg-white rounded-md shadow-lg p-6 mb-8 border-2 border-gray-200">
               <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div className="flex-1 w-full md:w-auto">
                   <div className="relative">
@@ -1591,7 +1591,7 @@ export default function AdminPage() {
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="bg-white rounded-2xl shadow-lg p-8 mb-8 border-2 border-primary"
+                  className="bg-white rounded-md shadow-lg p-8 mb-8 border-2 border-primary"
                 >
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-black text-secondary">Add New Drink</h2>
@@ -1900,7 +1900,7 @@ export default function AdminPage() {
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+              <div className="bg-white rounded-md shadow-lg p-12 text-center">
                 <AlertCircle className="mx-auto text-gray-400 mb-4" size={48} />
                 <p className="text-gray-600 text-lg">
                   {drinkSearchQuery 
