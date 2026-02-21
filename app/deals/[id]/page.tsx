@@ -118,7 +118,7 @@ export default async function DealDetailPage({ params }: DealDetailPageProps) {
                           ${deal.originalPrice.toFixed(2)}
                         </span>
                         <span className="text-sm text-green-600 font-bold mt-1">
-                          Save ${(deal.originalPrice - deal.price).toFixed(2)}
+                          Save ${deal.price && deal.originalPrice ? (deal.originalPrice - deal.price).toFixed(2) : '0.00'}
                         </span>
                       </div>
                     )}

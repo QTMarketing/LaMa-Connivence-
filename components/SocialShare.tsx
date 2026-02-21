@@ -66,7 +66,7 @@ export default function SocialShare({ url, title, description }: SocialShareProp
 
   return (
     <div className="flex items-center gap-2">
-      {navigator.share && (
+      {typeof navigator !== 'undefined' && 'share' in navigator && typeof navigator.share === 'function' && (
         <button
           onClick={handleShare}
           className="p-2 rounded-md hover:bg-gray-100 transition-colors"

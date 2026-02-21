@@ -122,7 +122,7 @@ export const CustomImageExtension = Node.create<ImageOptions>({
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(ImageNode, {
+    return ReactNodeViewRenderer(ImageNode as any, {
       as: 'div',
     });
   },

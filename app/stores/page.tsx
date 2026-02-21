@@ -278,7 +278,7 @@ export default function StoresPage() {
                     loading="lazy"
                     allowFullScreen
                     referrerPolicy="no-referrer-when-downgrade"
-                    src={getMapUrl()}
+                    src={getMapUrl() || undefined}
                     key={selectedStore?.id} // Force re-render when store changes
                   />
                 ) : (

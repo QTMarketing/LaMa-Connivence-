@@ -364,7 +364,7 @@ export default function RichTextEditor({ content, onChange, placeholder = 'Type 
         const { $from } = selection;
         
         // Find image node at cursor
-        let imageNode = null;
+        let imageNode: any = null;
         let imagePos = -1;
         
         state.doc.nodesBetween(Math.max(0, $from.pos - 100), Math.min(state.doc.content.size, $from.pos + 100), (node, pos) => {
@@ -376,8 +376,8 @@ export default function RichTextEditor({ content, onChange, placeholder = 'Type 
         });
 
         if (imageNode && imagePos >= 0) {
-          const currentSrc = imageNode.attrs.src || '';
-          const currentAlt = imageNode.attrs.alt || '';
+          const currentSrc = imageNode.attrs?.src || '';
+          const currentAlt = imageNode.attrs?.alt || '';
           
           // Open image modal with current values
           setShowImageModal(true);
