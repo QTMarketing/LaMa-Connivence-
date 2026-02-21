@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import 'leaflet/dist/leaflet.css';
 
 @theme {
   /* Primary Colors (LaMa Brand - Orange) */
@@ -65,20 +64,6 @@ html {
   }
 }
 
-/* Leaflet Map Styles */
-.custom-marker {
-  background: transparent !important;
-  border: none !important;
-}
-
-/* Fix for Leaflet popup styling */
-.leaflet-popup-content-wrapper {
-  border-radius: 8px;
-}
-
-.leaflet-popup-content {
-  margin: 0;
-}
 
 /* High-End Navbar Styles - 7-Eleven Scale */
 
@@ -532,87 +517,6 @@ footer h1, footer h2, footer .logo-text {
   transform: translateY(-2px);
 }
 
-@import "tailwindcss";
-@import 'leaflet/dist/leaflet.css';
-
-@theme {
-  /* Primary Colors (LaMa Brand - Orange) */
-  --color-primary: #FF6B35;
-  --color-primary-dark: #E55A2B;
-  
-  /* Secondary/Neutral Colors (Same as Yo Quiero - Pure Neutrals) */
-  --color-secondary: #1A1A1A;
-  
-  /* Background Colors (Same as Yo Quiero - Pure Neutrals) */
-  --color-background-white: #FFFFFF;
-  --color-background-light: #F7F7F7;
-  --color-background-dark: #1A1A1A;
-  
-  /* Text Colors (Same as Yo Quiero - Pure Neutrals) */
-  --color-text-primary: #1A1A1A;
-  --color-text-secondary: #4A5568;
-  --color-text-light: #FFFFFF;
-  
-  /* Border Colors */
-  --color-border-light: #E2E8F0;
-  --color-border-hover: #FF6B35;
-}
-
-:root {
-  --foreground: #1A1A1A;
-  --background: #FFFFFF;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  margin: 0;
-  padding: 0;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  /* Hide scrollbar for horizontal scroll */
-  .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-  }
-
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari and Opera */
-  }
-
-  /* Smooth scrolling */
-  html {
-    scroll-behavior: smooth;
-  }
-}
-
-/* Leaflet Map Styles */
-.custom-marker {
-  background: transparent !important;
-  border: none !important;
-}
-
-/* Fix for Leaflet popup styling */
-.leaflet-popup-content-wrapper {
-  border-radius: 8px;
-}
-
-.leaflet-popup-content {
-  margin: 0;
-}
 
 /* High-End Navbar Styles - 7-Eleven Scale */
 
