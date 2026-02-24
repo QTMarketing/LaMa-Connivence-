@@ -5,7 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, Clock, User } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import DOMPurify from 'isomorphic-dompurify';
 
 type BlogPostPageProps = {
   params: Promise<{ slug: string }> | { slug: string };
@@ -25,6 +26,13 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
     }
   }, [params]);
 
+  const blog = useMemo(() => (slug ? getBlogBySlug(slug) : null), [slug]);
+
+  const safeContent = useMemo(
+    () => (blog?.content ? DOMPurify.sanitize(blog.content) : ''),
+    [blog],
+  );
+
   // Don't render until slug is resolved
   if (!slug) {
     return (
@@ -36,8 +44,6 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
       </div>
     );
   }
-
-  const blog = getBlogBySlug(slug);
 
   if (!blog) {
     return (
@@ -131,7 +137,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               className="prose max-w-none"
-              dangerouslySetInnerHTML={{ __html: blog.content }}
+              dangerouslySetInnerHTML={{ __html: safeContent }}
             />
 
             {/* Related Posts */}

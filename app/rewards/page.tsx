@@ -90,49 +90,12 @@ export default function RewardsPage() {
             transition={{ duration: 0.6 }}
             className="text-center text-white max-w-4xl"
           >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring" }}
-              className="inline-flex items-center justify-center w-20 h-20 md:w-24 md:h-24 bg-primary rounded-md mb-6"
-            >
-              <Gift className="text-white" size={48} />
-            </motion.div>
-            <h1 className="typography-h1 mb-4 text-white">
+            <h1 className="typography-h1 text-white">
               Lama Rewards
             </h1>
-            <p className="typography-body-lg mb-8 opacity-85 max-w-2xl mx-auto text-white">
+            <p className="typography-body-lg mt-4 opacity-85 max-w-2xl mx-auto text-white">
               Join millions of members earning points on every purchase. Get free food, exclusive deals, and special rewards.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link
-                href="/rewards/dashboard"
-                className="btn-primary inline-flex items-center gap-2 text-lg px-8 py-4"
-              >
-                Join Now - It's Free
-                <ArrowRight size={20} />
-              </Link>
-              <Link
-                href="/stores"
-                className="btn-secondary bg-white/10 border-white/20 text-white hover:bg-white/20 inline-flex items-center gap-2 text-lg px-8 py-4"
-              >
-                Find a Store
-              </Link>
-            </div>
-            <div className="mt-8 flex items-center justify-center gap-6 text-sm md:text-base text-white">
-              <div className="flex items-center gap-2">
-                <Users size={20} className="text-white" />
-                <span className="text-white">2M+ Members</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Award size={20} className="text-white" />
-                <span className="text-white">Free to Join</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock size={20} className="text-white" />
-                <span className="text-white">Instant Rewards</span>
-              </div>
-            </div>
           </motion.div>
         </div>
       </section>

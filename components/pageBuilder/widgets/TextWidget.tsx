@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { GripVertical, Settings, Trash2 } from 'lucide-react';
 import { PageBuilderBlock } from '@/lib/pageBuilderStorage';
+import DOMPurify from 'isomorphic-dompurify';
 
 interface TextWidgetProps {
   block: PageBuilderBlock;
@@ -13,6 +14,10 @@ interface TextWidgetProps {
 
 export default function TextWidget({ block, isEditing, onUpdate, onDelete }: TextWidgetProps) {
   const [content, setContent] = useState(block.content?.text || '');
+  const safeContent = useMemo(
+    () => (content ? DOMPurify.sanitize(content) : '<p></p>'),
+    [content],
+  );
 
   useEffect(() => {
     setContent(block.content?.text || '');
@@ -88,7 +93,7 @@ export default function TextWidget({ block, isEditing, onUpdate, onDelete }: Tex
     <div 
       className="text-widget prose prose-sm sm:prose lg:prose-lg max-w-none"
       style={style}
-      dangerouslySetInnerHTML={{ __html: content || '<p></p>' }}
+      dangerouslySetInnerHTML={{ __html: safeContent }}
     />
   );
 }

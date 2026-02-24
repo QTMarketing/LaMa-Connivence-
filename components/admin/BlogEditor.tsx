@@ -6,6 +6,7 @@ import { Save, Eye, EyeOff, Calendar, User, Image as ImageIcon, X } from 'lucide
 import Image from 'next/image';
 import Link from 'next/link';
 import { blogStorage, categoryStorage, tagStorage, type BlogPost, type Category, type Tag } from '@/lib/blogStorage';
+import DOMPurify from 'isomorphic-dompurify';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import SEOPanel from '@/components/admin/SEOPanel';
 import PageBuilder from '@/components/pageBuilder/PageBuilder';
@@ -261,8 +262,11 @@ export default function BlogEditor({ blogId, isNew: isNewProp }: BlogEditorProps
               {/* Content */}
               <div 
                 className="prose prose-lg max-w-none"
+                // Preview is sanitized to avoid executing arbitrary scripts while editing.
                 dangerouslySetInnerHTML={{ 
-                  __html: blog.content || '<p class="text-gray-500 italic">No content yet. Start writing to see preview.</p>'
+                  __html: blog.content
+                    ? DOMPurify.sanitize(blog.content)
+                    : '<p class="text-gray-500 italic">No content yet. Start writing to see preview.</p>'
                 }}
               />
 
