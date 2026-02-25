@@ -14,7 +14,9 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Protect /admin routes (but allow access to the login page itself)
-  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
+  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+    console.info(`[middleware] Checking access to ${pathname}`);
+    
     const secret = await getJwtSecret();
     if (!secret) {
       console.warn(
@@ -40,6 +42,7 @@ export async function middleware(request: NextRequest) {
         const loginUrl = new URL("/admin/login", request.url);
         return NextResponse.redirect(loginUrl);
       }
+      console.info("[middleware] Valid admin session, allowing access.");
     } catch (error) {
       console.warn("[middleware] Failed to verify admin session:", error);
       const loginUrl = new URL("/admin/login", request.url);
@@ -51,6 +54,9 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: [
+    "/admin",
+    "/admin/:path*",
+  ],
 };
 

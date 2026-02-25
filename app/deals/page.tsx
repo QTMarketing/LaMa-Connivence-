@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAllDeals, getDealsByCategory, type Deal } from '@/lib/dealsData';
@@ -15,6 +15,8 @@ import SocialShare from '@/components/SocialShare';
 export default function DealsPage() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | Deal['category']>('all');
   const [currentPage, setCurrentPage] = useState(0);
+  const [showCategoryBar, setShowCategoryBar] = useState(true);
+  const lastScrollY = useRef(0);
   const { currentPromo, currentIndex, totalPromos, goToPromo, featuredDeals } = usePromo();
 
   const categories: Array<{ id: 'all' | Deal['category']; label: string; icon: typeof Tag }> = [
@@ -58,6 +60,39 @@ export default function DealsPage() {
       setCurrentPage(currentPage - 1);
     }
   };
+
+  // Hide secondary sticky category bar when scrolling down on mobile,
+  // and reveal it when scrolling up or near the top.
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      const isMobile = window.innerWidth < 768;
+
+      if (!isMobile) {
+        setShowCategoryBar(true);
+        lastScrollY.current = y;
+        return;
+      }
+
+      if (y < 140) {
+        setShowCategoryBar(true);
+      } else if (y > lastScrollY.current + 6) {
+        setShowCategoryBar(false);
+      } else if (y < lastScrollY.current - 6) {
+        setShowCategoryBar(true);
+      }
+
+      lastScrollY.current = y;
+    };
+
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-white pb-20 md:pb-0">
@@ -175,7 +210,11 @@ export default function DealsPage() {
       )}
 
       {/* Category Filters – sticky on scroll */}
-      <section className="py-4 md:py-5 px-4 md:px-6 bg-white border-b border-gray-200 sticky top-[72px] z-20">
+      <section
+        className={`py-4 md:py-5 px-4 md:px-6 bg-white border-b border-gray-200 sticky top-[72px] z-20 transition-transform duration-300 ${
+          showCategoryBar ? 'translate-y-0' : '-translate-y-full md:translate-y-0'
+        }`}
+      >
         <div className="container-standard">
           <nav className="flex flex-wrap items-center justify-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide pb-2 md:pb-0 md:overflow-visible">
             {categories.map((category) => {

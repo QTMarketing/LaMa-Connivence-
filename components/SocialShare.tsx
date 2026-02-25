@@ -1,7 +1,7 @@
 'use client';
 
 import { Share2, Facebook, Twitter, Copy, Check } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface SocialShareProps {
   url: string;
@@ -11,8 +11,13 @@ interface SocialShareProps {
 
 export default function SocialShare({ url, title, description }: SocialShareProps) {
   const [copied, setCopied] = useState(false);
+  const [canNativeShare, setCanNativeShare] = useState(false);
   const fullUrl = typeof window !== 'undefined' ? `${window.location.origin}${url}` : url;
   const shareText = description ? `${title} - ${description}` : title;
+
+  useEffect(() => {
+    setCanNativeShare(typeof navigator !== 'undefined' && typeof navigator.share === 'function');
+  }, []);
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -66,7 +71,7 @@ export default function SocialShare({ url, title, description }: SocialShareProp
 
   return (
     <div className="flex items-center gap-2">
-      {typeof navigator !== 'undefined' && 'share' in navigator && typeof navigator.share === 'function' && (
+      {canNativeShare && (
         <button
           onClick={handleShare}
           className="p-2 rounded-md hover:bg-gray-100 transition-colors"

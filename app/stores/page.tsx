@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -12,6 +12,8 @@ export default function StoresPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [stores, setStores] = useState<Store[]>([]);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [selectedCity, setSelectedCity] = useState('all');
 
   useEffect(() => {
     // Get search query from URL params
@@ -29,16 +31,31 @@ export default function StoresPage() {
     }
   }, []);
 
-  // Filter stores based on search query
-  const filteredStores = stores.filter((store) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      store.name.toLowerCase().includes(query) ||
-      store.address.toLowerCase().includes(query) ||
-      store.phone.includes(query)
+  const cityOptions = useMemo(() => {
+    const citySet = new Set(
+      stores
+        .map((store) => store.address.split(',')[1]?.trim())
+        .filter((city): city is string => Boolean(city)),
     );
-  });
+    return ['all', ...Array.from(citySet)];
+  }, [stores]);
+
+  // Filter stores based on search query and selected city
+  const filteredStores = useMemo(() => {
+    return stores.filter((store) => {
+      const matchesCity =
+        selectedCity === 'all' || store.address.toLowerCase().includes(selectedCity.toLowerCase());
+
+      if (!searchQuery) return matchesCity;
+      const query = searchQuery.toLowerCase();
+      const matchesQuery =
+        store.name.toLowerCase().includes(query) ||
+        store.address.toLowerCase().includes(query) ||
+        store.phone.includes(query);
+
+      return matchesCity && matchesQuery;
+    });
+  }, [stores, searchQuery, selectedCity]);
 
   // Update selected store when search results change
   useEffect(() => {
@@ -153,6 +170,56 @@ export default function StoresPage() {
                 </div>
               </motion.div>
 
+              {/* Quick Filters */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.15 }}
+                className="flex flex-wrap gap-2"
+              >
+                {cityOptions.slice(0, 6).map((city) => {
+                  const isActive = selectedCity === city;
+                  const label = city === 'all' ? 'All Cities' : city;
+                  return (
+                    <button
+                      key={city}
+                      type="button"
+                      onClick={() => setSelectedCity(city)}
+                      className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+                        isActive
+                          ? 'bg-primary text-white border-primary'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-primary/40'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </motion.div>
+
+              {/* Mobile View Toggle */}
+              <div className="md:hidden flex items-center gap-2 rounded-xl border border-gray-200 p-1 bg-gray-50">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('list')}
+                  className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+                    viewMode === 'list' ? 'bg-white text-secondary shadow-sm' : 'text-gray-600'
+                  }`}
+                >
+                  Store List
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('map')}
+                  className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+                    viewMode === 'map' ? 'bg-white text-secondary shadow-sm' : 'text-gray-600'
+                  }`}
+                >
+                  Map View
+                </button>
+              </div>
+
               {/* Store Count */}
               {filteredStores.length > 0 && (
                 <motion.div
@@ -187,7 +254,7 @@ export default function StoresPage() {
                   </button>
                 </motion.div>
               ) : (
-                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-hide overflow-x-visible">
+                <div className={`space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-hide overflow-x-visible ${viewMode === 'map' ? 'hidden md:block' : ''}`}>
                   {filteredStores.map((store, index) => {
                     const status = getStoreStatusBadge(store);
                     return (
@@ -234,20 +301,31 @@ export default function StoresPage() {
                           </div>
                         </div>
 
-                        <div 
-                          className="relative z-20 mt-4 pt-2 border-t border-gray-100" 
+                        <div
+                          className="relative z-20 mt-4 pt-3 border-t border-gray-100"
                           onClick={(e) => e.stopPropagation()}
-                          onMouseEnter={(e) => e.stopPropagation()}
-                          onMouseLeave={(e) => e.stopPropagation()}
                         >
+                          <div className="grid grid-cols-2 gap-2 mb-2">
+                            <a
+                              href={`tel:${store.phone.replace(/[^\d+]/g, '')}`}
+                              className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-secondary hover:border-primary/40 hover:text-primary transition-colors"
+                            >
+                              <Phone size={14} />
+                              Call
+                            </a>
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${store.lat},${store.lng}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-dark transition-colors"
+                            >
+                              <MapPin size={14} />
+                              Directions
+                            </a>
+                          </div>
                           <Link
                             href={`/stores/${store.id}`}
                             className="inline-flex items-center gap-2 typography-body-sm font-semibold text-primary hover:text-primary-dark hover:underline transition-all duration-200"
-                            style={{ 
-                              pointerEvents: 'auto',
-                              position: 'relative',
-                              zIndex: 20
-                            }}
                           >
                             View Details
                             <ArrowRight size={14} className="transition-transform duration-200 hover:translate-x-1" />
@@ -266,9 +344,36 @@ export default function StoresPage() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="sticky top-24"
+              className={`sticky top-24 ${viewMode === 'list' ? 'hidden md:block' : ''}`}
             >
-              <div className="card overflow-hidden p-0 h-[600px] md:h-[700px] lg:h-[800px] relative bg-gray-100">
+              <div className="mb-3 rounded-xl border border-gray-200 bg-white p-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold">Selected Store</p>
+                  <p className="font-bold text-secondary">{selectedStore?.name || 'Choose a location'}</p>
+                </div>
+                {selectedStore && (
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`tel:${selectedStore.phone.replace(/[^\d+]/g, '')}`}
+                      className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-secondary hover:border-primary/40 hover:text-primary transition-colors"
+                    >
+                      <Phone size={14} />
+                      Call
+                    </a>
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${selectedStore.lat},${selectedStore.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-dark transition-colors"
+                    >
+                      <MapPin size={14} />
+                      Directions
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              <div className="card overflow-hidden p-0 h-[420px] md:h-[700px] lg:h-[800px] relative bg-gray-100">
                 {/* Google Maps Embed */}
                 {getMapUrl() ? (
                   <iframe
@@ -299,7 +404,7 @@ export default function StoresPage() {
                       Open in Google Maps
                     </a>
                     <p className="typography-caption text-gray-500 mt-4 text-center max-w-xs">
-                      Add your Google Maps API key to enable embedded maps
+                      You can still open maps in a new tab for full navigation.
                     </p>
                   </div>
                 )}

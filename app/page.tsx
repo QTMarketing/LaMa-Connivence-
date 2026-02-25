@@ -178,15 +178,37 @@ export default function Home() {
                 Fuel Up Fast.
               </h1>
               <p className="typography-body-lg text-white opacity-85">
-                Fresh hot dogs and crispy taquitos,<br />
-                hot and ready to fuel your day
+                Fresh hot dogs, crispy taquitos, coffee, and cold drinks,
+                ready when you are.
               </p>
-              <Link
-                href="/deals"
-                className="btn-primary w-fit text-base md:text-lg"
-              >
-                Order Now
-              </Link>
+
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <Link
+                  href="/stores"
+                  className="btn-primary w-fit text-base md:text-lg inline-flex items-center gap-2"
+                >
+                  Find a Store Near You
+                  <MapPin size={18} />
+                </Link>
+                <Link
+                  href="/deals"
+                  className="btn-secondary w-fit text-base md:text-lg border-white !text-white hover:bg-white hover:text-primary inline-flex items-center gap-2"
+                >
+                  See Current Deals
+                  <ArrowRight size={18} />
+                </Link>
+              </div>
+
+              <div className="flex flex-wrap gap-3 md:gap-4 text-white/95">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-black/25 px-4 py-2">
+                  <Clock size={15} />
+                  <span className="text-sm font-semibold">Open 24/7 locations</span>
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-black/25 px-4 py-2">
+                  <Gift size={15} />
+                  <span className="text-sm font-semibold">Member-only rewards</span>
+                </div>
+              </div>
             </div>
 
             {/* Price - Bottom Right, closer to food */}
@@ -474,6 +496,22 @@ export default function Home() {
           <p className="typography-body-lg text-gray-600 max-w-2xl mx-auto text-center">
             Big, bold offers on your favorites – pizza, hot coffee, cold drinks, and more.
           </p>
+          <div className="mt-6 flex flex-col sm:flex-row justify-center items-center gap-3">
+            <Link
+              href="/deals"
+              className="btn-primary inline-flex items-center gap-2"
+            >
+              Browse All Deals
+              <ArrowRight size={16} />
+            </Link>
+            <Link
+              href="/rewards"
+              className="btn-secondary inline-flex items-center gap-2"
+            >
+              Join Rewards
+              <Gift size={16} />
+            </Link>
+          </div>
         </div>
 
         <div className="container-standard">
@@ -600,6 +638,41 @@ export default function Home() {
                   </div>
                 </Link>
               </motion.div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust + Proof Strip */}
+      <section className="bg-[#1A1A1A] py-8 md:py-10">
+        <div className="container-standard">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+            <div className="rounded-xl border border-white/15 bg-white/5 px-5 py-4 text-white">
+              <div className="inline-flex items-center gap-2 mb-2">
+                <MapPin size={16} className="text-primary" />
+                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
+                  Nearby Convenience
+                </span>
+              </div>
+              <p className="text-lg font-black leading-tight">Multiple Dallas-area locations</p>
+            </div>
+            <div className="rounded-xl border border-white/15 bg-white/5 px-5 py-4 text-white">
+              <div className="inline-flex items-center gap-2 mb-2">
+                <Clock size={16} className="text-primary" />
+                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
+                  Fast Access
+                </span>
+              </div>
+              <p className="text-lg font-black leading-tight">Open late and 24/7 at select stores</p>
+            </div>
+            <div className="rounded-xl border border-white/15 bg-white/5 px-5 py-4 text-white">
+              <div className="inline-flex items-center gap-2 mb-2">
+                <Gift size={16} className="text-primary" />
+                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
+                  Rewards Value
+                </span>
+              </div>
+              <p className="text-lg font-black leading-tight">Earn points and unlock member-only promos</p>
             </div>
           </div>
         </div>

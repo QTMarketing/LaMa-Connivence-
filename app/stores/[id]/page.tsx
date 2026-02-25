@@ -80,6 +80,13 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
 
               <div className="flex flex-col sm:flex-row gap-3 mt-6">
                 <a
+                  href={`tel:${store.phone.replace(/[^\d+]/g, '')}`}
+                  className="btn-secondary flex-1 justify-center"
+                >
+                  <Phone size={18} />
+                  Call Store
+                </a>
+                <a
                   href={`https://www.google.com/maps/search/?api=1&query=${store.lat},${store.lng}`}
                   target="_blank"
                   rel="noopener noreferrer"
