@@ -1,307 +1,230 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { ArrowRight, Gift, Star, TrendingUp, Zap, Smartphone, CheckCircle2, Clock, Users, Award, DollarSign, Coffee, ShoppingBag, Download, QrCode, Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowRight, MapPin, Plus } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { rewardFeatures } from '@/lib/rewardFeatureData';
+
+const membershipCards = rewardFeatures.map((feature) => ({
+  title: feature.title,
+  description:
+    feature.slug === 'digital-wallet'
+      ? 'Leave the bulky wallet at home. Pay securely with the LaMa app and track your rewards progress in real time.'
+      : feature.slug === 'savings'
+        ? 'Save more on the things you love. New members save 15% on their first three visits after signing up.'
+        : 'Shop our aisles at your own pace. Scan, pay, and go without ever standing in a traditional line.',
+  image: feature.cardImage,
+  href: `/rewards/features/${feature.slug}`,
+}));
+
+const faqItems = [
+  {
+    question: 'What is LaMa REWARDS?',
+    answer:
+      'LaMa REWARDS is our loyalty program inside the LaMa app. Members earn points on eligible purchases, unlock member-only offers, and redeem points for free or discounted items.',
+  },
+  {
+    question: 'How does it work?',
+    answer:
+      'Create a rewards account, scan your in-app barcode before you pay, and points are added automatically after checkout. Once you have enough points, choose a reward in the app and apply it on your next purchase.',
+  },
+  {
+    question: 'How many points do I earn with each purchase?',
+    answer:
+      'Most eligible purchases earn 1 point per $1 spent before tax. Some promotions and featured products can award bonus points, and those rates are shown in-app during active campaigns.',
+  },
+  {
+    question: 'How do I redeem points for my member rewards?',
+    answer:
+      'Open the Rewards section in the app, choose an available reward, and tap redeem. The reward moves to your wallet, where you can apply it at checkout by scanning your member barcode.',
+  },
+  {
+    question: 'Where can I view my available member rewards?',
+    answer:
+      'You can see current points, redeemed rewards, and expiration details in the app under Rewards and Wallet. Your balance updates shortly after qualifying transactions post.',
+  },
+  {
+    question: 'If I select a reward by mistake, how can I get the points back?',
+    answer:
+      'If the reward has not been used yet, contact support from the app Help section with the reward name and account email. Our team can review and reverse eligible accidental redemptions.',
+  },
+  {
+    question: 'Is it possible to merge multiple accounts?',
+    answer:
+      'Yes, in most cases. Reach out to support with both account emails or phone numbers, and we can help consolidate balances after ownership verification.',
+  },
+  {
+    question: 'How long do my LaMa REWARDS points last?',
+    answer:
+      'Points are valid for 12 months from the date they are earned. Any account activity, such as earning or redeeming, helps keep your rewards status active.',
+  },
+  {
+    question: 'Do I still earn points even if I have not registered my account yet?',
+    answer:
+      'A fully registered account is required to guarantee points. If you scanned as a guest, register with the same phone number as soon as possible so eligible recent activity can be matched.',
+  },
+  {
+    question: 'How can I confirm my scanned card/barcode registered for my transaction?',
+    answer:
+      'After scanning, the checkout screen should show your member confirmation. Your receipt and in-app activity history will also display the points earned for that transaction once it processes.',
+  },
+  {
+    question: 'Are there limitations with the use of LaMa REWARDS points?',
+    answer:
+      'Yes. Rewards generally cannot be exchanged for cash, may exclude restricted products, and usually cannot be combined with certain limited-time offers unless explicitly stated in the reward terms.',
+  },
+];
 
 export default function RewardsPage() {
-  const benefits = [
-    {
-      icon: Star,
-      title: "Earn Points on Every Purchase",
-      description: "Get 1 point for every dollar spent. Points add up fast with bonus offers and special promotions.",
-      color: "text-yellow-500"
-    },
-    {
-      icon: Gift,
-      title: "Redeem for Free Items",
-      description: "Use your points to get free food, drinks, snacks, and more from our rewards menu.",
-      color: "text-primary"
-    },
-    {
-      icon: TrendingUp,
-      title: "Exclusive Member Deals",
-      description: "Access special discounts, bonus points offers, and member-only promotions.",
-      color: "text-green-500"
-    },
-    {
-      icon: Zap,
-      title: "Fast & Easy Checkout",
-      description: "Scan your app at checkout to earn points instantly. No cards needed.",
-      color: "text-blue-500"
-    }
-  ];
+  const [openIndex, setOpenIndex] = useState<number>(0);
 
-  const howItWorks = [
-    {
-      step: 1,
-      title: "Sign Up Free",
-      description: "Download the app or sign up online. It takes less than a minute to get started.",
-      icon: Download
-    },
-    {
-      step: 2,
-      title: "Shop & Earn",
-      description: "Make purchases at any Lama location. Scan your app at checkout to earn points automatically.",
-      icon: QrCode
-    },
-    {
-      step: 3,
-      title: "Redeem Rewards",
-      description: "Browse our rewards menu and redeem your points for free items whenever you're ready.",
-      icon: Gift
-    },
-    {
-      step: 4,
-      title: "Enjoy Benefits",
-      description: "Get exclusive deals, bonus points, and special offers sent directly to your app.",
-      icon: Sparkles
-    }
-  ];
-
-  const rewardsMenu = [
-    { name: "Free Coffee", points: 50, icon: Coffee },
-    { name: "Free Slurpee", points: 75, icon: Coffee },
-    { name: "Free Snack", points: 100, icon: ShoppingBag },
-    { name: "Free Meal", points: 200, icon: Gift },
-    { name: "$5 Off Purchase", points: 500, icon: DollarSign },
-    { name: "$10 Off Purchase", points: 1000, icon: DollarSign },
-  ];
+  const toggleFaq = (index: number) => {
+    setOpenIndex((current) => (current === index ? -1 : index));
+  };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="relative w-full min-h-[360px] sm:h-[420px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
-        <div className="absolute inset-0">
-          <Image
-            src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=1080&fit=crop"
-            alt="Lama Rewards Hero"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-black/40"></div>
-        </div>
-        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-4 md:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center text-white max-w-4xl"
-          >
-            <h1 className="typography-h1 text-white">
-              Lama Rewards
-            </h1>
-            <p className="typography-body-lg mt-4 opacity-85 max-w-2xl mx-auto text-white">
-              Join millions of members earning points on every purchase. Get free food, exclusive deals, and special rewards.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="section bg-white">
-        <div className="container-standard">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <h2 className="typography-h2 text-secondary mb-4">
-              Why Join Lama Rewards?
-            </h2>
-            <p className="typography-body-lg text-gray-600 max-w-2xl mx-auto">
-              Get more value from every visit with our comprehensive rewards program designed for your convenience.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {benefits.map((benefit, index) => {
-              const Icon = benefit.icon;
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="bg-gray-50 rounded-md p-6 md:p-8 text-center border border-gray-100 hover:shadow-lg transition-all duration-300"
+    <div className="min-h-screen bg-[#F1F1F1]">
+      <main>
+        <section className="bg-[#FF6B35] pt-24 md:pt-28">
+          <div className="container-standard px-4 md:px-7 lg:px-10 pt-8 md:pt-10 pb-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 items-end gap-8 md:gap-10">
+              <div className="max-w-[560px] pb-8 md:pb-10">
+                <h1
+                  className="-mt-6 md:-mt-10 text-white font-black leading-[1.1] text-3xl md:text-[54px] tracking-[-0.01em] mb-4"
+                  style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.22)' }}
                 >
-                  <div className={`inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-md mb-4`}>
-                    <Icon className={benefit.color} size={32} />
-                  </div>
-                  <h3 className="typography-h4 text-secondary mb-3">
-                    {benefit.title}
-                  </h3>
-                  <p className="typography-body text-gray-600">
-                    {benefit.description}
-                  </p>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="section bg-gray-50">
-        <div className="container-standard">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <h2 className="typography-h2 text-secondary mb-4">
-              How It Works
-            </h2>
-            <p className="typography-body-lg text-gray-600 max-w-2xl mx-auto">
-              Getting started is easy. Follow these simple steps to start earning rewards today.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {howItWorks.map((step, index) => {
-              const StepIcon = step.icon;
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="relative"
+                  Elevate Your Every Day
+                  <br />
+                  with LaMa Rewards.
+                </h1>
+                <p className="!text-white text-sm md:text-base leading-relaxed max-w-[510px] mb-4">
+                  Turn your routine into rewards. From instant discounts to birthday surprises and partner privileges, your
+                  hometown LaMa app is your ticket to the best we have to offer.
+                </p>
+                <p className="!text-white font-semibold text-sm md:text-base mb-4">
+                  You&apos;re with LaMa. Get Rewarded for it.
+                </p>
+                <Link
+                  href="/rewards/dashboard"
+                  className="btn-secondary !bg-white !border-white !text-[#1A1A1A] hover:!bg-[#F5F5F5] hover:!text-[#1A1A1A] !text-sm !px-5 !py-2.5"
                 >
-                  <div className="bg-white rounded-md p-6 md:p-8 border border-gray-200 hover:shadow-lg transition-all duration-300 h-full">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="flex-shrink-0 w-12 h-12 bg-primary rounded-md flex items-center justify-center text-white font-bold typography-h3">
-                        {step.step}
-                      </div>
-                      <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-md flex items-center justify-center">
-                        <StepIcon className="text-primary" size={24} />
-                      </div>
-                    </div>
-                    <h3 className="typography-h4 text-secondary mb-3">
-                      {step.title}
-                    </h3>
-                    <p className="typography-body text-gray-600">
-                      {step.description}
-                    </p>
-                  </div>
-                  {index < howItWorks.length - 1 && (
-                    <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gray-300 transform -translate-y-1/2">
-                      <ArrowRight className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 text-gray-400" size={16} />
-                    </div>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Points System Section */}
-      <section className="section bg-white">
-        <div className="container-standard">
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <h2 className="typography-h2 text-secondary mb-4">
-                Earn Points, Get Rewards
-              </h2>
-              <p className="typography-body-lg text-gray-600 mb-6">
-                Our simple points system makes it easy to earn and redeem rewards. The more you shop, the more you save.
-              </p>
-              <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <CheckCircle2 className="text-primary flex-shrink-0 mt-1" size={24} />
-                  <div>
-                    <h4 className="typography-h4 text-secondary mb-1">1 Point = $1 Spent</h4>
-                    <p className="typography-body text-gray-600">Earn points on every purchase at any Lama location.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <CheckCircle2 className="text-primary flex-shrink-0 mt-1" size={24} />
-                  <div>
-                    <h4 className="typography-h4 text-secondary mb-1">Bonus Points Offers</h4>
-                    <p className="typography-body text-gray-600">Get extra points on select items and special promotions.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <CheckCircle2 className="text-primary flex-shrink-0 mt-1" size={24} />
-                  <div>
-                    <h4 className="typography-h4 text-secondary mb-1">Points Never Expire</h4>
-                    <p className="typography-body text-gray-600">Your points are yours to keep. Use them whenever you want.</p>
-                  </div>
-                </div>
+                  Get The App
+                </Link>
               </div>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="relative h-64 md:h-80 rounded-md overflow-hidden"
-            >
-              <Image
-                src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop"
-                alt="Points System"
-                fill
-                className="object-cover"
-              />
-            </motion.div>
-          </div>
-        </div>
-      </section>
 
-      {/* Combined Beautiful Section */}
-      <section className="section bg-gray-50">
-        <div className="container-standard">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto"
-          >
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-md mb-6">
-              <Smartphone className="text-primary" size={32} />
+              <div className="relative h-[250px] md:h-[340px] lg:h-[390px]">
+                <div className="absolute right-0 bottom-0 w-[96%] h-[90%] bg-[#F1F1F1] rounded-t-[999px]" />
+                <Image
+                  src="/lady.png"
+                  alt="LaMa Rewards App User"
+                  fill
+                  priority
+                  className="object-contain object-bottom-right scale-[1.08] md:scale-[1.12] lg:scale-[1.15] origin-bottom-right relative z-10"
+                />
+              </div>
             </div>
-            <h2 className="typography-h2 text-secondary mb-4">
-              Get Started with Lama Rewards
+          </div>
+        </section>
+
+        <section className="bg-[#F1F1F1]">
+          <div className="w-full max-w-[1380px] mx-auto px-3 md:px-5 lg:px-6 py-14 md:py-16 lg:py-20">
+            <h2 className="text-center text-[#1A1A1A] font-black text-xl md:text-3xl mb-8 md:mb-11">
+              Membership is a Rewarding Experience
             </h2>
-            <p className="typography-body-lg text-gray-600 mb-8">
-              Join Lama Rewards today and start earning points on every purchase. Download our app to manage your rewards, track your points, and access exclusive deals right from your phone. It's free to join and takes less than a minute.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button className="bg-secondary text-white px-8 py-4 rounded-md font-bold hover:bg-gray-800 transition-colors inline-flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
-                <Download size={20} />
-                App Store
-              </button>
-              <button className="bg-secondary text-white px-8 py-4 rounded-md font-bold hover:bg-gray-800 transition-colors inline-flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
-                <Download size={20} />
-                Google Play
-              </button>
-              <Link
-                href="/rewards/dashboard"
-                className="btn-primary inline-flex items-center gap-2 px-8 py-4"
-              >
-                Sign Up Now - It's Free
-                <ArrowRight size={20} />
-              </Link>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 lg:gap-12">
+              {membershipCards.map((card) => (
+                <article key={card.title}>
+                  <Link href={card.href} className="block group">
+                    <div className="relative w-full h-[220px] md:h-[265px] overflow-hidden bg-gray-200 rounded-sm">
+                      <Image src={card.image} alt={card.title} fill className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+                    </div>
+                  </Link>
+                  <h3 className="text-center text-[#1A1A1A] text-lg md:text-2xl font-black mt-4 mb-2">{card.title}</h3>
+                  <p className="text-[#1A1A1A]/80 text-center text-sm md:text-base leading-relaxed min-h-[68px]">{card.description}</p>
+                  <div className="mt-4 text-center">
+                    <Link
+                      href={card.href}
+                      className="btn-primary !text-sm !px-4 !py-2"
+                    >
+                      Learn More
+                    </Link>
+                  </div>
+                </article>
+              ))}
             </div>
-          </motion.div>
-        </div>
-      </section>
+          </div>
+        </section>
+
+        <section className="bg-[#FF6B35]">
+          <div className="container-standard px-4 text-center py-8 md:py-10">
+            <h3 className="!text-white font-black text-2xl md:text-[42px] mb-2">Join LaMaREWARDS</h3>
+            <p className="!text-white text-sm md:text-base mb-4">Sign up or log in to your existing LaMa account.</p>
+            <Link
+              href="/rewards/dashboard"
+              className="btn-secondary !bg-white !border-white !text-[#1A1A1A] hover:!bg-[#F5F5F5] hover:!text-[#1A1A1A] !text-sm !px-5 !py-2.5"
+            >
+              Learn More
+            </Link>
+          </div>
+        </section>
+
+        <section className="bg-[#F1F1F1]">
+          <div className="container-standard px-4 md:px-7 lg:px-10 py-9 md:py-12">
+            <h4 className="text-[#1A1A1A] text-xl md:text-3xl font-medium mb-5">Frequently Asked Questions</h4>
+            <div className="h-px bg-[#D9D9D9] mb-6" />
+
+            <h5 className="text-[#1A1A1A] text-2xl md:text-4xl font-black mb-5">LaMa REWARDS FAQ</h5>
+
+            <ul className="space-y-3 md:space-y-4">
+              {faqItems.map((item, index) => {
+                const isOpen = openIndex === index;
+                const panelId = `faq-panel-${index}`;
+                const buttonId = `faq-button-${index}`;
+
+                return (
+                  <li key={item.question} className="border-b border-[#DCDCDC] pb-3 md:pb-4">
+                    <button
+                      id={buttonId}
+                      aria-expanded={isOpen}
+                      aria-controls={panelId}
+                      onClick={() => toggleFaq(index)}
+                      className="w-full flex items-center justify-between gap-4 text-left"
+                    >
+                      <span className="text-[#1A1A1A] text-sm md:text-base">{item.question}</span>
+                      <span className="w-5 h-5 min-w-5 rounded-full bg-[#FF6B35] text-white inline-flex items-center justify-center hover:bg-[#E55A2B] transition-colors">
+                        <Plus size={12} className={isOpen ? 'rotate-45 transition-transform' : 'transition-transform'} />
+                      </span>
+                    </button>
+
+                    {isOpen && (
+                      <div id={panelId} role="region" aria-labelledby={buttonId} className="pt-3 pr-9">
+                        <p className="text-[#1A1A1A]/80 text-sm md:text-base leading-relaxed">{item.answer}</p>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+
+        <section className="bg-[#FF6B35] !text-white py-6 md:py-7">
+          <div className="container-standard px-4">
+            <Link
+              href="/stores"
+              className="flex items-center justify-between max-w-[560px] mx-auto !text-white text-base md:text-lg border-b border-white/50 pb-1.5"
+            >
+              <span className="inline-flex items-center gap-2">
+                <MapPin size={16} />
+                <span>Store Locator</span>
+              </span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
