@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAllDeals, getDealsByCategory, type Deal } from '@/lib/dealsData';
-import { Tag, Coffee, Zap, Pizza, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Tag, Zap, Pizza, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import GlassBanner from '@/components/GlassBanner';
 import { usePromo } from '@/hooks/usePromo';
 import { DealCountdown } from './DealCountdown';
@@ -21,14 +21,8 @@ export default function DealsPage() {
 
   const categories: Array<{ id: 'all' | Deal['category']; label: string; icon: typeof Tag }> = [
     { id: 'all' as const, label: 'ALL DEALS', icon: Tag },
-    // Pizza-focused deals (use meal-deals category)
-    { id: 'meal-deals' as const, label: 'PIZZA', icon: Pizza },
-    // Meal combo offers
-    { id: 'combo-offers' as const, label: 'MEAL DEALS', icon: Tag },
-    // Coffee-specific daily specials
-    { id: 'daily-specials' as const, label: 'COFFEE', icon: Coffee },
-    // General drinks / weekly promos
-    { id: 'weekly-promotions' as const, label: 'DRINKS', icon: Zap },
+    { id: 'grill-items' as const, label: 'GRILL ITEMS', icon: Zap },
+    { id: 'mix-and-match' as const, label: 'MIX & MATCH', icon: Pizza },
   ];
 
   const filteredDeals =

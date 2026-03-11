@@ -111,7 +111,14 @@ export const getAllDrinks = (): Drink[] => {
     const savedDrinks = localStorage.getItem('adminAllDrinks');
     if (savedDrinks) {
       try {
-        return JSON.parse(savedDrinks);
+        const parsed = JSON.parse(savedDrinks) as Drink[];
+
+        // Merge any saved admin edits onto the default seed data by id so that
+        // missing fields (like price) still fall back to the server defaults.
+        return drinks.map((base) => {
+          const override = parsed.find((d) => d.id === base.id);
+          return override ? { ...base, ...override } : base;
+        });
       } catch {
         return drinks;
       }

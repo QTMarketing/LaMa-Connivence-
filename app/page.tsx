@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Coffee, ShoppingBag, IceCream, ShoppingCart, Package, UtensilsCrossed, MapPin, ArrowRight, Gift, Star, TrendingUp, Zap, Smartphone, Instagram, Facebook, Twitter, ChevronDown, Search, Clock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getHomepagePromos, getFeaturedDeals } from '@/lib/dealsData';
+import { getHomepagePromos, getFeaturedDeals, deals, type Deal } from '@/lib/dealsData';
 import { products } from '@/lib/productData';
 import { getAllBlogs } from '@/lib/blogHelpers';
 import { useState, useEffect, useRef } from 'react';
@@ -12,6 +12,35 @@ import { DealCountdownBadge } from '@/components/DealCountdownBadge';
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Homepage promos — initialised with static data so server HTML matches
+  // the first client render, then updated from localStorage after mount.
+  const [promoSlides, setPromoSlides] = useState<Deal[]>(() => getHomepagePromos());
+
+  useEffect(() => {
+    // Re-read after mount so any admin-saved deals in localStorage are picked up
+    setPromoSlides(getHomepagePromos());
+    // Clear stale admin-saved deals that no longer match current data shape
+    try {
+      const saved = localStorage.getItem('adminAllDeals');
+      if (saved) {
+        const parsed = JSON.parse(saved) as Deal[];
+        // If saved deals still reference old placeholder categories, wipe the cache
+        const hasOldCategories = parsed.some(
+          (d) =>
+            (d.category as string) === 'meal-deals' ||
+            (d.category as string) === 'daily-specials' ||
+            (d.category as string) === 'weekly-promotions',
+        );
+        if (hasOldCategories) {
+          localStorage.removeItem('adminAllDeals');
+          setPromoSlides(getHomepagePromos());
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   // Hero slides data - Complete banners with both text and images
   const heroSlides = [
@@ -47,8 +76,7 @@ export default function Home() {
     },
   ];
 
-  // Promo slides data - driven by admin-managed deals
-  const promoSlides = getHomepagePromos();
+  // promoSlides is now managed as state above (hydration-safe)
 
   // Local hero banner images
   const heroImages = [
@@ -160,7 +188,7 @@ export default function Home() {
       <section className="relative pt-20 pb-0 overflow-hidden">
         <div className="relative w-full h-[calc(100vh-80px)] min-h-[500px]">
           <Image
-            src="/foo/bet.jpg"
+            src="/foo/hero101.jpg"
             alt="Hero banner"
             fill
             className="object-cover"
@@ -173,7 +201,7 @@ export default function Home() {
             <div className="flex flex-col gap-8 md:gap-10 max-w-3xl z-10">
               <h1
                 className="typography-display text-white break-words sm:whitespace-nowrap"
-                style={{ fontSize: 'clamp(4.5rem, 8vw, 6.5rem)' }}
+                style={{ fontSize: 'clamp(5rem, 9vw, 7rem)' }}
               >
                 Fuel Up Fast.
               </h1>
@@ -185,14 +213,14 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <Link
                   href="/stores"
-                  className="btn-primary w-fit text-base md:text-lg inline-flex items-center gap-2"
+                  className="btn-primary w-fit text-base md:text-lg inline-flex items-center gap-2 !bg-white !text-[#FF6B35] hover:!bg-[#FFE5D7]"
                 >
                   Find a Store Near You
                   <MapPin size={18} />
                 </Link>
                 <Link
                   href="/deals"
-                  className="btn-secondary w-fit text-base md:text-lg border-white !text-white hover:bg-white hover:text-primary inline-flex items-center gap-2"
+                  className="btn-secondary w-fit text-base md:text-lg inline-flex items-center gap-2 border-2 border-white !text-white hover:bg-white hover:text-primary"
                 >
                   See Current Deals
                   <ArrowRight size={18} />
@@ -212,7 +240,7 @@ export default function Home() {
             </div>
 
             {/* Price - Bottom Right, closer to food */}
-            <div className="absolute bottom-8 right-4 md:bottom-12 md:right-6 lg:bottom-16 lg:right-8 z-10">
+            <div className="absolute bottom-8 right-10 md:bottom-12 md:right-16 lg:bottom-16 lg:right-24 z-10">
               <div
                 className="inline-flex w-fit px-6 md:px-8 py-3 md:py-4 rounded-lg border"
                 style={{
@@ -325,8 +353,8 @@ export default function Home() {
                 {/* Large Image - Increased Height with Label Inside */}
                 <div className="relative w-full flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[400px] rounded-md overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
                   <Image
-                    src={getHomepagePromos()[0]?.image || 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop'}
-                    alt={getHomepagePromos()[0]?.title || 'Promo'}
+                    src={promoSlides[0]?.image || '/photos/hotdog.jpg'}
+                    alt={promoSlides[0]?.title || 'Promo'}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
@@ -340,7 +368,7 @@ export default function Home() {
                       }}
                     >
                       <span className="typography-body-sm md:typography-body font-black uppercase tracking-wide">
-                        {getHomepagePromos()[0]?.title || 'Meal Deals'}
+                        {promoSlides[0]?.title || 'Hot Grill Deals'}
                       </span>
                     </div>
                   </div>
@@ -360,8 +388,8 @@ export default function Home() {
                 {/* Large Image - Increased Height with Label Inside */}
                 <div className="relative w-full flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[400px] rounded-md overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
                   <Image
-                    src={getHomepagePromos()[1]?.image || 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=600&fit=crop'}
-                    alt={getHomepagePromos()[1]?.title || 'Promo'}
+                    src={promoSlides[1]?.image || '/photos/hotdog.jpg'}
+                    alt={promoSlides[1]?.title || 'Promo'}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
@@ -375,7 +403,7 @@ export default function Home() {
                       }}
                     >
                       <span className="font-black text-sm sm:text-base md:text-lg lg:text-xl uppercase tracking-wide">
-                        {getHomepagePromos()[1]?.title || 'Food Specials'}
+                        {promoSlides[1]?.title || 'Hot Grill Deals'}
                       </span>
                     </div>
                   </div>
@@ -396,8 +424,8 @@ export default function Home() {
                 {/* Top Image - Increased Height with Label Inside */}
                 <div className="relative w-full aspect-[5/4] rounded-md overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
                   <Image
-                    src={getHomepagePromos()[2]?.image || 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=800&h=600&fit=crop'}
-                    alt={getHomepagePromos()[2]?.title || 'Promo'}
+                    src={promoSlides[2]?.image || '/photos/food1.jpg'}
+                    alt={promoSlides[2]?.title || 'Promo'}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
@@ -411,7 +439,7 @@ export default function Home() {
                       }}
                     >
                       <span className="font-black text-sm sm:text-base md:text-lg lg:text-xl uppercase tracking-wide">
-                        {getHomepagePromos()[2]?.title || 'Weekly Promotions'}
+                        {promoSlides[2]?.title || 'Grill Items'}
                       </span>
                     </div>
                   </div>
@@ -423,8 +451,8 @@ export default function Home() {
                 {/* Bottom Image - Increased Height with Label Inside */}
                 <div className="relative w-full aspect-[5/4] rounded-md overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
                   <Image
-                    src={getHomepagePromos()[3]?.image || 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800&h=600&fit=crop'}
-                    alt={getHomepagePromos()[3]?.title || 'Promo'}
+                    src={promoSlides[3]?.image || '/photos/food2.jpg'}
+                    alt={promoSlides[3]?.title || 'Promo'}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
@@ -438,7 +466,7 @@ export default function Home() {
                       }}
                     >
                       <span className="font-black text-sm sm:text-base md:text-lg lg:text-xl uppercase tracking-wide">
-                        {getHomepagePromos()[3]?.title || 'Combo Offers'}
+                        {promoSlides[3]?.title || 'Mix & Match'}
                       </span>
                     </div>
                   </div>
@@ -638,41 +666,6 @@ export default function Home() {
                   </div>
                 </Link>
               </motion.div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust + Proof Strip */}
-      <section className="bg-[#1A1A1A] py-8 md:py-10">
-        <div className="container-standard">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-            <div className="rounded-xl border border-white/15 bg-white/5 px-5 py-4 text-white">
-              <div className="inline-flex items-center gap-2 mb-2">
-                <MapPin size={16} className="text-primary" />
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
-                  Nearby Convenience
-                </span>
-              </div>
-              <p className="text-lg font-black leading-tight">Multiple Dallas-area locations</p>
-            </div>
-            <div className="rounded-xl border border-white/15 bg-white/5 px-5 py-4 text-white">
-              <div className="inline-flex items-center gap-2 mb-2">
-                <Clock size={16} className="text-primary" />
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
-                  Fast Access
-                </span>
-              </div>
-              <p className="text-lg font-black leading-tight">Open late and 24/7 at select stores</p>
-            </div>
-            <div className="rounded-xl border border-white/15 bg-white/5 px-5 py-4 text-white">
-              <div className="inline-flex items-center gap-2 mb-2">
-                <Gift size={16} className="text-primary" />
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
-                  Rewards Value
-                </span>
-              </div>
-              <p className="text-lg font-black leading-tight">Earn points and unlock member-only promos</p>
             </div>
           </div>
         </div>

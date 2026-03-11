@@ -75,29 +75,29 @@ export default function Navbar() {
         }`}
       >
         <div className="relative w-full flex items-center justify-between px-4 md:px-6 lg:px-8 py-3">
-          {/* Left: Logo with animation */}
-          <Link href="/" className="flex items-center justify-center gap-2 group/logo">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-              whileHover={{ y: -2 }}
-              className="transition-transform duration-300"
-            >
-              <Image
-                src="/Lama.png"
-                alt="LaMa"
-                width={72}
-                height={72}
-                className="object-contain"
-                priority
-              />
-            </motion.div>
-          </Link>
+          {/* Left: Logo + desktop nav grouped together */}
+          <div className="flex items-center gap-6 xl:gap-10">
+            <Link href="/" className="flex items-center justify-center gap-2 group/logo">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                whileHover={{ y: -2 }}
+                className="transition-transform duration-300"
+              >
+                <Image
+                  src="/Lama.png"
+                  alt="LaMa"
+                  width={72}
+                  height={72}
+                  className="object-contain"
+                  priority
+                />
+              </motion.div>
+            </Link>
 
-          {/* Center: Desktop nav with 7-Eleven scale typography */}
-          {/* 7-Eleven Scale: 22-24px, Archivo Narrow, Medium (500), Title Case, -0.02em tracking */}
-          <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center justify-center gap-6 xl:gap-8 select-none">
+            {/* Desktop nav */}
+            <nav className="hidden lg:flex items-center justify-center gap-6 xl:gap-8 select-none">
             <Link
               href="/deals"
               className="nav-link-premium relative text-[22px] xl:text-[24px] font-bold tracking-[0.01em] text-[#1A1A1A] transition-colors duration-300"
@@ -136,7 +136,8 @@ export default function Navbar() {
             >
               Delivery
             </span>
-          </nav>
+            </nav>
+          </div>
 
           {/* Right: Find a Store + mobile menu */}
           <div className="flex items-center justify-center gap-3">
