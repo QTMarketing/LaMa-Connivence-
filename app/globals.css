@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Custom distDir for the :3002 server is not gitignored like .next,
+   so Tailwind would scan compiled chunks and emit invalid classes. */
+@source not "../.next";
+@source not "../.next-3002";
+
 @theme {
   /* Primary Colors (LaMa Brand - Orange) */
   --color-primary: #FF6B35;
@@ -26,6 +31,21 @@
 :root {
   --foreground: #1A1A1A;
   --background: #FFFFFF;
+  /* Universal UI meaning — not brand. Orange stays CTA.
+     Soft tinted chips — between pale pastel and heavy mid-green. */
+  --color-savings: #3F5F4C;
+  --color-savings-wash: #D4E6D8;
+  --color-urgency: #7E4A45;
+  --color-urgency-wash: #E9D0CC;
+  --color-info: #3E4E6A;
+  --color-info-wash: #D5DEED;
+  --color-notice: #6B5544;
+  --color-notice-wash: #EDE3D6;
+}
+
+html {
+  margin: 0;
+  padding: 0;
 }
 
 body {
@@ -34,11 +54,6 @@ body {
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  margin: 0;
-  padding: 0;
-}
-
-html {
   margin: 0;
   padding: 0;
 }
@@ -62,6 +77,66 @@ html {
   html {
     scroll-behavior: smooth;
   }
+
+  /* Money saved / confirmed. Not LaMa orange. */
+  .badge-savings {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    background-color: var(--color-savings-wash);
+    color: var(--color-savings);
+    border: 1px solid color-mix(in srgb, var(--color-savings) 18%, transparent);
+  }
+
+  /* Ending soon, low stock, limited. */
+  .badge-urgency {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    background-color: var(--color-urgency-wash);
+    color: var(--color-urgency);
+    border: 1px solid color-mix(in srgb, var(--color-urgency) 18%, transparent);
+  }
+
+  /* New / just in. */
+  .badge-info {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    background-color: var(--color-info-wash);
+    color: var(--color-info);
+    border: 1px solid color-mix(in srgb, var(--color-info) 18%, transparent);
+  }
+
+  /* Seasonal / still-has-time notice. */
+  .badge-notice {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    background-color: var(--color-notice-wash);
+    color: var(--color-notice);
+    border: 1px solid color-mix(in srgb, var(--color-notice) 18%, transparent);
+  }
+
+  .badge-meta {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+
+  .text-savings {
+    color: var(--color-savings);
+  }
+
+  .text-urgency {
+    color: var(--color-urgency);
+  }
+
+  .icon-confirmed {
+    color: var(--color-savings);
+  }
 }
 
 
@@ -70,7 +145,7 @@ html {
 /* 7-Eleven Scale Navbar Links */
 .nav-link-premium {
   font-family: var(--font-rajdhani), sans-serif;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700; /* Bold weight for stronger appearance */
   letter-spacing: 0.01em; /* Slightly positive tracking for Rajdhani */
   line-height: 1.2; /* Consistent line-height for vertical alignment */
@@ -80,7 +155,7 @@ html {
 
 @media (min-width: 1280px) {
   .nav-link-premium {
-    font-size: 24px; /* The 7-Eleven Scale */
+    font-size: 22px;
   }
 }
 
@@ -198,11 +273,11 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700; /* Bold default */
 }
 
-/* Hero section - let component classes control font-size */
-.hero-section h1,
-.hero-section p {
-  font-size: inherit;
-}
+/* NOTE: a `.hero-section h1, .hero-section p { font-size: inherit }` rule used to live
+   here. Its comment claimed it let component classes control size, but at specificity
+   (0,1,1) it BEAT every component class — including .typography-display (0,1,0) — and
+   forced the hero H1 to the inherited 16px. That is why the hero carried an inline
+   fontSize override. Removed so the named type scale actually governs, per DESIGN.md. */
 
 /* Deal Card Titles - Override font size for specific cards only */
 .deal-card-title h3,
@@ -227,38 +302,44 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Deals Grid - Override h3 font size for deal cards */
 .deals-grid h3 {
-  font-size: 24px !important;
-  line-height: 1.5 !important;
+  font-size: 18px !important;
+  line-height: 1.3 !important;
 }
 
 @media (min-width: 640px) {
   .deals-grid h3 {
-    font-size: 26px !important;
+    font-size: 19px !important;
   }
 }
 
 @media (min-width: 768px) {
   .deals-grid h3 {
-    font-size: 28px !important;
+    font-size: 20px !important;
   }
 }
 
-/* 2. GLOBAL BODY TEXT - Inter for all paragraphs */
-p, li, .body-text, .description {
-  font-family: var(--font-inter), sans-serif;
-  font-size: 16px;
-  line-height: 1.6;
-  color: #444444;
+/* 2. GLOBAL BODY TEXT - Inter for all paragraphs.
+   In @layer base so Tailwind color/size utilities can override. */
+@layer base {
+  p, li, .body-text, .description {
+    font-family: var(--font-inter), sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #444444;
+  }
 }
 
-/* Glass Banner paragraphs should be white */
+/* Glass Banner copy sits on orange — ink, not white */
 .glass-banner p {
-  color: #FFFFFF !important;
+  color: #1A1A1A !important;
 }
 
 /* Hero section paragraphs should be white - only for sections with h1 (not h2) and dark overlays */
+/* :not(.hero-campaign) — the campaign band sits on brand ORANGE, where white body
+   copy measures 2.84:1 and fails AA at both 4.5 and 3.0. It carries ink copy instead.
+   .hero-photo-band is the same orange field. */
 section:has(h1.typography-h1):has(div[class*="bg-black"]) p,
-section[class*="hero"] p,
+section[class*="hero"]:not(.hero-campaign):not(.hero-photo-band) p,
 .hero-section p {
   color: #FFFFFF !important;
 }
@@ -461,16 +542,18 @@ footer h1, footer h2, footer .logo-text {
   width: 100%;
 }
 
-/* Standard Button Classes */
+/* Standard Button Classes
+   Grammar (Vodafone, not Stripe): cards stay 6px; primary CTAs are pills.
+   !important so leftover rounded-md / rounded-[6px] on the same node cannot win. */
 .btn-primary {
   padding: 0.75rem 1.5rem;
-  border-radius: 0.25rem; /* sharper 4px radius */
+  border-radius: 9999px !important;
   font-weight: 700;
   font-size: 1rem;
   font-family: var(--font-inter), sans-serif;
   background-color: #FF6B35;
   color: #FFFFFF;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -478,12 +561,11 @@ footer h1, footer h2, footer .logo-text {
 
 .btn-primary:hover {
   background-color: #E55A2B;
-  transform: scale(1.05);
 }
 
 .btn-secondary {
   padding: 0.75rem 1.5rem;
-  border-radius: 0.25rem; /* sharper 4px radius */
+  border-radius: 9999px !important; /* same pill language as primary CTAs */
   font-weight: 700;
   font-size: 1rem;
   font-family: var(--font-inter), sans-serif;
@@ -499,475 +581,147 @@ footer h1, footer h2, footer .logo-text {
 .btn-secondary:hover {
   border-color: #FF6B35;
   color: #FF6B35;
-  transform: scale(1.05);
 }
 
 /* Standard Card Classes */
 .card {
   background-color: #FFFFFF;
-  border-radius: 0.25rem; /* sharper 4px radius */
+  border-radius: 0.375rem; /* unified 6px radius */
   overflow: hidden;
   border: 1px solid #E2E8F0;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
 }
 
-.card:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+/*
+  One hover language for consumer cards (Vodafone cards stay 6px).
+  Recipe: 220ms ease-out, lift 4px, orange border, soft shadow. No scale.
+*/
+.card-interactive {
+  border: 1px solid #E2E8F0;
 }
 
-
-/* High-End Navbar Styles - 7-Eleven Scale */
-
-/* 7-Eleven Scale Navbar Links */
-.nav-link-premium {
-  font-family: var(--font-rajdhani), sans-serif;
-  font-size: 22px;
-  font-weight: 700; /* Bold weight for stronger appearance */
-  letter-spacing: 0.01em; /* Slightly positive tracking for Rajdhani */
-  line-height: 1.2; /* Consistent line-height for vertical alignment */
-  display: flex;
-  align-items: center;
+.card-interactive,
+.card,
+.brand-tile {
+  transition:
+    transform 220ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 220ms cubic-bezier(0, 0, 0.2, 1),
+    border-color 220ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-@media (min-width: 1280px) {
-  .nav-link-premium {
-    font-size: 24px; /* The 7-Eleven Scale */
+.card-interactive:hover,
+.card:hover,
+.brand-tile:hover {
+  transform: translateY(-0.25rem);
+  border-color: #FF6B35;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-interactive,
+  .card-interactive:hover,
+  .card,
+  .card:hover,
+  .brand-tile,
+  .brand-tile:hover {
+    transform: none;
+    transition-property: border-color, box-shadow;
   }
 }
 
-/* Adjust dropdown arrow size for larger text */
-.nav-link-premium svg,
-.nav-link-premium .arrow {
-  width: 16px;
-  height: 16px;
+/* Card content: 24px all sides so CTAs are not flush to the edge */
+.card-body {
+  padding: 1.5rem;
 }
 
-/* Dynamic Underline Animation - Center Outward */
-.nav-link-premium::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  width: 0;
-  height: 2px;
-  background-color: #FF6B35;
-  transform: translateX(-50%) scaleX(0);
-  transition: transform 0.3s ease-out, width 0.3s ease-out;
-  transform-origin: center;
-}
-
-.nav-link-premium:hover::after {
-  width: 100%;
-  transform: translateX(-50%) scaleX(1);
-}
-
-.nav-link-premium:hover {
-  color: #FF6B35;
-}
-
-/* Prevent accidental text selection in navbar links/buttons */
-.nav-link-premium,
-.nav-link-premium-mobile,
-.nav-link-premium * {
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-/* Mobile Nav Link - Rajdhani Font */
-.nav-link-premium-mobile {
-  font-family: var(--font-rajdhani), sans-serif;
-}
-
-/* Mobile Nav Link Underline */
-.nav-link-premium-mobile::after {
-  content: '';
-  position: absolute;
-  bottom: 8px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background-color: #FF6B35;
-  transform: scaleX(0);
-  transition: transform 0.3s ease-out, width 0.3s ease-out;
-  transform-origin: left;
-}
-
-.nav-link-premium-mobile:hover::after {
-  width: 100%;
-  transform: scaleX(1);
-}
-
-.nav-link-premium-mobile:hover {
-  color: #FF6B35;
-}
-
-/* 7-Eleven Style Mega-Menu */
-.menu-column {
-  min-width: 0;
-}
-
-.menu-column h3 {
-  letter-spacing: -0.02em;
-}
-
-.menu-column ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.mega-menu-link {
+/* Inner photo-hero band — modest height, not a 600px full-bleed */
+.hero-photo-band {
   position: relative;
-}
-
-.mega-menu-link::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background-color: #FF6B35;
-  transition: width 0.2s ease-out;
-}
-
-.mega-menu-link:hover::after {
   width: 100%;
-}
-
-/* ============================================
-   UNIFIED BRAND TYPOGRAPHY - 7-ELEVEN LOOK
-   ============================================ */
-
-/* 1. GLOBAL HEADLINES - ALL h1, h2, h3 use Rajdhani (matching navbar) */
-/* Font-size removed - let Tailwind classes control size per component */
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-rajdhani), sans-serif !important;
-  text-transform: none; /* Title Case */
-  letter-spacing: -0.02em;
-  line-height: 1.1; /* Tighter for condensed headlines */
-  font-weight: 700; /* Bold default */
-}
-
-/* Hero section - let component classes control font-size */
-.hero-section h1,
-.hero-section p {
-  font-size: inherit;
-}
-
-/* Deal Card Titles - Override font size for specific cards only */
-.deal-card-title h3,
-.promo-card-title h3 {
-  font-size: 16px !important; /* Base size */
-  line-height: 1.5 !important; /* More readable line height */
-}
-
-@media (min-width: 640px) {
-  .deal-card-title h3,
-  .promo-card-title h3 {
-    font-size: 18px !important; /* sm breakpoint */
-  }
-}
-
-@media (min-width: 768px) {
-  .deal-card-title h3,
-  .promo-card-title h3 {
-    font-size: 20px !important; /* md breakpoint */
-  }
-}
-
-/* Deals Grid - Override h3 font size for deal cards */
-.deals-grid h3 {
-  font-size: 24px !important;
-  line-height: 1.5 !important;
-}
-
-@media (min-width: 640px) {
-  .deals-grid h3 {
-    font-size: 26px !important;
-  }
-}
-
-@media (min-width: 768px) {
-  .deals-grid h3 {
-    font-size: 28px !important;
-  }
-}
-
-/* 2. GLOBAL BODY TEXT - Inter for all paragraphs */
-p, li, .body-text, .description {
-  font-family: var(--font-inter), sans-serif;
-  font-size: 16px;
-  line-height: 1.6;
-  color: #444444;
-}
-
-/* Glass Banner paragraphs should be white */
-.glass-banner p {
-  color: #FFFFFF !important;
-}
-
-/* Hero section paragraphs should be white - only for sections with h1 (not h2) and dark overlays */
-section:has(h1.typography-h1):has(div[class*="bg-black"]) p,
-section[class*="hero"] p,
-.hero-section p {
-  color: #FFFFFF !important;
-}
-
-/* All paragraphs in sections with black background (#1A1A1A) should be white */
-[style*="background-color: #1A1A1A"] p,
-[style*="background-color: #1A1A1A"] li,
-.timeline-content p {
-  color: rgba(255, 255, 255, 0.9) !important;
-}
-
-/* Buttons and utility text use Inter */
-button:not(.nav-link-premium), .btn, .btn-utility, .footer-text {
-  font-family: var(--font-inter), sans-serif;
-}
-
-/* Links (except nav links) use Inter */
-a:not(.nav-link-premium):not(.nav-link-premium-mobile) {
-  font-family: var(--font-inter), sans-serif;
-}
-
-/* 3. SPECIFIC SECTION CLASSES */
-.rewards-title {
-  font-size: 48px;
-  font-weight: 800;
-  font-family: var(--font-rajdhani), sans-serif;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-}
-
-@media (min-width: 640px) {
-  .rewards-title {
-    font-size: 56px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .rewards-title {
-    font-size: 64px;
-  }
-}
-
-.hiring-banner {
-  font-size: 24px;
-  font-weight: 700;
-  font-family: var(--font-rajdhani), sans-serif;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-}
-
-@media (min-width: 768px) {
-  .hiring-banner {
-    font-size: 28px;
-  }
-}
-
-/* Section Title Class for Consistent Styling */
-.section-title-large {
-  font-family: var(--font-rajdhani), sans-serif;
-  font-size: 40px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-}
-
-@media (min-width: 640px) {
-  .section-title-large {
-    font-size: 48px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .section-title-large {
-    font-size: 56px;
-  }
-}
-
-/* Footer logo - use Rajdhani for consistency */
-footer h1, footer h2, footer .logo-text {
-  font-family: var(--font-rajdhani), sans-serif;
-}
-
-/* Glass Banner titles */
-.glass-banner h2 {
-  font-family: var(--font-inter), sans-serif !important;
-}
-
-/* Category labels and filters */
-.category-label, .filter-label {
-  font-family: var(--font-rajdhani), sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-/* ============================================
-   DESIGN SYSTEM UTILITY CLASSES
-   ============================================ */
-
-/* Typography Utility Classes */
-/* Typography Utility Classes */
-.typography-display {
-  font-size: clamp(3.5rem, 7vw, 4.5rem);
-  line-height: 1.08;
-  font-weight: 900;
-  font-family: var(--font-rajdhani), sans-serif;
-  letter-spacing: -0.02em;
-}
-
-.typography-h1 {
-  font-size: clamp(2.75rem, 4.5vw, 3.5rem);
-  line-height: 1.1;
-  font-weight: 800;
-  font-family: var(--font-rajdhani), sans-serif;
-  letter-spacing: -0.02em;
-}
-
-.typography-h2 {
-  font-size: clamp(2.25rem, 3.8vw, 3rem);
-  line-height: 1.15;
-  font-weight: 800;
-  font-family: var(--font-rajdhani), sans-serif;
-  letter-spacing: -0.02em;
-}
-
-.typography-h3 {
-  font-size: clamp(1.75rem, 3vw, 2.25rem);
-  line-height: 1.2;
-  font-weight: 700;
-  font-family: var(--font-rajdhani), sans-serif;
-  letter-spacing: -0.01em;
-}
-
-.typography-h4 {
-  font-size: clamp(1.375rem, 2.5vw, 1.75rem);
-  line-height: 1.3;
-  font-weight: 700;
-  font-family: var(--font-rajdhani), sans-serif;
-  letter-spacing: -0.01em;
-}
-
-.typography-body {
-  font-size: 1rem;
-  line-height: 1.6;
-  font-family: var(--font-inter), sans-serif;
-  font-weight: 400;
-}
-
-.typography-body-lg {
-  font-size: 1.125rem;
-  line-height: 1.6;
-  font-family: var(--font-inter), sans-serif;
-  font-weight: 400;
-}
-
-.typography-body-sm {
-  font-size: 0.875rem;
-  line-height: 1.5;
-  font-family: var(--font-inter), sans-serif;
-  font-weight: 400;
-}
-
-.typography-caption {
-  font-size: 0.75rem;
-  line-height: 1.4;
-  font-family: var(--font-inter), sans-serif;
-  font-weight: 400;
-}
-
-/* Standard Section Spacing */
-.section {
-  padding-top: 3rem;
-  padding-bottom: 3rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-@media (min-width: 768px) {
-  .section {
-    padding-top: 4rem;
-    padding-bottom: 4rem;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .section {
-    padding-top: 5rem;
-    padding-bottom: 5rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
-
-/* Standard Container */
-.container-standard {
-  max-width: 80rem; /* 1280px */
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-}
-
-/* Standard Button Classes */
-.btn-primary {
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.375rem; /* unified 6px radius */
-  font-weight: 700;
-  font-size: 1rem;
-  font-family: var(--font-inter), sans-serif;
-  background-color: #FF6B35;
-  color: #FFFFFF;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-primary:hover {
-  background-color: #E55A2B;
-  transform: scale(1.05);
-}
-
-.btn-secondary {
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.375rem; /* unified 6px radius */
-  font-weight: 700;
-  font-size: 1rem;
-  font-family: var(--font-inter), sans-serif;
-  background-color: transparent;
-  color: #1A1A1A;
-  border: 2px solid #E2E8F0;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-secondary:hover {
-  border-color: #FF6B35;
-  color: #FF6B35;
-  transform: scale(1.05);
-}
-
-/* Standard Card Classes */
-.card {
-  background-color: #FFFFFF;
-  border-radius: 0.375rem; /* unified 6px radius */
+  height: 17.5rem; /* 280px */
   overflow: hidden;
-  border: 1px solid #E2E8F0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+}
+@media (min-width: 640px) {
+  .hero-photo-band { height: 20rem; } /* 320px */
+}
+@media (min-width: 768px) {
+  .hero-photo-band { height: 22.5rem; } /* 360px */
+}
+@media (min-width: 1024px) {
+  .hero-photo-band { height: 25rem; } /* 400px */
 }
 
-.card:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+/*
+  Contrast lives on the PHOTO (full-bleed veil), not a radial behind glyphs.
+  Kill any leftover blob layer if a stale CSS chunk still ships ::before.
+*/
+.hero-copy-glow::before,
+.hero-home-veil {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  filter: none !important;
+  opacity: 0 !important;
+}
+
+.hero-type-shadow {
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 4px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Brand grid tiles — same hover as .card-interactive; no mix-blend (it knocks out the can on white) */
+.brand-tile {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+}
+.brand-tile-pack {
+  position: relative;
+  width: 100%;
+  min-height: 13rem;
+  height: 13rem;
+  overflow: hidden;
+  background: #ffffff;
+}
+@media (min-width: 640px) {
+  .brand-tile-pack {
+    min-height: 14rem;
+    height: 14rem;
+  }
+}
+
+/*
+  Blog marquee: motion-design ambient table is 8–20s for small cycles.
+  Track distance ~4 × (440px + 20px) = 1840px → ~48s at ~38px/s (particle ambient 20–60px/s).
+  Linear is required for a seamless loop (progress-bar exception).
+*/
+.blog-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: blog-marquee 48s linear infinite;
+}
+
+.blog-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes blog-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blog-marquee-track {
+    animation: none;
+  }
+
+  .blog-marquee-clone {
+    display: none;
+  }
 }
 
 /* Blog Content Styling */
@@ -1043,4 +797,44 @@ footer h1, footer h2, footer .logo-text {
   height: auto;
   border-radius: 0.375rem;
   margin: 1.5em 0;
+}
+
+/* ============================================
+   CAMPAIGN BAND — motion layer
+   Pure CSS so the resting state is the VISIBLE state; JS entrance variants used to
+   bake opacity:0 into the SSR output. Everything here is decorative and is disabled
+   under prefers-reduced-motion.
+   ============================================ */
+
+.hero-campaign .hero-sunburst {
+  transform-origin: 50% 50%;
+}
+
+.hero-campaign .hero-cluster {
+  animation: lama-float 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+.hero-campaign .hero-burst {
+  animation: lama-burst-pulse 5s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes lama-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+
+@keyframes lama-burst-pulse {
+  0%, 100% { transform: rotate(-8deg) scale(1); }
+  50%      { transform: rotate(-8deg) scale(1.045); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-campaign .hero-sunburst,
+  .hero-campaign .hero-cluster,
+  .hero-campaign .hero-burst {
+    animation: none;
+  }
+  .hero-campaign .hero-burst { transform: rotate(-8deg); }
 }

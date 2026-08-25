@@ -1,4 +1,4 @@
-import { blogs as staticBlogs } from './blogData';
+import { blogs as staticBlogs, BLOG_COVER_FALLBACK } from './blogData';
 import { blogStorage, type BlogPost } from './blogStorage';
 
 // Convert BlogPost (from blogStorage) to simple blog format
@@ -9,7 +9,7 @@ function convertBlogPostToSimple(blogPost: BlogPost) {
     title: blogPost.title,
     description: blogPost.excerpt || blogPost.seoDescription || '',
     content: blogPost.content,
-    image: blogPost.featuredImage || '/photos/store1.jpg', // Placeholder image
+    image: blogPost.featuredImage || BLOG_COVER_FALLBACK,
     date: blogPost.publishedAt 
       ? new Date(blogPost.publishedAt).toLocaleDateString('en-US', { 
           year: 'numeric', 

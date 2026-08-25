@@ -14,7 +14,7 @@ export default function SnacksPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="pt-32 pb-12 px-6 bg-gradient-to-b from-gray-50 to-white">
+      <section className="pt-8 pb-12 md:pt-12 px-6 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto">
           <Link 
             href="/products" 

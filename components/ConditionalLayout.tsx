@@ -15,11 +15,11 @@ export default function ConditionalLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <>
+    <div className="flex min-h-[100svh] flex-col">
       <Navbar />
-      {children}
+      <div className="flex-1">{children}</div>
       <MobileStickyCTA />
       <Footer />
-    </>
+    </div>
   );
 }

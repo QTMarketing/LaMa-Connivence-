@@ -7,8 +7,11 @@ import Image from 'next/image';
 import { getHomepagePromos, getFeaturedDeals, deals, type Deal } from '@/lib/dealsData';
 import { products } from '@/lib/productData';
 import { getAllBlogs } from '@/lib/blogHelpers';
-import { useState, useEffect, useRef } from 'react';
+import { BLOG_COVER_FALLBACK } from '@/lib/blogData';
+import { CAMPAIGN } from '@/lib/campaignImages';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { DealCountdownBadge } from '@/components/DealCountdownBadge';
+import HeroCampaignBand from '@/components/HeroCampaignBand';
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -16,6 +19,13 @@ export default function Home() {
   // Homepage promos — initialised with static data so server HTML matches
   // the first client render, then updated from localStorage after mount.
   const [promoSlides, setPromoSlides] = useState<Deal[]>(() => getHomepagePromos());
+
+  useLayoutEffect(() => {
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     // Re-read after mount so any admin-saved deals in localStorage are picked up
@@ -49,7 +59,7 @@ export default function Home() {
       italicText: 'Convenience',
       headline: 'LIKE YOU MEAN IT',
       bodyText: "We go all in on convenience. Lama is full of flavor, freshness and community spirit, bringing bold energy to every visit. We've got classic coffee, fresh food, and everyday essentials — plus specialty drinks and made-fresh meals for those who like to push boundaries. Ready yet? We thought so.",
-      image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=1600&fit=crop',
+      image: CAMPAIGN.innerBand,
       alt: 'Lama convenience store products',
       ctaText: 'Find a Store',
       ctaLink: '/stores',
@@ -59,7 +69,7 @@ export default function Home() {
       italicText: 'Fresh & Fast',
       headline: 'COFFEE DEALS',
       bodyText: 'Start your day right with our premium coffee selection. Freshly brewed daily, we offer everything from classic espresso to specialty lattes. Get 20% off any coffee drink every Monday. Perfect for your morning routine or afternoon pick-me-up.',
-      image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=1200&h=1600&fit=crop',
+      image: CAMPAIGN.coffee,
       alt: 'Premium coffee selection',
       ctaText: 'View Coffee Deals',
       ctaLink: '/deals',
@@ -69,7 +79,7 @@ export default function Home() {
       italicText: 'Hot & Ready',
       headline: 'FAST FOOD DEALS',
       bodyText: 'Hungry for something delicious? Our made-fresh fast food hits the spot. Hot dogs, pizza, sandwiches, and more — all made to order. Grab a lunch combo: hot dog or sandwich plus chips and drink for just $6.99. Available daily!',
-      image: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=1200&h=1600&fit=crop',
+      image: CAMPAIGN.homeHero,
       alt: 'Fresh fast food options',
       ctaText: 'View Food Deals',
       ctaLink: '/deals',
@@ -77,15 +87,6 @@ export default function Home() {
   ];
 
   // promoSlides is now managed as state above (hydration-safe)
-
-  // Local hero banner images
-  const heroImages = [
-    '/photos/monster.jpg',
-    '/photos/redbull.jpg',
-    '/photos/c4.jpg',
-    '/photos/hotdog.jpg',
-  ];
-
 
   // Featured promo slider (Concha y Toro style)
   const [featuredPromoIndex, setFeaturedPromoIndex] = useState(0);
@@ -96,22 +97,8 @@ export default function Home() {
       ? promoSlides[(featuredPromoIndex + 1) % promoSlides.length]
       : currentPromo;
 
-
-  // Blog carousel active index (for scroll indicators)
-  const [blogIndex, setBlogIndex] = useState(0);
-  const blogScrollRef = useRef<HTMLDivElement | null>(null);
   const blogs = getAllBlogs();
-
-  const handleBlogScroll = () => {
-    const el = blogScrollRef.current;
-    if (!el) return;
-    const firstChild = el.firstElementChild as HTMLElement | null;
-    if (!firstChild) return;
-
-    const cardWidth = firstChild.clientWidth || 1;
-    const index = Math.round(el.scrollLeft / cardWidth);
-    setBlogIndex(Math.max(0, Math.min(index, blogs.slice(0, 4).length - 1)));
-  };
+  const blogCards = blogs.slice(0, 4);
 
   const goToNextFeaturedPromo = () => {
     if (promoSlides.length === 0) return;
@@ -184,87 +171,48 @@ export default function Home() {
   return (
     <>
     <div className="min-h-screen bg-white pb-20 md:pb-0">
-      {/* Hero Banner Section - Static coke2.jpg image */}
-      <section className="relative pt-20 pb-0 overflow-hidden">
-        <div className="relative w-full h-[calc(100vh-80px)] min-h-[500px]">
-          <Image
-            src="/foo/hero101.jpg"
-            alt="Hero banner"
-            fill
-            className="object-cover"
-            priority
-          />
-          
-          {/* Content Overlay */}
-          <div className="hero-section absolute inset-0 flex items-center px-6 sm:px-8 md:px-12 lg:px-16">
-            {/* Left Side - Title, Description and Button */}
-            <div className="flex flex-col gap-8 md:gap-10 max-w-3xl z-10">
-              <h1
-                className="typography-display text-white break-words sm:whitespace-nowrap"
-                style={{ fontSize: 'clamp(5rem, 9vw, 7rem)' }}
-              >
-                Fuel Up Fast.
-              </h1>
-              <p className="typography-body-lg text-white opacity-85">
-                Fresh hot dogs, crispy taquitos, coffee, and cold drinks,
-                ready when you are.
-              </p>
+      {/* Hero: photo tucks under the sticky header so there is no dark seam */}
+      {/* Campaign band — see ART_DIRECTION.md. Replaces the dark full-bleed photo hero.
+          The graphic layer (rays, halftone, starburst) is SVG/CSS, so
+          the price and copy stay editable without regenerating artwork. */}
+      {/* price: $3.99 is the real "Grill Items Mix & Match" in lib/dealsData.ts.
+          The previous $4 matched no deal we actually run. */}
+      <HeroCampaignBand
+        eyebrow="Open 24/7 · 96 neighborhood locations"
+        title={<>Fuel Up Fast.</>}
+        subtitle="Fresh hot dogs, crispy taquitos, coffee, and cold drinks, ready when you are."
+        price={{ amount: '$3.99', label: 'Mix & Match' }}
+      >
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+            <Link
+              href="/stores"
+              className="btn-primary inline-flex w-fit items-center gap-2 !bg-[#1A1A1A] text-base !text-white shadow-[0_6px_18px_rgba(26,26,26,0.28)] hover:!bg-black md:text-lg"
+            >
+              Find a Store Near You
+              <MapPin size={18} />
+            </Link>
+            <Link
+              href="/deals"
+              className="btn-secondary inline-flex w-fit items-center gap-2 border-2 !border-white/55 text-base !text-[#1A1A1A] hover:!border-white hover:!bg-white/25 md:text-lg"
+            >
+              See Current Deals
+              <ArrowRight size={18} />
+            </Link>
+          </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <Link
-                  href="/stores"
-                  className="btn-primary w-fit text-base md:text-lg inline-flex items-center gap-2 !bg-white !text-[#FF6B35] hover:!bg-[#FFE5D7]"
-                >
-                  Find a Store Near You
-                  <MapPin size={18} />
-                </Link>
-                <Link
-                  href="/deals"
-                  className="btn-secondary w-fit text-base md:text-lg inline-flex items-center gap-2 border-2 border-white !text-white hover:bg-white hover:text-primary"
-                >
-                  See Current Deals
-                  <ArrowRight size={18} />
-                </Link>
-              </div>
-
-              <div className="flex flex-wrap gap-3 md:gap-4 text-white/95">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-black/25 px-4 py-2">
-                  <Clock size={15} />
-                  <span className="text-sm font-semibold">Open 24/7 locations</span>
-                </div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-black/25 px-4 py-2">
-                  <Gift size={15} />
-                  <span className="text-sm font-semibold">Member-only rewards</span>
-                </div>
-              </div>
+          <div className="flex flex-wrap gap-3 md:gap-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/20 px-4 py-2 text-[#1A1A1A]">
+              <Clock size={15} />
+              <span className="text-sm font-semibold">Open 24/7 locations</span>
             </div>
-
-            {/* Price - Bottom Right, closer to food */}
-            <div className="absolute bottom-8 right-10 md:bottom-12 md:right-16 lg:bottom-16 lg:right-24 z-10">
-              <div
-                className="inline-flex w-fit px-6 md:px-8 py-3 md:py-4 rounded-lg border"
-                style={{
-                  background: 'linear-gradient(180deg, rgba(20,20,20,0.7) 0%, rgba(8,8,8,0.82) 100%)',
-                  borderColor: 'rgba(255, 215, 0, 0.35)',
-                  boxShadow: '0 8px 20px rgba(0,0,0,0.35)',
-                }}
-              >
-                <span
-                  className="font-black leading-none"
-                  style={{
-                    fontSize: 'clamp(2.5rem, 8vw, 6rem)',
-                    color: '#FFD700',
-                    textShadow: '0 0 6px rgba(255, 215, 0, 0.25)',
-                    WebkitTextStroke: '0.5px rgba(108, 72, 0, 0.3)',
-                  }}
-                >
-                  $4
-                </span>
-              </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/20 px-4 py-2 text-[#1A1A1A]">
+              <Gift size={15} />
+              <span className="text-sm font-semibold">Member-only rewards</span>
             </div>
           </div>
         </div>
-      </section>
+      </HeroCampaignBand>
 
       {/* Loyalty + Current Promos Section - 7-Eleven style two-up cards */}
       <section className="bg-white">
@@ -275,9 +223,9 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="relative overflow-hidden border-2 border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] bg-[#1A1A1A]"
+            className="card-interactive relative overflow-hidden bg-[#1A1A1A]"
           >
-            {/* Background coke image */}
+            {/* Background coke image — FIFA collab art, keep as-is */}
             <Image
               src="/foo/coke.jpg"
               alt="Coke"
@@ -299,9 +247,9 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="relative overflow-hidden border-2 border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] bg-[#1A1A1A]"
+            className="card-interactive relative overflow-hidden bg-[#1A1A1A]"
           >
-            {/* Background cola1 image */}
+            {/* Background cola1 image — keep as-is with the Coke FIFA pair */}
             <Image
               src="/foo/cola1.jpg"
               alt="Cola"
@@ -351,12 +299,12 @@ export default function Home() {
             >
               <Link href="/deals" className="block flex-1 flex flex-col">
                 {/* Large Image - Increased Height with Label Inside */}
-                <div className="relative w-full flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[400px] rounded-md overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+                <div className="card-interactive relative w-full flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[400px] rounded-md overflow-hidden">
                   <Image
-                    src={promoSlides[0]?.image || '/photos/hotdog.jpg'}
+                    src={promoSlides[0]?.image || CAMPAIGN.homeHero}
                     alt={promoSlides[0]?.title || 'Promo'}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="object-cover"
                   />
                   {/* Label Inside Card - Top Left */}
                   <div className="absolute top-4 left-4 z-10">
@@ -386,12 +334,12 @@ export default function Home() {
             >
               <Link href="/deals" className="block flex-1 flex flex-col">
                 {/* Large Image - Increased Height with Label Inside */}
-                <div className="relative w-full flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[400px] rounded-md overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+                <div className="card-interactive relative w-full flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[400px] rounded-md overflow-hidden">
                   <Image
-                    src={promoSlides[1]?.image || '/photos/hotdog.jpg'}
+                    src={promoSlides[1]?.image || CAMPAIGN.sausage}
                     alt={promoSlides[1]?.title || 'Promo'}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="object-cover"
                   />
                   {/* Label Inside Card - Top Left */}
                   <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-10">
@@ -422,12 +370,12 @@ export default function Home() {
               {/* Top Image in Right Column */}
               <Link href="/deals" className="block">
                 {/* Top Image - Increased Height with Label Inside */}
-                <div className="relative w-full aspect-[5/4] rounded-md overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+                <div className="card-interactive relative w-full aspect-[5/4] rounded-md overflow-hidden">
                   <Image
-                    src={promoSlides[2]?.image || '/photos/food1.jpg'}
+                    src={promoSlides[2]?.image || CAMPAIGN.taquito}
                     alt={promoSlides[2]?.title || 'Promo'}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="object-cover"
                   />
                   {/* Label Inside Card - Top Left */}
                   <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-10">
@@ -435,7 +383,7 @@ export default function Home() {
                       className="px-4 sm:px-6 py-2 sm:py-3 rounded-md shadow-lg"
                       style={{ 
                         backgroundColor: '#FF6B35',
-                        color: '#FFFFFF'
+                        color: '#1A1A1A'
                       }}
                     >
                       <span className="font-black text-sm sm:text-base md:text-lg lg:text-xl uppercase tracking-wide">
@@ -449,12 +397,12 @@ export default function Home() {
               {/* Bottom Image in Right Column - Label Inside */}
               <Link href="/deals" className="block">
                 {/* Bottom Image - Increased Height with Label Inside */}
-                <div className="relative w-full aspect-[5/4] rounded-md overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+                <div className="card-interactive relative w-full aspect-[5/4] rounded-md overflow-hidden">
                   <Image
-                    src={promoSlides[3]?.image || '/photos/food2.jpg'}
+                    src={promoSlides[3]?.image || CAMPAIGN.bites}
                     alt={promoSlides[3]?.title || 'Promo'}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="object-cover"
                   />
                   {/* Label Inside Card - Top Left */}
                   <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-10">
@@ -479,9 +427,9 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
             {['Coffee Deals', 'Food Specials', 'Combo Offers'].map((buttonText, index) => {
               const buttonColors = [
-                { bg: '#2E7D32', text: '#FFFFFF' }, // Green (like AVOCADO)
-                { bg: '#1A1A1A', text: '#FFFFFF' }, // Dark (like WHITE DIP)
-                { bg: '#FF6B35', text: '#FFFFFF' }, // Orange (like VEGGIE DIPS)
+                { bg: '#1A1A1A', text: '#FFFFFF' },
+                { bg: '#1A1A1A', text: '#FFFFFF' },
+                { bg: '#FF6B35', text: '#FFFFFF' },
               ];
               const button = buttonColors[index % buttonColors.length];
               // Match column widths: left=3, middle=5, right=4
@@ -551,26 +499,25 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="relative md:row-span-2 overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01]"
+              className="card-interactive relative md:row-span-2 overflow-hidden rounded-md"
               style={{ minHeight: '520px' }}
             >
-              <Link href="/deals">
-                <div className="relative w-full h-[320px] sm:h-[420px] md:h-full">
+              <Link href="/deals" className="flex h-full min-h-[520px] flex-col bg-white">
+                <div className="relative min-h-[320px] flex-1 sm:min-h-[420px]">
                   <Image
-                    src="/foo/pizza.jpg" // Pizza image
+                    src={CAMPAIGN.pizza}
                     alt="Pizza Deals"
                     fill
                     className="object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-                  <div className="absolute inset-x-6 bottom-8 text-left">
-                    <p className="typography-caption font-semibold uppercase tracking-[0.22em] mb-2" style={{ color: '#FFFFFF' }}>
-                      Pizza
-                    </p>
-                    <h3 className="typography-h2 mb-2" style={{ color: '#FFFFFF' }}>
-                      Hot, cheesy slices
-                    </h3>
-                  </div>
+                </div>
+                <div className="px-6 py-5 text-left">
+                  <p className="typography-caption mb-2 font-semibold uppercase tracking-[0.22em] text-[#1A1A1A]/65">
+                    Pizza
+                  </p>
+                  <h3 className="typography-h2 text-[#1A1A1A]">
+                    Hot, cheesy slices
+                  </h3>
                 </div>
               </Link>
             </motion.div>
@@ -585,25 +532,24 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: 0.05 }}
-                  className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01]"
+                  className="card-interactive relative overflow-hidden rounded-md"
                 >
-                  <Link href="/deals">
-                    <div className="relative w-full h-[230px] sm:h-[250px] md:h-[260px] lg:h-[270px]">
+                  <Link href="/deals" className="flex h-full flex-col bg-white">
+                    <div className="relative h-[230px] w-full sm:h-[250px] md:h-[260px] lg:h-[270px]">
                       <Image
-                        src="/foo/coffee.jpg" // Coffee image
+                        src={CAMPAIGN.coffee}
                         alt="Coffee"
                         fill
                         className="object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-                      <div className="absolute inset-x-5 bottom-6 text-left">
-                        <p className="typography-caption font-semibold uppercase tracking-[0.22em] mb-1" style={{ color: '#FFFFFF' }}>
-                          Coffee
-                        </p>
-                        <h3 className="typography-h4" style={{ color: '#FFFFFF' }}>
-                          Hot brews, tiny price
-                        </h3>
-                      </div>
+                    </div>
+                    <div className="px-5 py-4 text-left">
+                      <p className="typography-caption mb-1 font-semibold uppercase tracking-[0.22em] text-[#1A1A1A]/65">
+                        Coffee
+                      </p>
+                      <h3 className="typography-h4 text-[#1A1A1A]">
+                        Hot brews, tiny price
+                      </h3>
                     </div>
                   </Link>
                 </motion.div>
@@ -614,25 +560,24 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: 0.1 }}
-                  className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01]"
+                  className="card-interactive relative overflow-hidden rounded-md"
                 >
-                  <Link href="/deals">
-                    <div className="relative w-full h-[230px] sm:h-[250px] md:h-[260px] lg:h-[270px] bg-[#000000]">
+                  <Link href="/deals" className="flex h-full flex-col bg-white">
+                    <div className="relative h-[230px] w-full sm:h-[250px] md:h-[260px] lg:h-[270px]">
                       <Image
-                        src="/foo/drink.jpg" // Drinks image
+                        src={CAMPAIGN.drinks}
                         alt="Drinks"
                         fill
-                        className="object-cover opacity-80"
+                        className="object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-                      <div className="absolute inset-x-5 bottom-6 text-left">
-                        <p className="typography-caption font-semibold uppercase tracking-[0.22em] mb-1" style={{ color: '#FFFFFF' }}>
-                          Drinks
-                        </p>
-                        <h3 className="typography-h4" style={{ color: '#FFFFFF' }}>
-                          Ice‑cold refreshment
-                        </h3>
-                      </div>
+                    </div>
+                    <div className="px-5 py-4 text-left">
+                      <p className="typography-caption mb-1 font-semibold uppercase tracking-[0.22em] text-[#1A1A1A]/65">
+                        Drinks
+                      </p>
+                      <h3 className="typography-h4 text-[#1A1A1A]">
+                        Ice‑cold refreshment
+                      </h3>
                     </div>
                   </Link>
                 </motion.div>
@@ -644,25 +589,24 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.15 }}
-                className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01]"
+                className="card-interactive relative overflow-hidden rounded-md"
               >
-                <Link href="/deals">
-                  <div className="relative w-full h-[230px] sm:h-[250px] md:h-[260px] lg:h-[270px] bg-[#FF6B35]">
+                <Link href="/deals" className="flex h-full flex-col bg-white">
+                  <div className="relative h-[230px] w-full sm:h-[250px] md:h-[260px] lg:h-[270px]">
                     <Image
-                      src="/foo/burger.jpg" // Meal deal image
+                      src={CAMPAIGN.combo}
                       alt="Meal Deal"
                       fill
-                      className="object-cover opacity-90"
+                      className="object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-                    <div className="absolute inset-x-5 sm:inset-x-6 bottom-6 text-left">
-                      <p className="typography-caption font-semibold uppercase tracking-[0.22em] mb-1" style={{ color: '#FFFFFF' }}>
-                        Meal Deal
-                      </p>
-                      <h3 className="typography-h3" style={{ color: '#FFFFFF' }}>
-                        Combo meals made easy
-                      </h3>
-                    </div>
+                  </div>
+                  <div className="px-5 py-4 text-left sm:px-6">
+                    <p className="typography-caption mb-1 font-semibold uppercase tracking-[0.22em] text-[#1A1A1A]/65">
+                      Meal Deal
+                    </p>
+                    <h3 className="typography-h3 text-[#1A1A1A]">
+                      Combo meals made easy
+                    </h3>
                   </div>
                 </Link>
               </motion.div>
@@ -676,12 +620,12 @@ export default function Home() {
         <div className="container-standard">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4">
-              <h3 className="typography-h3 text-white">We're Hiring!</h3>
-              <ChevronDown size={24} className="text-white" />
+              <h3 className="typography-h3 text-[#1A1A1A]">We're Hiring!</h3>
+              <ChevronDown size={24} className="text-[#1A1A1A]" />
             </div>
             <Link
               href="/careers"
-              className="btn-secondary border-white text-white hover:bg-white hover:text-primary"
+              className="btn-secondary !border-[#1A1A1A] !text-[#1A1A1A] hover:!bg-[#1A1A1A] hover:!text-white"
             >
               Apply Now
             </Link>
@@ -744,7 +688,7 @@ export default function Home() {
               className="relative h-64 md:h-96 rounded-xl overflow-hidden"
             >
               <Image
-                src="https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?w=800&h=800&fit=crop"
+                src={CAMPAIGN.coffee}
                 alt="LaMa Rewards Mobile App"
                 fill
                 className="object-cover"
@@ -765,7 +709,6 @@ export default function Home() {
       {/* Blog & News Section */}
       <section className="py-12 sm:py-16 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -782,84 +725,52 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* Blog Cards Carousel - Full Width with Overflow */}
         <div className="relative w-full overflow-hidden">
-          <div
-            ref={blogScrollRef}
-            onScroll={handleBlogScroll}
-            className="overflow-x-auto scrollbar-hide pb-4"
-            style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch',
-            }}
-          >
-            <div className="flex gap-6 sm:gap-8 w-max pl-4 sm:pl-6 pr-[calc(85vw-100px)] sm:pr-[calc(500px-100px)] md:pr-[calc(600px-120px)] lg:pr-[calc(700px-150px)]">
-              {blogs.slice(0, 4).map((blog, index) => (
-                <motion.div
-                  key={blog.id}
-                  initial={{ opacity: index < 3 ? 1 : 0, x: index < 3 ? 0 : 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: '-200px' }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="flex-shrink-0 w-[85vw] sm:w-[500px] md:w-[600px] lg:w-[700px]"
-                >
-                  <Link
-                    href={`/media/blog/${blog.slug}`}
-                    className="block bg-white rounded-xl overflow-hidden border-2 border-gray-100 hover:shadow-xl hover:border-primary transition-all duration-300 group h-full"
+          <div className="blog-marquee-track pl-4 sm:pl-6">
+            {[0, 1].map((copy) => (
+              <div
+                key={`blog-copy-${copy}`}
+                className={`flex gap-5 pr-5 ${copy === 1 ? 'blog-marquee-clone' : ''}`}
+                aria-hidden={copy === 1}
+              >
+                {blogCards.map((blog) => (
+                  <article
+                    key={`${copy}-${blog.id}`}
+                    className="flex-shrink-0 w-[min(88vw,440px)]"
                   >
-                    {/* Image Section */}
-                    <div className="relative w-full h-[400px] sm:h-[450px] md:h-[500px] lg:h-[550px] overflow-hidden bg-gray-200">
-                      <Image
-                        src={blog.image || '/photos/store1.jpg'}
-                        alt={blog.title}
-                        fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                        onError={(e) => {
-                          // Fallback to placeholder if image fails to load
-                          const target = e.target as HTMLImageElement;
-                          if (target.src !== '/photos/store1.jpg') {
-                            target.src = '/photos/store1.jpg';
-                          }
-                        }}
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 sm:p-6">
-                        <div className="flex items-center gap-2 text-white typography-caption mb-2">
+                    <Link
+                      href={`/media/blog/${blog.slug}`}
+                      className="card block h-full group"
+                      tabIndex={copy === 1 ? -1 : undefined}
+                    >
+                      <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#FAFAF5]">
+                        <Image
+                          src={blog.image || BLOG_COVER_FALLBACK}
+                          alt={blog.title}
+                          fill
+                          className="object-cover object-center group-hover:scale-[1.03] transition-transform duration-500"
+                          sizes="440px"
+                        />
+                      </div>
+                      <div className="card-body flex flex-col">
+                        <div className="flex items-center gap-2 text-[#4A5568] typography-caption mb-2">
                           <Clock size={14} />
                           <span>1 min</span>
                         </div>
-                        <h3 className="typography-h4 text-white line-clamp-2">
+                        <h3 className="text-lg font-bold text-[#1A1A1A] line-clamp-2 min-h-[2.5em]">
                           {blog.title}
                         </h3>
-                        <div className="mt-4">
-                          <span className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg font-bold typography-body-sm transition-all duration-300">
-                            Read More
-                            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                          </span>
-                        </div>
+                        <span className="btn-primary mt-5 w-fit !text-sm !px-5 !py-2.5">
+                          Read More
+                          <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                        </span>
                       </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
+                    </Link>
+                  </article>
+                ))}
+              </div>
+            ))}
           </div>
-        </div>
-
-        {/* Scroll hint indicators under cards */}
-        <div className="mt-4 sm:mt-6 flex justify-center gap-2 sm:gap-3">
-          {[0, 1, 2, 3].map((i) => (
-            <span
-              key={i}
-              className={`inline-block rounded-full ${
-                i === blogIndex ? 'w-10' : 'w-4'
-              } h-[3px] sm:h-1`}
-              style={{
-                backgroundColor: '#FF6B35',
-                opacity: i === blogIndex ? 1 : 0.35,
-              }}
-            />
-          ))}
         </div>
       </section>
 
@@ -871,19 +782,22 @@ export default function Home() {
             src="/photos/lama.jpg"
             alt="LaMa Store"
             fill
-            className="object-cover"
+            className="object-cover object-top"
+            sizes="100vw"
             priority
           />
-          {/* Base overlay for text readability */}
-          <div className="absolute inset-0 bg-black/40"></div>
-          {/* Black mist at edges - top */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent"></div>
-          {/* Black mist at edges - bottom */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-          {/* Black mist at edges - left */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent"></div>
-          {/* Black mist at edges - right */}
-          <div className="absolute inset-0 bg-gradient-to-l from-black/50 via-transparent to-transparent"></div>
+          {/* Contrast is shaped to the copy, not flattened across the photo.
+              A single bg-black/40 veil kills the storefront everywhere; this keeps a
+              light base and concentrates the darkness behind the headline + search. */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 bg-black/30" />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(ellipse 68% 62% at 50% 60%, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.36) 55%, rgba(0,0,0,0) 100%)',
+            }}
+          />
         </div>
 
         {/* Content */}
@@ -894,8 +808,12 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            {/* Heading */}
-            <h2 className="typography-display text-white mb-6">
+            <h2
+              className="typography-display text-white mb-6"
+              style={{
+                textShadow: '0 1px 2px rgba(0,0,0,0.35), 0 4px 24px rgba(0,0,0,0.35)',
+              }}
+            >
               Find Your Nearest
               <br />
               <span className="text-white">LaMa Convenience Store</span>
@@ -917,13 +835,13 @@ export default function Home() {
                   type="text"
                   name="search"
                   placeholder="Enter your address, city, or zip code"
-                  className="w-full pl-12 pr-4 py-4 rounded-lg bg-white/95 backdrop-blur-sm border-2 border-white/20 focus:outline-none focus:border-white/40 focus:bg-white text-gray-900 placeholder-gray-500 typography-body font-medium transition-all duration-300"
+                  className="w-full pl-12 pr-4 py-4 rounded-lg bg-white/95 backdrop-blur-sm border-2 border-white/20 shadow-[0_10px_34px_rgba(0,0,0,0.45)] focus:outline-none focus:border-white/40 focus:bg-white text-gray-900 placeholder-gray-500 typography-body font-medium transition-all duration-300"
                 />
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               </div>
               <button
                 type="submit"
-                className="btn-primary px-6 md:px-8 py-4 uppercase min-h-[56px] flex items-center justify-center gap-2 whitespace-nowrap bg-[#1A1A1A] hover:bg-black"
+                className="btn-primary px-6 md:px-8 py-4 uppercase min-h-[56px] flex items-center justify-center gap-2 whitespace-nowrap bg-[#1A1A1A] hover:bg-black shadow-[0_10px_34px_rgba(0,0,0,0.45)]"
               >
                 <MapPin size={18} />
                 Find Store

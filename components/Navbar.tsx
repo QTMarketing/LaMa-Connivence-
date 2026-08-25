@@ -68,36 +68,28 @@ export default function Navbar() {
       {/* Navbar: Full-width top bar with premium design */}
       <header
         ref={navbarRef}
-        className={`fixed top-0 inset-x-0 z-50 border-b transition-all duration-300 ${
-          isScrolled 
-            ? 'bg-[#FAFAF5] border-gray-200 shadow-[0px_4px_15px_rgba(0,0,0,0.1)]' 
-            : 'bg-white border-transparent'
+        className={`sticky top-0 z-50 h-16 w-full shrink-0 border-b border-gray-200 bg-white lg:h-20 ${
+          isScrolled ? 'shadow-[0px_4px_15px_rgba(0,0,0,0.1)]' : ''
         }`}
       >
-        <div className="relative w-full flex items-center justify-between px-4 md:px-6 lg:px-8 py-3">
+        <div className="relative flex h-full min-w-0 w-full items-center justify-between gap-3 px-4 md:px-6 lg:px-8">
           {/* Left: Logo + desktop nav grouped together */}
-          <div className="flex items-center gap-6 xl:gap-10">
+          <div className="flex min-w-0 items-center gap-4 xl:gap-10">
             <Link href="/" className="flex items-center justify-center gap-2 group/logo">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
-                whileHover={{ y: -2 }}
-                className="transition-transform duration-300"
-              >
+              <div className="flex items-center justify-center">
                 <Image
-                  src="/Lama.png"
+                  src="/brand/lama-mascot.png"
                   alt="LaMa"
                   width={72}
-                  height={72}
-                  className="object-contain"
+                  height={110}
+                  className="h-10 w-auto object-contain lg:h-14"
                   priority
                 />
-              </motion.div>
+              </div>
             </Link>
 
             {/* Desktop nav */}
-            <nav className="hidden lg:flex items-center justify-center gap-6 xl:gap-8 select-none">
+            <nav className="hidden lg:flex items-center justify-center gap-5 xl:gap-8 select-none">
             <Link
               href="/deals"
               className="nav-link-premium relative text-[22px] xl:text-[24px] font-bold tracking-[0.01em] text-[#1A1A1A] transition-colors duration-300"
@@ -140,13 +132,14 @@ export default function Navbar() {
           </div>
 
           {/* Right: Find a Store + mobile menu */}
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex shrink-0 items-center justify-center gap-3">
             <Link
               href="/stores"
-              className="inline-flex items-center gap-2 btn-primary text-white"
+              className="inline-flex items-center gap-2 btn-primary text-white whitespace-nowrap px-3 py-2 md:px-6"
             >
               <MapPin size={18} />
-              Find a Store
+              <span className="hidden min-[380px]:inline">Find a Store</span>
+              <span className="min-[380px]:hidden">Store</span>
             </Link>
 
             {/* Mobile menu toggle */}
@@ -270,7 +263,7 @@ export default function Navbar() {
                 >
                   <Link
                     href="/stores"
-                    className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-6 py-4 rounded-lg text-base font-bold transition-all duration-300 inline-flex items-center justify-center gap-2 w-full min-h-[48px]"
+                    className="btn-primary w-full min-h-[48px]"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Find a Store

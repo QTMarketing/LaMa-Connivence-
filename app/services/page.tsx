@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getProductsByCategory } from '@/lib/productData';
+import CategoryBand from '@/components/CategoryBand';
+import { CAMPAIGN } from '@/lib/campaignImages';
 import { 
   MapPin, 
   ArrowRight, 
@@ -76,33 +78,14 @@ export default function ServicesPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative w-full min-h-[360px] sm:h-[420px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
-        <div className="absolute inset-0">
-          <Image
-            src="https://images.unsplash.com/photo-1556740758-90de374c12ad?w=1920&h=1080&fit=crop"
-            alt="Services Hero"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-black/40"></div>
-        </div>
-        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-4 md:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center text-white max-w-4xl"
-          >
-            <h1 className="typography-h1 text-white">
-              Our Services
-            </h1>
-            <p className="typography-body-lg mt-4 opacity-85 max-w-2xl mx-auto text-white">
-              Everything you need, right when you need it. From financial services to vehicle care, we're here to make your life more convenient.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+        <CategoryBand
+          heading="h1"
+          field="sage"
+          title="Our Services"
+          subtitle="Everything you need, right when you need it. From financial services to vehicle care, we're here to make your life more convenient."
+          imageSrc={CAMPAIGN.services}
+          imageAlt="Illustration of a LaMa associate helping with payments, vehicle care, and Wi-Fi"
+        />
 
       {/* Services by Category */}
       <section className="section bg-white">
@@ -166,7 +149,7 @@ export default function ServicesPage() {
                               {service.name}
                             </h3>
                             {service.featured && (
-                              <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-primary text-white typography-caption font-semibold whitespace-nowrap">
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-[#FF6B35] text-[#1A1A1A] typography-caption font-semibold whitespace-nowrap">
                                 Featured
                               </span>
                             )}
@@ -179,7 +162,7 @@ export default function ServicesPage() {
                           {/* Service Features */}
                           <div className="space-y-2 mb-6">
                             <div className="flex items-center gap-2 text-gray-600">
-                              <CheckCircle2 size={16} className="text-primary flex-shrink-0" />
+                              <CheckCircle2 size={16} className="icon-confirmed flex-shrink-0" />
                               <span className="typography-body-sm">Available at all locations</span>
                             </div>
                             <div className="flex items-center gap-2 text-gray-600">

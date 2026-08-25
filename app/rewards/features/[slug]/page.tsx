@@ -20,7 +20,7 @@ export default async function RewardFeatureDetailPage({ params }: RewardFeatureD
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="relative w-full min-h-[340px] sm:h-[400px] md:h-[470px] overflow-hidden pt-24 md:pt-28">
+      <section className="relative w-full min-h-[340px] sm:h-[400px] md:h-[470px] overflow-hidden">
         <div className="absolute inset-0">
           <Image src={feature.heroImage} alt={feature.title} fill className="object-cover" priority />
           <div className="absolute inset-0 bg-black/45" />
@@ -61,7 +61,7 @@ export default async function RewardFeatureDetailPage({ params }: RewardFeatureD
           <div className="grid md:grid-cols-3 gap-5 md:gap-6">
             {feature.steps.map((step, index) => (
               <article key={step} className="bg-[#FAFAFA] border border-gray-200 rounded-md p-5 md:p-6">
-                <div className="w-10 h-10 rounded-full bg-[#FF6B35] text-white font-bold flex items-center justify-center mb-4">
+                <div className="w-10 h-10 rounded-full bg-[#FF6B35] text-[#1A1A1A] font-bold flex items-center justify-center mb-4">
                   {index + 1}
                 </div>
                 <p className="typography-body text-gray-700">{step}</p>
@@ -78,7 +78,7 @@ export default async function RewardFeatureDetailPage({ params }: RewardFeatureD
             {feature.benefits.map((benefit) => (
               <article key={benefit.title} className="bg-white border border-gray-200 rounded-md p-5 md:p-6">
                 <div className="inline-flex items-center gap-2 mb-3">
-                  <CheckCircle2 className="text-[#FF6B35]" size={18} />
+                  <CheckCircle2 className="icon-confirmed" size={18} />
                   <h3 className="typography-h4 text-secondary">{benefit.title}</h3>
                 </div>
                 <p className="typography-body text-gray-700 leading-relaxed">{benefit.description}</p>
@@ -101,14 +101,14 @@ export default async function RewardFeatureDetailPage({ params }: RewardFeatureD
         </div>
       </section>
 
-      <section className="section bg-[#FF6B35]">
+      <section className="section bg-[#1A1A1A]">
         <div className="container-standard px-4 md:px-7 lg:px-10 text-center text-white">
           <h2 className="typography-h2 text-white mb-3">Ready to Use {feature.title}?</h2>
-          <p className="typography-body-lg text-white/90 mb-6 max-w-2xl mx-auto">
+          <p className="typography-body-lg !text-white/90 mb-6 max-w-2xl mx-auto">
             Open your rewards dashboard to manage your account, view active offers, and start using this feature today.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/rewards/dashboard" className="btn-secondary border-white text-white hover:bg-white hover:text-[#1A1A1A]">
+            <Link href="/rewards/dashboard" className="btn-primary">
               Open Rewards Dashboard
             </Link>
             <Link href="/rewards" className="inline-flex items-center gap-2 text-white font-semibold hover:underline">

@@ -357,14 +357,14 @@ export const products: Product[] = [
     id: 42,
     name: 'Fuel Services',
     description: 'Premium gasoline and diesel fuel. Rewards program members save on every fill-up.',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=600&fit=crop',
+    image: '/campaign/unsplash-services.jpg',
     category: 'services',
   },
   {
     id: 43,
     name: 'Car Wash',
     description: 'Automated and hand car wash services. Various packages available.',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=600&fit=crop',
+    image: '/campaign/unsplash-carwash.jpg',
     category: 'services',
   },
   {

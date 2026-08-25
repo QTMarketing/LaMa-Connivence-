@@ -1,56 +1,43 @@
-'use client';
-
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowRight, Gift } from 'lucide-react';
 
+/**
+ * Rewards prompt.
+ *
+ * This used to be a framer-motion card with initial={{opacity:0}}, which baked
+ * `opacity:0` into the SERVER HTML — twice, on the wrapper and on the card. The rewards
+ * offer shipped invisible and only appeared if JS hydrated. It was also a 42%-opacity
+ * glass panel, so even once visible the copy fought whatever sat behind it.
+ *
+ * Now: no JS, an opaque warm card, and a CSS entrance whose resting state is the
+ * VISIBLE state. If the animation never runs, the content is still there.
+ */
 export default function GlassBanner() {
   return (
-    <div className="relative z-30 w-full max-w-[calc(100vw-1rem)] sm:max-w-xl md:max-w-3xl lg:max-w-4xl px-2 sm:px-4 md:px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="rounded-md p-3 sm:p-4 md:p-6 shadow-xl border border-white/10"
-        style={{
-          background: 'rgba(255, 255, 255, 0.05)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          boxShadow: '0 4px 16px 0 rgba(0, 0, 0, 0.05)',
-        }}
-      >
-        <div className="text-center glass-banner">
-          <h2 
-            className="text-white mb-1.5 sm:mb-2 px-1 sm:px-2 break-words sm:whitespace-nowrap"
-            style={{ 
-              fontFamily: 'var(--font-inter), sans-serif !important',
-              fontSize: 'clamp(0.875rem, 3vw, 1.125rem)', // Smaller on mobile
-              fontWeight: 700,
-              lineHeight: 1.3,
-            }}
-          >
-            Join LaMa Convenience Rewards
-          </h2>
-          <p 
-            className="text-white mb-3 sm:mb-4 px-1 sm:px-2"
-            style={{ 
-              color: '#FFFFFF',
-              fontFamily: 'var(--font-inter), sans-serif !important',
-              fontSize: 'clamp(0.75rem, 2.5vw, 0.875rem)', // Smaller on mobile
-              lineHeight: 1.4,
-            }}
-          >
-            Unlock exclusive member-only deals and earn points on every purchase!
-          </p>
-          <Link
-            href="/rewards"
-            className="btn-primary inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5"
-          >
-            Sign Up Free
-            <ArrowRight size={14} className="sm:w-4 sm:h-4 md:w-5 md:h-5" />
-          </Link>
+    <div className="rewards-prompt relative z-30 w-full max-w-sm">
+      <div className="overflow-hidden rounded-md border border-[#1A1A1A]/10 bg-[#FFE8D8] shadow-[0_8px_24px_rgba(26,26,26,0.12)]">
+        <div className="flex items-start gap-3 p-4 md:p-5">
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#FF6B35]">
+            <Gift size={18} className="text-[#1A1A1A]" />
+          </span>
+
+          <div className="min-w-0">
+            <h2 className="typography-body font-bold text-[#1A1A1A]">
+              Join LaMa Convenience Rewards
+            </h2>
+            <p className="typography-body-sm mt-1 text-[#1A1A1A]/75">
+              Unlock exclusive member-only deals and earn points on every purchase.
+            </p>
+            <Link
+              href="/rewards"
+              className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#1A1A1A] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-black"
+            >
+              Sign Up Free
+              <ArrowRight size={15} />
+            </Link>
+          </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

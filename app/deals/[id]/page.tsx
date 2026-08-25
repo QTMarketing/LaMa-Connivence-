@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { getDealById, getAllDeals } from '@/lib/dealsData';
 import { ArrowLeft, ShoppingBag, Truck } from 'lucide-react';
 import { DealCountdownBadge } from '@/components/DealCountdownBadge';
+import { savingsChipClass } from '@/lib/semantic';
 
 type DealDetailPageProps = {
   params: Promise<{ id: string }> | { id: string };
@@ -31,7 +32,7 @@ export default async function DealDetailPage({ params }: DealDetailPageProps) {
   return (
     <div className="min-h-screen bg-white">
       {/* Breadcrumb */}
-      <section className="bg-gray-50 border-b border-gray-200 pt-24 pb-4">
+      <section className="bg-gray-50 border-b border-gray-200 py-4">
         <div className="container-standard px-4 md:px-6">
           <Link
             href="/deals"
@@ -61,7 +62,7 @@ export default async function DealDetailPage({ params }: DealDetailPageProps) {
                 {/* Badge Overlay */}
                 {deal.savings && (
                   <div className="absolute top-4 left-4">
-                    <span className="inline-flex items-center px-4 py-2 rounded-md bg-orange-500 text-white typography-body-sm font-bold shadow-lg">
+                    <span className={`${savingsChipClass(deal.savings)} rounded-md px-4 py-2 shadow-lg`}>
                       {deal.savings}
                     </span>
                   </div>
@@ -117,7 +118,7 @@ export default async function DealDetailPage({ params }: DealDetailPageProps) {
                         <span className="text-lg text-gray-400 line-through">
                           ${deal.originalPrice.toFixed(2)}
                         </span>
-                        <span className="text-sm text-green-600 font-bold mt-1">
+                        <span className="text-sm font-bold mt-1 text-savings">
                           Save ${deal.price && deal.originalPrice ? (deal.originalPrice - deal.price).toFixed(2) : '0.00'}
                         </span>
                       </div>
@@ -171,23 +172,23 @@ export default async function DealDetailPage({ params }: DealDetailPageProps) {
         <section className="py-12 bg-gray-50">
           <div className="container-standard px-4 md:px-6">
             <h2 className="typography-h2 text-secondary mb-8">You May Also Like</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
               {relatedDeals.map((relatedDeal) => (
                 <Link
                   key={relatedDeal.id}
                   href={`/deals/${relatedDeal.id}`}
                   className="group"
                 >
-                  <div className="card overflow-hidden hover:shadow-xl transition-all">
-                    <div className="relative w-full aspect-square overflow-hidden rounded-md">
+                  <div className="card overflow-hidden h-full flex flex-col">
+                    <div className="relative w-full aspect-[16/9] overflow-hidden bg-[#FAFAF5]">
                       <Image
                         src={relatedDeal.image}
                         alt={relatedDeal.title}
                         fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="object-contain"
                       />
                     </div>
-                    <div className="p-4">
+                    <div className="card-body flex flex-col flex-1">
                       <h3 className="typography-h4 text-secondary line-clamp-2 mb-2">
                         {relatedDeal.title}
                       </h3>
@@ -196,6 +197,9 @@ export default async function DealDetailPage({ params }: DealDetailPageProps) {
                           ${relatedDeal.price.toFixed(2)}
                         </p>
                       )}
+                      <span className="btn-primary mt-5 w-fit !text-sm">
+                        View Deal
+                      </span>
                     </div>
                   </div>
                 </Link>

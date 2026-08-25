@@ -108,14 +108,14 @@ export function getStoreStatusBadge(store: Store): { text: string; color: string
   if (isOpen) {
     return {
       text: 'Open Now',
-      color: '#10B981', // green
-      bgColor: '#D1FAE5'
+      color: '#3F5F4C',
+      bgColor: '#D4E6D8',
     };
   } else {
     return {
       text: 'Closed',
-      color: '#EF4444', // red
-      bgColor: '#FEE2E2'
+      color: '#7E4A45',
+      bgColor: '#E9D0CC',
     };
   }
 }

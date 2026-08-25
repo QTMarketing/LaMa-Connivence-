@@ -34,8 +34,31 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="border-t border-gray-700 section" style={{ backgroundColor: '#1A1A1A' }}>
-      <div className="container-standard">
+    <footer
+      className="relative overflow-hidden section"
+      style={{
+        backgroundColor: '#1A1A1A',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14)',
+      }}
+    >
+      {/* Orange strike + a short white sheen. Gloss on the slab, not a new footer. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 8%, var(--color-primary) 50%, transparent 92%)',
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-28"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 42%, transparent 100%)',
+        }}
+      />
+      <div className="container-standard relative">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 md:gap-12 mb-12">
           {/* Logo Section */}
@@ -64,11 +87,11 @@ export default function Footer() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                   whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileTap={{ scale: 0.96 }}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/80 hover:text-primary transition-colors duration-300"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-[6px] border border-white/15 text-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-[color,border-color,background-color] duration-300 hover:border-white/30 hover:bg-white/5 hover:text-primary"
                   aria-label={social.label}
                 >
                   <social.icon size={20} />
@@ -224,7 +247,7 @@ export default function Footer() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-primary focus:outline-none transition-colors duration-300 typography-body"
+                className="w-full rounded-[6px] border border-white/15 bg-white/5 px-4 py-3 typography-body text-white placeholder:text-white/40 focus:border-primary focus:outline-none transition-[border-color,background-color] duration-300"
                 required
               />
               <button
@@ -243,7 +266,7 @@ export default function Footer() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="border-t border-gray-700 pt-8"
+          className="border-t border-white/10 pt-8"
         >
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="typography-body-sm text-white/60">
