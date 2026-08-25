@@ -6,6 +6,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import GlassBanner from '@/components/GlassBanner';
+import InnerHero from '@/components/InnerHero';
+import { CAMPAIGN } from '@/lib/campaignImages';
 import { Timeline } from '@/components/ui/timeline';
 
 
@@ -22,29 +24,29 @@ export default function AboutPage() {
           </p>
           <div className="grid grid-cols-2 gap-4">
             <Image
-              src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&h=500&fit=crop"
-              alt="Mission"
+              src={CAMPAIGN.combo}
+              alt="LaMa mix-and-match food"
               width={500}
               height={500}
               className="rounded-lg object-cover h-32 md:h-44 lg:h-60 w-full shadow-lg"
             />
             <Image
-              src="https://images.unsplash.com/photo-1551218808-94e220e084d2?w=500&h=500&fit=crop"
-              alt="Mission"
+              src={CAMPAIGN.coffee}
+              alt="LaMa coffee"
               width={500}
               height={500}
               className="rounded-lg object-cover h-32 md:h-44 lg:h-60 w-full shadow-lg"
             />
             <Image
-              src="https://images.unsplash.com/photo-1554866585-cd94860890b7?w=500&h=500&fit=crop"
-              alt="Mission"
+              src={CAMPAIGN.pizza}
+              alt="LaMa pizza"
               width={500}
               height={500}
               className="rounded-lg object-cover h-32 md:h-44 lg:h-60 w-full shadow-lg"
             />
             <Image
-              src="https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=500&h=500&fit=crop"
-              alt="Mission"
+              src={CAMPAIGN.taquito}
+              alt="LaMa taquitos"
               width={500}
               height={500}
               className="rounded-lg object-cover h-32 md:h-44 lg:h-60 w-full shadow-lg"
@@ -62,29 +64,29 @@ export default function AboutPage() {
           </p>
           <div className="grid grid-cols-2 gap-4">
             <Image
-              src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=500&h=500&fit=crop"
-              alt="Vision"
+              src={CAMPAIGN.sausage}
+              alt="LaMa sausage"
               width={500}
               height={500}
               className="rounded-lg object-cover h-32 md:h-44 lg:h-60 w-full shadow-lg"
             />
             <Image
-              src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=500&h=500&fit=crop"
-              alt="Vision"
+              src={CAMPAIGN.pizza}
+              alt="LaMa pizza"
               width={500}
               height={500}
               className="rounded-lg object-cover h-32 md:h-44 lg:h-60 w-full shadow-lg"
             />
             <Image
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=500&h=500&fit=crop"
-              alt="Vision"
+              src={CAMPAIGN.coffee}
+              alt="LaMa coffee"
               width={500}
               height={500}
               className="rounded-lg object-cover h-32 md:h-44 lg:h-60 w-full shadow-lg"
             />
             <Image
-              src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&h=500&fit=crop"
-              alt="Vision"
+              src={CAMPAIGN.innerBand}
+              alt="LaMa campaign food"
               width={500}
               height={500}
               className="rounded-lg object-cover h-32 md:h-44 lg:h-60 w-full shadow-lg"
@@ -102,29 +104,29 @@ export default function AboutPage() {
           </p>
           <div className="grid grid-cols-2 gap-4">
             <Image
-              src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=500&h=500&fit=crop"
-              alt="History"
+              src={CAMPAIGN.storefront}
+              alt="LaMa storefront"
               width={500}
               height={500}
               className="rounded-lg object-cover h-32 md:h-44 lg:h-60 w-full shadow-lg"
             />
             <Image
-              src="https://images.unsplash.com/photo-1551218808-94e220e084d2?w=500&h=500&fit=crop"
-              alt="History"
+              src={CAMPAIGN.combo}
+              alt="LaMa food"
               width={500}
               height={500}
               className="rounded-lg object-cover h-32 md:h-44 lg:h-60 w-full shadow-lg"
             />
             <Image
-              src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&h=500&fit=crop"
-              alt="History"
+              src={CAMPAIGN.coffee}
+              alt="LaMa coffee"
               width={500}
               height={500}
               className="rounded-lg object-cover h-32 md:h-44 lg:h-60 w-full shadow-lg"
             />
             <Image
-              src="https://images.unsplash.com/photo-1554866585-cd94860890b7?w=500&h=500&fit=crop"
-              alt="History"
+              src={CAMPAIGN.pizza}
+              alt="LaMa pizza"
               width={500}
               height={500}
               className="rounded-lg object-cover h-32 md:h-44 lg:h-60 w-full shadow-lg"
@@ -137,34 +139,15 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-white" ref={containerRef}>
-      {/* Hero Section - Full Width Image with Text Overlay */}
-      <section className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
-        <div className="absolute inset-0">
-          <Image
-            src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=1080&fit=crop"
-            alt="About Us Hero"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-black/50"></div>
-        </div>
-        {/* Container for Title and Glass Banner */}
-        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center text-white max-w-4xl mb-6 sm:mb-6 md:mb-8"
-          >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black">
-              About Us
-            </h1>
-          </motion.div>
-          {/* Glass Banner - Floating Inside Hero */}
+        <InnerHero
+          title="About Us"
+          subtitle="Your trusted neighborhood stop — fresh food, daily essentials, and the people who know your order."
+          imageSrc={CAMPAIGN.about}
+          imageAlt="Inside a neighborhood convenience store"
+          field="#F3E8DC"
+        >
           <GlassBanner />
-        </div>
-      </section>
+        </InnerHero>
 
       {/* Timeline Section - Mission, Vision, History */}
       <Timeline data={timelineData} />

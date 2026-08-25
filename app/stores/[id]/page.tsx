@@ -5,11 +5,16 @@ import { getStoreById } from '@/lib/storeData';
 import { MapPin, Phone, Clock, ArrowLeft } from 'lucide-react';
 
 type StoreDetailPageProps = {
-  params: { id: string };
+  // Next 16: params is a Promise. Accepting both shapes matches the pattern
+  // already working in app/deals/[id]/page.tsx.
+  params: Promise<{ id: string }> | { id: string };
 };
 
 export default async function StoreDetailPage({ params }: StoreDetailPageProps) {
-  const id = Number(params.id);
+  // Without awaiting, params.id is undefined on the Promise, Number(undefined)
+  // is NaN, and EVERY store detail page 404s. That was the bug.
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const id = Number(resolvedParams.id);
   if (Number.isNaN(id)) {
     return notFound();
   }
@@ -22,7 +27,7 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="relative py-12 md:py-16 lg:py-20 bg-[#FAFAF5]">
+      <section className="relative pt-8 pb-12 md:pt-12 md:pb-16 lg:pt-16 lg:pb-20 bg-[#FAFAF5]">
         <div className="container-standard px-4 md:px-6">
           <Link
             href="/stores"
@@ -33,13 +38,17 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-start bg-white rounded-md shadow-lg overflow-hidden">
-            {/* Store Image/Map Placeholder */}
+            {/* A real LaMa storefront. Was a stock Unsplash photo of a clothing
+                boutique — mirrors, racks, a salon counter — on a convenience
+                store page. Nothing breaks the "real company" read faster than
+                imagery that is visibly not your business. */}
             <div className="relative w-full aspect-video lg:aspect-[4/3] overflow-hidden rounded-md bg-gray-200">
               <Image
-                src="https://images.unsplash.com/photo-1556740758-90de374c12ad?w=1920&h=1080&fit=crop"
-                alt={store.name}
+                src="/photos/lama.jpg"
+                alt={`${store.name} storefront`}
                 fill
                 className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 priority
               />
             </div>
@@ -60,11 +69,18 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
                     </div>
                   </div>
 
+                  {/* Only 8 of 96 phones were recovered (see PLACEHOLDERS.md).
+                      A labelled row with nothing after it reads as broken, so
+                      say plainly that we do not have it. */}
                   <div className="flex items-start gap-3">
                     <Phone className="text-primary flex-shrink-0 mt-1" size={20} />
                     <div>
                       <p className="typography-body font-semibold text-gray-900 mb-1">Phone</p>
-                      <p className="typography-body text-gray-700">{store.phone}</p>
+                      {store.phone ? (
+                        <p className="typography-body text-gray-700">{store.phone}</p>
+                      ) : (
+                        <p className="typography-body text-gray-500">Not listed</p>
+                      )}
                     </div>
                   </div>
 
@@ -79,13 +95,18 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 mt-6">
-                <a
-                  href={`tel:${store.phone.replace(/[^\d+]/g, '')}`}
-                  className="btn-secondary flex-1 justify-center"
-                >
-                  <Phone size={18} />
-                  Call Store
-                </a>
+                {/* Without the guard this rendered href="tel:" on 88 of 96
+                    stores — a dead button on 92% of pages. If we have no
+                    number, do not offer the call. */}
+                {store.phone && (
+                  <a
+                    href={`tel:${store.phone.replace(/[^\d+]/g, '')}`}
+                    className="btn-secondary flex-1 justify-center"
+                  >
+                    <Phone size={18} />
+                    Call Store
+                  </a>
+                )}
                 <a
                   href={`https://www.google.com/maps/search/?api=1&query=${store.lat},${store.lng}`}
                   target="_blank"

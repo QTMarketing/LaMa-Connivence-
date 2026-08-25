@@ -1,6 +1,7 @@
 'use client';
 
 import { getBlogBySlug, getAllBlogs } from '@/lib/blogHelpers';
+import { BLOG_COVER_FALLBACK } from '@/lib/blogData';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, Clock, User } from 'lucide-react';
@@ -67,7 +68,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
   return (
     <div className="min-h-screen bg-white">
       {/* Breadcrumb */}
-      <section className="bg-gray-50 border-b border-gray-200 pt-24 pb-4">
+      <section className="bg-gray-50 border-b border-gray-200 py-4">
         <div className="container-standard px-4 md:px-6">
           <Link
             href="/media/blog"
@@ -117,17 +118,10 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
               className="relative w-full aspect-[16/9] rounded-md overflow-hidden mb-8 bg-gray-200"
             >
               <Image
-                src={blog.image || '/photos/store1.jpg'}
+                src={blog.image || BLOG_COVER_FALLBACK}
                 alt={blog.title}
                 fill
                 className="object-cover"
-                onError={(e) => {
-                  // Fallback to placeholder if image fails to load
-                  const target = e.target as HTMLImageElement;
-                  if (target.src !== '/photos/store1.jpg') {
-                    target.src = '/photos/store1.jpg';
-                  }
-                }}
               />
             </motion.div>
 
@@ -160,17 +154,10 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
                     >
                       <div className="relative w-full aspect-[4/3] overflow-hidden bg-gray-200">
                         <Image
-                          src={relatedBlog.image || '/photos/store1.jpg'}
+                          src={relatedBlog.image || BLOG_COVER_FALLBACK}
                           alt={relatedBlog.title}
                           fill
                           className="object-cover group-hover:scale-110 transition-transform duration-500"
-                          onError={(e) => {
-                            // Fallback to placeholder if image fails to load
-                            const target = e.target as HTMLImageElement;
-                            if (target.src !== '/photos/store1.jpg') {
-                              target.src = '/photos/store1.jpg';
-                            }
-                          }}
                         />
                       </div>
                       <div className="p-4">

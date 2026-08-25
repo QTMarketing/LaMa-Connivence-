@@ -90,19 +90,32 @@ function convertToMinutes(hour: number, minute: number, period: string): number 
  * Get "Open Now" status badge for a store
  */
 export function getStoreStatusBadge(store: Store): { text: string; color: string; bgColor: string } {
+  // Unknown hours must NOT render as "Closed". We have no hours for any of the
+  // 96 stores (see PLACEHOLDERS.md), so isStoreOpen() cannot parse the
+  // "Call to confirm" placeholder and falls through to closed — which tells a
+  // customer a store is shut when we simply do not know. Saying nothing is
+  // honest; saying "Closed" is wrong, and it costs someone a wasted drive.
+  if (store.hoursVerified === false) {
+    return {
+      text: 'Hours not confirmed',
+      color: '#57504C', // warm neutral — deliberately NOT a status colour
+      bgColor: '#EFEBE4',
+    };
+  }
+
   const isOpen = isStoreOpen(store.hours);
-  
+
   if (isOpen) {
     return {
       text: 'Open Now',
-      color: '#10B981', // green
-      bgColor: '#D1FAE5'
+      color: '#3F5F4C',
+      bgColor: '#D4E6D8',
     };
   } else {
     return {
       text: 'Closed',
-      color: '#EF4444', // red
-      bgColor: '#FEE2E2'
+      color: '#7E4A45',
+      bgColor: '#E9D0CC',
     };
   }
 }

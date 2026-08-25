@@ -1,3 +1,5 @@
+import { CAMPAIGN } from '@/lib/campaignImages';
+
 export interface Deal {
   id: number;
   title: string;
@@ -27,7 +29,7 @@ export const deals: Deal[] = [
     id: 1,
     title: 'Bahama Mama Smoked Sausage',
     description: 'Juicy smoked sausage, hot off the roller grill. A classic convenience store favourite.',
-    image: '/photos/hotdog.jpg',
+    image: CAMPAIGN.sausage,
     category: 'grill-items',
     savings: 'Just $2',
     featured: true,
@@ -39,7 +41,7 @@ export const deals: Deal[] = [
     id: 2,
     title: 'Bahama Mama Smoked Cheddar',
     description: 'Smoked sausage loaded with cheddar flavour — a fan favourite at every Lama store.',
-    image: '/photos/hotdog.jpg',
+    image: CAMPAIGN.cheddar,
     category: 'grill-items',
     savings: 'Just $2',
     featured: true,
@@ -51,7 +53,7 @@ export const deals: Deal[] = [
     id: 3,
     title: 'Crispitos',
     description: 'Crispy seasoned taquitos, hot and ready. A quick snack that hits every time.',
-    image: '/photos/food1.jpg',
+    image: CAMPAIGN.taquito,
     category: 'grill-items',
     savings: 'Just $2',
     featured: true,
@@ -63,19 +65,20 @@ export const deals: Deal[] = [
     id: 4,
     title: 'Rollerbites Buffalo Chicken',
     description: 'Spicy buffalo chicken bites with bold flavour in every bite.',
-    image: '/photos/food2.jpg',
+    image: CAMPAIGN.bites,
     category: 'grill-items',
     savings: 'Just $2',
     featured: true,
     displayName: 'HOT GRILL DEALS',
     homepageOrder: 4,
     price: 2.00,
+    stockLeft: 8,
   },
   {
     id: 5,
     title: 'Rollerbites Sausage, Egg & Cheese',
     description: 'A hearty breakfast bite with sausage, egg, and melted cheese — great any time of day.',
-    image: '/photos/food3.jpg',
+    image: CAMPAIGN.bites,
     category: 'grill-items',
     savings: 'Just $2',
     price: 2.00,
@@ -84,7 +87,7 @@ export const deals: Deal[] = [
     id: 6,
     title: 'Rollerbites Cheeseburger Bites',
     description: 'All the taste of a cheeseburger packed into a hot, handheld bite.',
-    image: '/photos/food1.jpg',
+    image: CAMPAIGN.bites,
     category: 'grill-items',
     savings: 'Just $2',
     price: 2.00,
@@ -93,7 +96,7 @@ export const deals: Deal[] = [
     id: 7,
     title: 'El Mont Tornado Chicken',
     description: 'Seasoned chicken wrapped in a crispy tornado shell. Hot, fast, and delicious.',
-    image: '/photos/food2.jpg',
+    image: CAMPAIGN.tornado,
     category: 'grill-items',
     savings: 'Just $2',
     price: 2.00,
@@ -102,7 +105,7 @@ export const deals: Deal[] = [
     id: 8,
     title: 'El Mont Pepper Jack Tornado',
     description: 'Spicy pepper jack flavour in a crispy tornado shell — perfect for heat lovers.',
-    image: '/photos/food3.jpg',
+    image: CAMPAIGN.tornado,
     category: 'grill-items',
     savings: 'Just $2',
     price: 2.00,
@@ -111,7 +114,7 @@ export const deals: Deal[] = [
     id: 9,
     title: 'El Mont Tornado Ranch Steak',
     description: 'Tender ranch-seasoned steak in a warm tornado wrap. A fan favourite.',
-    image: '/photos/food1.jpg',
+    image: CAMPAIGN.tornado,
     category: 'grill-items',
     savings: 'Just $2',
     price: 2.00,
@@ -120,7 +123,7 @@ export const deals: Deal[] = [
     id: 10,
     title: 'El Mont Tornado Ranch Steak & Cheese',
     description: 'Ranch steak tornado loaded with melted cheese. A satisfying grab-and-go meal.',
-    image: '/photos/food2.jpg',
+    image: CAMPAIGN.tornado,
     category: 'grill-items',
     savings: 'Just $2',
     price: 2.00,
@@ -129,7 +132,7 @@ export const deals: Deal[] = [
     id: 11,
     title: 'El Mont Tornado Cheese Pepper Jack',
     description: 'Double cheese and pepper jack heat packed into a crunchy tornado roll.',
-    image: '/photos/food3.jpg',
+    image: CAMPAIGN.tornado,
     category: 'grill-items',
     savings: 'Just $2',
     price: 2.00,
@@ -138,7 +141,7 @@ export const deals: Deal[] = [
     id: 12,
     title: 'Eisenberg Beef Frank',
     description: 'A classic all-beef frank, roller grilled to perfection. Simple, satisfying, and only $2.',
-    image: '/photos/hotdog.jpg',
+    image: CAMPAIGN.frank,
     category: 'grill-items',
     savings: 'Just $2',
     price: 2.00,
@@ -149,11 +152,12 @@ export const deals: Deal[] = [
     id: 13,
     title: 'Grill Items Mix & Match',
     description: 'Pick any 2 grill items for just $3.99. Mix and match your favourites — sausages, tornados, rollerbites, and more.',
-    image: '/photos/food2.jpg',
+    image: CAMPAIGN.combo,
     category: 'mix-and-match',
     savings: '2 for $3.99',
     featured: false,
     price: 3.99,
+    stockLeft: 11,
   },
 ];
 
@@ -166,7 +170,12 @@ export const getAllDeals = (): Deal[] => {
     const savedDeals = localStorage.getItem('adminAllDeals');
     if (savedDeals) {
       try {
-        return JSON.parse(savedDeals);
+        const parsed = JSON.parse(savedDeals) as Deal[];
+        const byId = new Map(deals.map((deal) => [deal.id, deal]));
+        return parsed.map((deal) => {
+          const canonical = byId.get(deal.id);
+          return canonical ? { ...deal, image: canonical.image, stockLeft: canonical.stockLeft } : deal;
+        });
       } catch {
         return deals;
       }

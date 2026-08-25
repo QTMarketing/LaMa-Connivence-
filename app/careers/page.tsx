@@ -2,9 +2,10 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowRight, MapPin, Clock, DollarSign } from 'lucide-react';
 import GlassBanner from '@/components/GlassBanner';
+import InnerHero from '@/components/InnerHero';
+import { CAMPAIGN } from '@/lib/campaignImages';
 
 export default function CareersPage() {
   const benefits = [
@@ -48,34 +49,9 @@ export default function CareersPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section - Full Width Image with Text Overlay */}
-      <section className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
-        <div className="absolute inset-0">
-          <Image
-            src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=1080&fit=crop"
-            alt="Careers Hero"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-black/50"></div>
-        </div>
-        {/* Container for Title and Glass Banner */}
-        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center text-white max-w-4xl mb-6 sm:mb-6 md:mb-8"
-          >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black">
-              Careers
-            </h1>
-          </motion.div>
-          {/* Glass Banner - Floating Inside Hero */}
+        <InnerHero title="Careers" imageSrc={CAMPAIGN.innerCoffee} imageAlt="LaMa coffee on orange">
           <GlassBanner />
-        </div>
-      </section>
+        </InnerHero>
 
       {/* Benefits Section */}
       <section className="py-12 md:py-16 px-6 bg-gray-50">

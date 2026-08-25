@@ -12,22 +12,17 @@ const defaultPromo: PromoItem = {
   id: 0,
   title: 'Join LaMa Convenience Rewards',
   description: 'Unlock exclusive member-only deals and earn points on every purchase!',
-  image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop',
+  image: '/campaign/ad-mixmatch-16x9.webp',
   category: 'meal-deals',
   savings: '',
   featured: true,
 } as Deal;
 
-// IMPORTANT: For React/Next hydration to work, the initial state **must**
-// be the same on the server and the client. We therefore always start with
-// an empty list here and load the real promos in a client-side effect.
-function getInitialFeaturedPromos(): PromoItem[] {
-  return [];
-}
-
 export function usePromo(type: 'deals' | 'drinks' = 'deals') {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [featuredDeals, setFeaturedDeals] = useState<PromoItem[]>(getInitialFeaturedPromos());
+  const [featuredDeals, setFeaturedDeals] = useState<PromoItem[]>(() =>
+    type === 'drinks' ? (getFeaturedDrinks() as PromoItem[]) : getFeaturedDeals()
+  );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -90,15 +85,15 @@ export function usePromo(type: 'deals' | 'drinks' = 'deals') {
     }, 5000);
   };
 
-  const currentPromo = featuredDeals.length > 0 
+  const currentPromo = featuredDeals.length > 0
     ? (featuredDeals[currentIndex] || featuredDeals[0])
     : defaultPromo;
 
   return {
     currentPromo,
     currentIndex: featuredDeals.length > 0 ? currentIndex : 0,
-    totalPromos: featuredDeals.length > 0 ? featuredDeals.length : 1,
+    totalPromos: featuredDeals.length,
     goToPromo,
-    featuredDeals: featuredDeals.length > 0 ? featuredDeals : [defaultPromo],
+    featuredDeals,
   };
 }

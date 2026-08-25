@@ -1,3 +1,6 @@
+export const BLOG_COVER_FALLBACK =
+  'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=1600&h=900&fit=crop';
+
 export const blogs = [
     {
         id: 1,
@@ -14,7 +17,7 @@ export const blogs = [
       </ul>
       <p>We can't wait to serve you and become a part of this vibrant community. See you there!</p>
     `,
-        image: "/photos/store1.jpg",
+        image: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=1600&h=900&fit=crop",
         date: "Nov 20, 2025",
         author: "LaMa Team"
     },
@@ -29,7 +32,7 @@ export const blogs = [
       <p>Our baristas are trained to brew every cup with care, ensuring you get the perfect start to your day. We use a precise water-to-coffee ratio and control the temperature to extract the optimal flavor profile.</p>
       <p>Stop by and taste the difference for yourself!</p>
     `,
-        image: "/photos/food1.jpg",
+        image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1600&h=900&fit=crop",
         date: "Nov 18, 2025",
         author: "Head Barista"
     },
@@ -43,7 +46,7 @@ export const blogs = [
       <p>A portion of every sale goes directly to these causes. We are also organizing volunteer days for our staff and customers to get involved.</p>
       <p>Together, we can make a real difference.</p>
     `,
-        image: "/photos/store1.jpg",
+        image: "https://images.unsplash.com/photo-1593113598332-cd288d649433?w=1600&h=900&fit=crop",
         date: "Nov 15, 2025",
         author: "Community Outreach"
     },
@@ -61,15 +64,8 @@ export const blogs = [
       </ul>
       <p>Whether you're craving something salty or sweet, we have something for everyone. Stop by today to try them out!</p>
     `,
-        image: "/photos/food2.jpg",
+        image: "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=1600&h=900&fit=crop",
         date: "Nov 10, 2025",
         author: "Product Team"
     }
 ];
-
-
-
-
-
-
-

@@ -10,14 +10,14 @@ export default function MobileStickyCTA() {
       <div className="flex items-center justify-between px-4 py-3 gap-3">
         <Link
           href="/stores"
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 btn-secondary"
         >
           <MapPin size={18} className="text-primary" />
           <span className="typography-body-sm font-semibold text-gray-900">Find Store</span>
         </Link>
         <Link
           href="/deals"
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md btn-primary"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 btn-primary"
         >
           <Tag size={18} />
           <span className="typography-body-sm font-semibold">View Deals</span>

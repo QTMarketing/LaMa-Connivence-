@@ -1,23 +1,26 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAllDeals, getDealsByCategory, type Deal } from '@/lib/dealsData';
 import { Tag, Zap, Pizza, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import GlassBanner from '@/components/GlassBanner';
 import { usePromo } from '@/hooks/usePromo';
-import { DealCountdown } from './DealCountdown';
 import { DealCountdownBadge } from '@/components/DealCountdownBadge';
 import SocialShare from '@/components/SocialShare';
+import CategoryBand from '@/components/CategoryBand';
+import FeaturedPromo from '@/components/FeaturedPromo';
+import FilterChips from '@/components/FilterChips';
+import { CAMPAIGN, resolveDealImage } from '@/lib/campaignImages';
+import { savingsChipClass } from '@/lib/semantic';
 
 export default function DealsPage() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | Deal['category']>('all');
   const [currentPage, setCurrentPage] = useState(0);
   const [showCategoryBar, setShowCategoryBar] = useState(true);
   const lastScrollY = useRef(0);
-  const { currentPromo, currentIndex, totalPromos, goToPromo, featuredDeals } = usePromo();
+  const { currentPromo, currentIndex, goToPromo, featuredDeals } = usePromo();
 
   const categories: Array<{ id: 'all' | Deal['category']; label: string; icon: typeof Tag }> = [
     { id: 'all' as const, label: 'ALL DEALS', icon: Tag },
@@ -90,171 +93,67 @@ export default function DealsPage() {
 
   return (
     <div className="min-h-screen bg-white pb-20 md:pb-0">
-      {/* Hero Section - Full Width Image with Text Overlay */}
-      <section className="relative w-full min-h-[360px] sm:h-[420px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
-        <div className="absolute inset-0">
-          <Image
-            src="https://images.unsplash.com/photo-1551218808-94e220e084d2?w=1920&h=1080&fit=crop"
-            alt="Deals Hero"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-black/40"></div>
-        </div>
-        {/* Container for Title and Glass Banner */}
-        <div className="relative z-40 h-full w-full flex flex-col items-center justify-center px-4 md:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center text-white max-w-4xl mb-8"
-          >
-            <h1 className="typography-h1 text-white">
-              Deals
-            </h1>
-          </motion.div>
-          {/* Glass Banner - Floating Inside Hero */}
-          <GlassBanner />
-        </div>
-      </section>
+        <CategoryBand
+          heading="h1"
+          field="peach"
+          title="Hot off the grill"
+          subtitle="Crispitos, Rollerbites and Bahama Mama, hot and ready all day."
+          cta={{ label: 'Join LaMa Rewards', href: '/rewards' }}
+          ctaNote="Free to join · earn on every visit"
+          imageSrc={CAMPAIGN.cutCrispitos}
+          imageAlt="Crispitos rolled taquitos"
+        />
 
-      {/* Featured Deal Section */}
-      {currentPromo && featuredDeals.length > 0 && (
-        <section className="py-section-xs md:py-section-sm px-4 md:px-6 bg-white">
-          <div className="container-standard">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="bg-gray-50 rounded-lg p-6 md:p-8"
-            >
-              <div className="relative">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={currentIndex}
-                    initial={{ opacity: 0, x: 30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -30 }}
-                    transition={{ duration: 0.5, ease: "easeInOut" }}
-                    className="grid md:grid-cols-2 gap-6 md:gap-8 items-center"
-                  >
-                    <div className="relative w-full aspect-[4/3] md:aspect-[3/2] rounded-lg overflow-hidden">
-                      <Image
-                        src={currentPromo.image}
-                        alt={currentPromo.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div>
-                      <h2 className="typography-h2 text-secondary mb-4">
-                        {currentPromo.title}
-                      </h2>
-                      <p className="typography-body-lg text-gray-600 mb-6">
-                        {currentPromo.description}
-                      </p>
-                      <div className="mb-6">
-                        <Link
-                          href="/stores"
-                          className="btn-primary"
-                        >
-                          Find a Store
-                        </Link>
-                      </div>
-                      <p className="typography-caption text-gray-500">
-                        *Valid at participating locations through Sunday. While supplies last.
-                      </p>
-                    </div>
-                  </motion.div>
-                </AnimatePresence>
-
-                {/* Dot Indicators */}
-                {totalPromos > 1 && (
-                  <div className="flex items-center justify-center gap-3 mt-8">
-                    {featuredDeals.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => goToPromo(index)}
-                        className="focus:outline-none transition-all p-1"
-                        aria-label={`Go to promo ${index + 1}`}
-                      >
-                        <motion.div
-                          className={`rounded-full transition-all ${
-                            index === currentIndex
-                              ? 'w-8 h-2.5 bg-primary'
-                              : 'w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400'
-                          }`}
-                          whileHover={{ scale: 1.3 }}
-                          whileTap={{ scale: 0.9 }}
-                          animate={{
-                            opacity: index === currentIndex ? 1 : 0.5,
-                          }}
-                          style={index === currentIndex ? { backgroundColor: '#FF6B35' } : {}}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </div>
-        </section>
+      {featuredDeals.length > 0 && (
+        <FeaturedPromo
+          current={currentPromo}
+          currentIndex={currentIndex}
+          items={featuredDeals}
+          onGoTo={goToPromo}
+          resolveImage={resolveDealImage}
+        />
       )}
 
       {/* Category Filters – sticky on scroll */}
       <section
-        className={`py-4 md:py-5 px-4 md:px-6 bg-white border-b border-gray-200 sticky top-[72px] z-20 transition-transform duration-300 ${
+        className={`py-4 md:py-5 px-4 md:px-6 bg-white border-b border-gray-200 sticky top-16 lg:top-20 z-20 transition-transform duration-300 ${
           showCategoryBar ? 'translate-y-0' : '-translate-y-full md:translate-y-0'
         }`}
       >
         <div className="container-standard">
-          <nav className="flex flex-wrap items-center justify-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide pb-2 md:pb-0 md:overflow-visible">
-            {categories.map((category) => {
-              const Icon = category.icon;
-              return (
-                <button
-                  key={category.id}
-                  onClick={() => handleCategoryChange(category.id)}
-                  className={`inline-flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 rounded-md typography-body-sm font-semibold transition-all min-h-[44px] border ${
-                    selectedCategory === category.id
-                      ? 'bg-primary text-white border-transparent shadow-sm scale-[1.02]'
-                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-                  }`}
-                  style={selectedCategory === category.id ? { backgroundColor: '#FF6B35' } : {}}
-                >
-                  <Icon size={18} />
-                  {category.label}
-                </button>
-              );
-            })}
-          </nav>
+          <FilterChips
+            items={categories}
+            value={selectedCategory}
+            onChange={handleCategoryChange}
+            ariaLabel="Deal categories"
+          />
         </div>
       </section>
 
       {/* Deals Grid */}
       <section id="deals-grid" className="section" style={{ backgroundColor: '#FAFAF5' }}>
         <div className="container-standard">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 deals-grid">
-            {currentDeals.map((deal: Deal, index: number) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 deals-grid">
+            {currentDeals.map((deal: Deal, index: number) => {
+              const src = resolveDealImage(deal.image);
+              const isCutout = src.includes('/cut-');
+              return (
               <Link
                 key={deal.id}
                 href={`/deals/${deal.id}`}
-                className="block"
+                className="block h-full min-w-0"
               >
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: index * 0.05 }}
-                  whileHover={{ y: -4, boxShadow: '0 18px 30px rgba(0,0,0,0.16)' }}
-                  className="card relative overflow-hidden group cursor-pointer"
+                  className="card relative flex h-full flex-col overflow-hidden group cursor-pointer"
                 >
                   {/* Badges / urgency */}
                   <div className="absolute z-10 top-3 left-3 flex flex-col gap-2">
                     {deal.savings && (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-orange-500 text-white typography-caption font-semibold shadow">
+                      <span className={savingsChipClass(deal.savings)}>
                         {deal.savings}
                       </span>
                     )}
@@ -275,20 +174,34 @@ export default function DealsPage() {
                     />
                   </div>
 
-                  {/* Image */}
-                  <div className="relative w-full aspect-video overflow-hidden rounded-md">
-                    <Image
-                      src={deal.image}
-                      alt={deal.title}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    />
+                  {/* Image: locked frame so mixed POS art and photos share one row height */}
+                  <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-white">
+                    {isCutout ? (
+                    <div className="absolute inset-5 md:inset-6">
+                      <Image
+                        src={src}
+                        alt={deal.title}
+                        fill
+                        className="object-contain"
+                        loading="lazy"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                    </div>
+                    ) : (
+                      <Image
+                        src={src}
+                        alt={deal.title}
+                        fill
+                        className="object-cover"
+                        loading="lazy"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                    )}
                   </div>
 
                   {/* Content */}
-                  <div className="p-4 md:p-6 flex flex-col gap-3">
-                    <h3 className="typography-h3 text-secondary">
+                  <div className="card-body flex flex-1 flex-col gap-2">
+                    <h3 className="typography-h3 text-secondary line-clamp-2 min-h-[2.6em]">
                       {deal.title}
                     </h3>
 
@@ -296,7 +209,7 @@ export default function DealsPage() {
                     {(deal.price || deal.originalPrice) && (
                       <div className="flex items-baseline gap-3">
                         {typeof deal.price === 'number' && (
-                          <span className="text-3xl md:text-4xl font-black text-primary">
+                          <span className="text-2xl font-black text-primary">
                             ${deal.price.toFixed(2)}
                           </span>
                         )}
@@ -306,7 +219,7 @@ export default function DealsPage() {
                               ${deal.originalPrice.toFixed(2)}
                             </span>
                             {typeof deal.price === 'number' && (
-                              <span className="text-xs text-green-600 font-semibold">
+                              <span className="text-xs font-semibold text-savings">
                                 Save ${(deal.originalPrice - deal.price).toFixed(2)}
                               </span>
                             )}
@@ -322,8 +235,8 @@ export default function DealsPage() {
                     {/* Urgency indicators */}
                     <div className="flex items-center justify-between mt-1 flex-wrap gap-2">
                       {typeof deal.stockLeft === 'number' && deal.stockLeft < 20 && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-md bg-red-50 text-red-700 typography-caption font-semibold">
-                          ⚡ Only {deal.stockLeft} left!
+                        <span className="badge-urgency px-3 py-1 typography-caption font-semibold">
+                          Only {deal.stockLeft} left
                         </span>
                       )}
                       {deal.expirationDate && (
@@ -333,7 +246,7 @@ export default function DealsPage() {
                       )}
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between gap-3">
+                    <div className="mt-auto flex items-center justify-between gap-3 pt-4">
                       <span className="btn-primary flex-1 justify-center text-center">
                         Redeem Now
                       </span>
@@ -345,7 +258,8 @@ export default function DealsPage() {
                   </div>
                 </motion.div>
               </Link>
-            ))}
+              );
+            })}
           </div>
 
           {filteredDeals.length === 0 && (

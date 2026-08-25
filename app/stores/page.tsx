@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Clock, Search, ArrowRight } from 'lucide-react';
 import { getAllStores, type Store } from '@/lib/storeData';
+import InnerHero from '@/components/InnerHero';
 import { getStoreStatusBadge } from '@/lib/storeUtils';
 
 export default function StoresPage() {
@@ -99,36 +100,11 @@ export default function StoresPage() {
 
   return (
     <div className="min-h-screen bg-white pb-20 md:pb-0">
-      {/* Hero Section */}
-      <section className="relative w-full min-h-[360px] sm:h-[420px] md:h-[500px] lg:h-[600px] overflow-hidden pt-24 md:pt-28">
-        <div className="absolute inset-0">
-          <Image
-            src="https://images.unsplash.com/photo-1556740758-90de374c12ad?w=1920&h=1080&fit=crop"
-            alt="Find a Store"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-black/40"></div>
-        </div>
-
-        <div className="relative z-10 container-standard px-4 md:px-6 lg:px-8 h-full flex items-center">
-          <div className="max-w-4xl mx-auto text-center w-full">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <h1 className="typography-h1 text-white mb-4">
-                Find Your Nearest Store
-              </h1>
-              <p className="typography-body-lg text-white opacity-85 max-w-2xl mx-auto">
-                Visit one of our convenient locations to shop, grab a quick bite, or access our services.
-              </p>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+        <InnerHero
+          title="Find Your Nearest Store"
+          subtitle="Visit one of our convenient locations to shop, grab a quick bite, or access our services."
+          imageAlt="LaMa food on orange"
+        />
 
       {/* Main Content Section - Two Column Layout */}
       <section className="section bg-white">
@@ -265,10 +241,10 @@ export default function StoresPage() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.4, delay: index * 0.05 }}
                         onClick={() => setSelectedStore(store)}
-                        className={`card p-5 cursor-pointer transition-all duration-300 relative ${
+                        className={`card p-5 cursor-pointer relative ${
                           selectedStore?.id === store.id
                             ? 'border-2 border-primary shadow-lg'
-                            : 'border border-gray-200 hover:border-primary/50 hover:shadow-md'
+                            : ''
                         }`}
                       >
                         <div className="flex items-start justify-between mb-3">
@@ -293,7 +269,9 @@ export default function StoresPage() {
                           </div>
                           <div className="flex items-start gap-2">
                             <Phone className="text-primary flex-shrink-0 mt-1" size={16} />
-                            <p className="typography-body-sm text-gray-700">{store.phone}</p>
+                            <p className={`typography-body-sm ${store.phone ? 'text-gray-700' : 'text-gray-500'}`}>
+                              {store.phone || 'Not listed'}
+                            </p>
                           </div>
                           <div className="flex items-start gap-2">
                             <Clock className="text-primary flex-shrink-0 mt-1" size={16} />
@@ -305,14 +283,16 @@ export default function StoresPage() {
                           className="relative z-20 mt-4 pt-3 border-t border-gray-100"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <div className="grid grid-cols-2 gap-2 mb-2">
-                            <a
-                              href={`tel:${store.phone.replace(/[^\d+]/g, '')}`}
-                              className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-secondary hover:border-primary/40 hover:text-primary transition-colors"
-                            >
-                              <Phone size={14} />
-                              Call
-                            </a>
+                          <div className={`grid gap-2 mb-2 ${store.phone ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                            {store.phone ? (
+                              <a
+                                href={`tel:${store.phone.replace(/[^\d+]/g, '')}`}
+                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-secondary hover:border-primary/40 hover:text-primary transition-colors"
+                              >
+                                <Phone size={14} />
+                                Call
+                              </a>
+                            ) : null}
                             <a
                               href={`https://www.google.com/maps/search/?api=1&query=${store.lat},${store.lng}`}
                               target="_blank"
@@ -353,13 +333,15 @@ export default function StoresPage() {
                 </div>
                 {selectedStore && (
                   <div className="flex items-center gap-2">
-                    <a
-                      href={`tel:${selectedStore.phone.replace(/[^\d+]/g, '')}`}
-                      className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-secondary hover:border-primary/40 hover:text-primary transition-colors"
-                    >
-                      <Phone size={14} />
-                      Call
-                    </a>
+                    {selectedStore.phone ? (
+                      <a
+                        href={`tel:${selectedStore.phone.replace(/[^\d+]/g, '')}`}
+                        className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-secondary hover:border-primary/40 hover:text-primary transition-colors"
+                      >
+                        <Phone size={14} />
+                        Call
+                      </a>
+                    ) : null}
                     <a
                       href={`https://www.google.com/maps/search/?api=1&query=${selectedStore.lat},${selectedStore.lng}`}
                       target="_blank"

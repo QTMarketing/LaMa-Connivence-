@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ArrowRight, MapPin, Plus } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import RewardsHero from '@/components/RewardsHero';
 import { rewardFeatures } from '@/lib/rewardFeatureData';
 
 const membershipCards = rewardFeatures.map((feature) => ({
@@ -86,67 +87,31 @@ export default function RewardsPage() {
   return (
     <div className="min-h-screen bg-[#F1F1F1]">
       <main>
-        <section className="bg-[#FF6B35] pt-24 md:pt-28">
-          <div className="container-standard px-4 md:px-7 lg:px-10 pt-8 md:pt-10 pb-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 items-end gap-8 md:gap-10">
-              <div className="max-w-[560px] pb-8 md:pb-10">
-                <h1
-                  className="-mt-6 md:-mt-10 text-white font-black leading-[1.1] text-3xl md:text-[54px] tracking-[-0.01em] mb-4"
-                  style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.22)' }}
-                >
-                  Elevate Your Every Day
-                  <br />
-                  with LaMa Rewards.
-                </h1>
-                <p className="!text-white text-sm md:text-base leading-relaxed max-w-[510px] mb-4">
-                  Turn your routine into rewards. From instant discounts to birthday surprises and partner privileges, your
-                  hometown LaMa app is your ticket to the best we have to offer.
-                </p>
-                <p className="!text-white font-semibold text-sm md:text-base mb-4">
-                  You&apos;re with LaMa. Get Rewarded for it.
-                </p>
-                <Link
-                  href="/rewards/dashboard"
-                  className="btn-secondary !bg-white !border-white !text-[#1A1A1A] hover:!bg-[#F5F5F5] hover:!text-[#1A1A1A] !text-sm !px-5 !py-2.5"
-                >
-                  Get The App
-                </Link>
-              </div>
-
-              <div className="relative h-[250px] md:h-[340px] lg:h-[390px]">
-                <div className="absolute right-0 bottom-0 w-[96%] h-[90%] bg-[#F1F1F1] rounded-t-[999px]" />
-                <Image
-                  src="/lady.png"
-                  alt="LaMa Rewards App User"
-                  fill
-                  priority
-                  className="object-contain object-bottom-right scale-[1.08] md:scale-[1.12] lg:scale-[1.15] origin-bottom-right relative z-10"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
+        <RewardsHero />
 
         <section className="bg-[#F1F1F1]">
-          <div className="w-full max-w-[1380px] mx-auto px-3 md:px-5 lg:px-6 py-14 md:py-16 lg:py-20">
+          <div className="w-full max-w-[1380px] mx-auto px-3 md:px-5 lg:px-6 py-10 md:py-12">
             <h2 className="text-center text-[#1A1A1A] font-black text-xl md:text-3xl mb-8 md:mb-11">
               Membership is a Rewarding Experience
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 lg:gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
               {membershipCards.map((card) => (
-                <article key={card.title}>
+                <article
+                  key={card.title}
+                  className="card flex h-full flex-col p-6"
+                >
                   <Link href={card.href} className="block group">
-                    <div className="relative w-full h-[220px] md:h-[265px] overflow-hidden bg-gray-200 rounded-sm">
-                      <Image src={card.image} alt={card.title} fill className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+                    <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#FAFAF5] rounded-[6px]">
+                      <Image src={card.image} alt={card.title} fill className="object-contain object-center" sizes="(max-width: 768px) 100vw, 33vw" />
                     </div>
                   </Link>
-                  <h3 className="text-center text-[#1A1A1A] text-lg md:text-2xl font-black mt-4 mb-2">{card.title}</h3>
-                  <p className="text-[#1A1A1A]/80 text-center text-sm md:text-base leading-relaxed min-h-[68px]">{card.description}</p>
-                  <div className="mt-4 text-center">
+                  <h3 className="text-center text-[#1A1A1A] text-lg md:text-xl font-black mt-5 mb-2">{card.title}</h3>
+                  <p className="text-[#1A1A1A]/80 text-center text-sm md:text-base leading-relaxed min-h-[68px] flex-1">{card.description}</p>
+                  <div className="mt-5 text-center">
                     <Link
                       href={card.href}
-                      className="btn-primary !text-sm !px-4 !py-2"
+                      className="btn-primary !text-sm !px-5 !py-2.5"
                     >
                       Learn More
                     </Link>
@@ -157,13 +122,13 @@ export default function RewardsPage() {
           </div>
         </section>
 
-        <section className="bg-[#FF6B35]">
+        <section className="bg-[#1A1A1A]">
           <div className="container-standard px-4 text-center py-8 md:py-10">
             <h3 className="!text-white font-black text-2xl md:text-[42px] mb-2">Join LaMaREWARDS</h3>
             <p className="!text-white text-sm md:text-base mb-4">Sign up or log in to your existing LaMa account.</p>
             <Link
               href="/rewards/dashboard"
-              className="btn-secondary !bg-white !border-white !text-[#1A1A1A] hover:!bg-[#F5F5F5] hover:!text-[#1A1A1A] !text-sm !px-5 !py-2.5"
+              className="btn-primary !text-sm !px-5 !py-2.5"
             >
               Learn More
             </Link>
@@ -193,7 +158,7 @@ export default function RewardsPage() {
                       className="w-full flex items-center justify-between gap-4 text-left"
                     >
                       <span className="text-[#1A1A1A] text-sm md:text-base">{item.question}</span>
-                      <span className="w-5 h-5 min-w-5 rounded-full bg-[#FF6B35] text-white inline-flex items-center justify-center hover:bg-[#E55A2B] transition-colors">
+                      <span className="w-5 h-5 min-w-5 rounded-full bg-[#FF6B35] text-[#1A1A1A] inline-flex items-center justify-center hover:bg-[#E55A2B] transition-colors">
                         <Plus size={12} className={isOpen ? 'rotate-45 transition-transform' : 'transition-transform'} />
                       </span>
                     </button>
@@ -210,11 +175,11 @@ export default function RewardsPage() {
           </div>
         </section>
 
-        <section className="bg-[#FF6B35] !text-white py-6 md:py-7">
+        <section className="bg-[#FF6B35] py-6 md:py-7">
           <div className="container-standard px-4">
             <Link
               href="/stores"
-              className="flex items-center justify-between max-w-[560px] mx-auto !text-white text-base md:text-lg border-b border-white/50 pb-1.5"
+              className="flex items-center justify-between max-w-[560px] mx-auto text-[#1A1A1A] text-base md:text-lg border-b border-[#1A1A1A]/40 pb-1.5"
             >
               <span className="inline-flex items-center gap-2">
                 <MapPin size={16} />
