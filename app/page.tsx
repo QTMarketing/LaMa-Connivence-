@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Coffee, ShoppingBag, IceCream, ShoppingCart, Package, UtensilsCrossed, MapPin, ArrowRight, Gift, Star, TrendingUp, Zap, Smartphone, Instagram, Facebook, Twitter, ChevronDown, Search, Clock } from 'lucide-react';
+import { Coffee, ShoppingBag, IceCream, ShoppingCart, Package, UtensilsCrossed, MapPin, ArrowRight, Gift, Star, TrendingUp, Zap, Instagram, Facebook, Twitter, ChevronDown, Search, Clock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getHomepagePromos, getFeaturedDeals, deals, type Deal } from '@/lib/dealsData';
@@ -225,11 +225,12 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="card-interactive relative overflow-hidden bg-[#1A1A1A]"
           >
-            {/* Background coke image — FIFA collab art, keep as-is */}
+            {/* FIFA collab photo */}
             <Image
               src="/foo/coke.jpg"
-              alt="Coke"
+              alt="Fans celebrating with Coca-Cola"
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
 
@@ -249,11 +250,12 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="card-interactive relative overflow-hidden bg-[#1A1A1A]"
           >
-            {/* Background cola1 image — keep as-is with the Coke FIFA pair */}
+            {/* Coke six-pack product shot */}
             <Image
-              src="/foo/cola1.jpg"
-              alt="Cola"
+              src="/foo/coke-sixpack.png"
+              alt="Six-pack of Coca-Cola Original Taste glass bottles"
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
 
@@ -537,10 +539,10 @@ export default function Home() {
                   <Link href="/deals" className="flex h-full flex-col bg-white">
                     <div className="relative h-[230px] w-full sm:h-[250px] md:h-[260px] lg:h-[270px]">
                       <Image
-                        src={CAMPAIGN.coffee}
+                        src={CAMPAIGN.promoBlobCoffee}
                         alt="Coffee"
                         fill
-                        className="object-cover"
+                        className="object-contain"
                       />
                     </div>
                     <div className="px-5 py-4 text-left">
@@ -565,10 +567,10 @@ export default function Home() {
                   <Link href="/deals" className="flex h-full flex-col bg-white">
                     <div className="relative h-[230px] w-full sm:h-[250px] md:h-[260px] lg:h-[270px]">
                       <Image
-                        src={CAMPAIGN.drinks}
+                        src={CAMPAIGN.promoBlobDrinks}
                         alt="Drinks"
                         fill
-                        className="object-cover"
+                        className="object-contain"
                       />
                     </div>
                     <div className="px-5 py-4 text-left">
@@ -594,7 +596,7 @@ export default function Home() {
                 <Link href="/deals" className="flex h-full flex-col bg-white">
                   <div className="relative h-[230px] w-full sm:h-[250px] md:h-[260px] lg:h-[270px]">
                     <Image
-                      src={CAMPAIGN.combo}
+                      src={CAMPAIGN.promoComboHz}
                       alt="Meal Deal"
                       fill
                       className="object-cover"
@@ -685,22 +687,15 @@ export default function Home() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="relative h-64 md:h-96 rounded-xl overflow-hidden"
+              className="relative h-64 md:h-96 overflow-hidden"
             >
               <Image
-                src={CAMPAIGN.coffee}
-                alt="LaMa Rewards Mobile App"
+                src={CAMPAIGN.rewardsIllustration}
+                alt="Gift box, phone, and piggy bank with coins bursting out"
                 fill
-                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="origin-bottom object-contain scale-[1.22]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-6">
-                <div className="flex gap-3">
-                  <div className="bg-white/10 backdrop-blur-md rounded-lg px-4 py-2 text-white text-xs">
-                    <Smartphone size={16} className="inline mr-2" />
-                    Download App
-                  </div>
-          </div>
-        </div>
             </motion.div>
           </div>
         </div>

@@ -12,6 +12,7 @@ export const CAMPAIGN = {
   about: '/campaign/unsplash-about.jpg',
   carwash: '/campaign/unsplash-carwash.jpg',
   rewards: '/campaign/rewards-gift-burst.png',
+  rewardsIllustration: '/campaign/rewards-unbox.png',
   sausage: '/campaign/unsplash-sausage.jpg',
   cheddar: '/campaign/unsplash-cheddar.jpg',
   taquito: '/campaign/cut-crispitos.webp',
@@ -22,6 +23,9 @@ export const CAMPAIGN = {
   coffee: '/campaign/promo-coffee-brand.png',
   drinks: '/campaign/promo-drinks-solo.png',
   combo: '/campaign/promo-combo-solo.png',
+  promoComboHz: '/campaign/promo-combo-hz.webp',
+  promoBlobCoffee: '/campaign/promo-blob-coffee.webp',
+  promoBlobDrinks: '/campaign/promo-blob-drinks.webp',
   snacks: '/campaign/card-taquito-16x9.webp',
   community: '/campaign/ad-community-16x9.webp',
   // Transparent product cutouts for CategoryBand (Wawa grammar). These are the three
