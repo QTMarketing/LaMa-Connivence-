@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+import { getPublishedBlogs } from '@/lib/blog/queries';
+
 // LLM.txt endpoint for AI crawlers
 // Provides structured information about the site for LLMs
 
@@ -48,37 +50,25 @@ export async function GET() {
   // Blog Posts Section
   llmContent += '## Blog Posts\n\n';
   llmContent += 'Recent blog posts and news:\n\n';
-  
-  // UNCOMMENT WHEN YOU HAVE DATABASE CONNECTION
-  /*
-  try {
-    const blogs = await prisma.blog.findMany({
-      where: { status: 'published' },
-      select: { title: true, slug: true, excerpt: true, seoDescription: true },
-      orderBy: { publishedAt: 'desc' },
-      take: 20, // Limit to 20 most recent
-    });
 
-    if (blogs.length > 0) {
-      blogs.forEach(blog => {
-        llmContent += `- ${blog.title}: ${baseUrl}/media/blog/${blog.slug}\n`;
-        const description = blog.excerpt || blog.seoDescription;
-        if (description) {
-          llmContent += `  ${description.substring(0, 150)}${description.length > 150 ? '...' : ''}\n`;
+  try {
+    const posts = await getPublishedBlogs(20);
+
+    if (posts.length > 0) {
+      for (const post of posts) {
+        llmContent += `- ${post.title}: ${baseUrl}/media/blog/${post.slug}\n`;
+        if (post.excerpt) {
+          llmContent += `  ${post.excerpt.slice(0, 150)}${post.excerpt.length > 150 ? '...' : ''}\n`;
         }
         llmContent += '\n';
-      });
+      }
     } else {
       llmContent += 'No blog posts available yet.\n\n';
     }
   } catch (error) {
-    console.error('Error fetching blogs for llm.txt:', error);
-    llmContent += 'Blog posts are dynamically generated. Visit /media/blog for the latest posts.\n\n';
+    console.error('[llm.txt] Could not list blog posts:', error);
+    llmContent += 'Visit /media/blog for the latest posts.\n\n';
   }
-  */
-  
-  // Placeholder for now
-  llmContent += 'Blog posts are dynamically generated. Visit /media/blog for the latest posts.\n\n';
 
   // Contact Information
   llmContent += '## Contact\n\n';

@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useRef, DragEvent } from 'react';
-import { X, Upload, Link as LinkIcon, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { X, Upload, Link as LinkIcon, Loader2 } from 'lucide-react';
+
+import {
+  IMAGE_ACCEPT_ATTRIBUTE,
+  MAX_IMAGE_LABEL,
+} from '@/lib/content/imageUpload';
+import { uploadAdminImage } from '@/lib/content/uploadImage';
 
 interface ImageUploadModalProps {
   isOpen: boolean;
@@ -15,32 +21,25 @@ export default function ImageUploadModal({ isOpen, onClose, onInsert }: ImageUpl
   const [uploadMethod, setUploadMethod] = useState<'url' | 'upload'>('url');
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
 
-  const handleFileSelect = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+  const handleFileSelect = async (file: File) => {
+    setError(null);
+    setIsUploading(true);
+
+    const result = await uploadAdminImage(file, 'blog');
+    setIsUploading(false);
+
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
 
-    setIsUploading(true);
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setIsUploading(false);
-      onInsert(base64String, altText);
-      handleClose();
-    };
-
-    reader.onerror = () => {
-      setIsUploading(false);
-      alert('Error reading file. Please try again.');
-    };
-
-    reader.readAsDataURL(file);
+    onInsert(result.url, altText);
+    handleClose();
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +74,7 @@ export default function ImageUploadModal({ isOpen, onClose, onInsert }: ImageUpl
 
   const handleInsertUrl = () => {
     if (!imageUrl.trim()) {
-      alert('Please enter an image URL');
+      setError('Enter an image URL first.');
       return;
     }
     onInsert(imageUrl.trim(), altText);
@@ -87,6 +86,7 @@ export default function ImageUploadModal({ isOpen, onClose, onInsert }: ImageUpl
     setAltText('');
     setIsDragging(false);
     setIsUploading(false);
+    setError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -110,6 +110,15 @@ export default function ImageUploadModal({ isOpen, onClose, onInsert }: ImageUpl
 
         {/* Content */}
         <div className="p-6 space-y-6">
+          {error && (
+            <p
+              className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+              role="alert"
+            >
+              {error}
+            </p>
+          )}
+
           {/* Method Tabs */}
           <div className="flex gap-2 border-b border-gray-200">
             <button
@@ -206,7 +215,7 @@ export default function ImageUploadModal({ isOpen, onClose, onInsert }: ImageUpl
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept={IMAGE_ACCEPT_ATTRIBUTE}
                   onChange={handleFileInputChange}
                   className="hidden"
                   disabled={isUploading}
@@ -224,7 +233,7 @@ export default function ImageUploadModal({ isOpen, onClose, onInsert }: ImageUpl
                       Drop an image here or click to browse
                     </p>
                     <p className="text-sm text-gray-500">
-                      Supports: JPG, PNG, GIF, WebP (Max 10MB)
+                      JPEG, PNG, WebP or AVIF up to {MAX_IMAGE_LABEL}
                     </p>
                   </>
                 )}

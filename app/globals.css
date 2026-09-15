@@ -26,6 +26,14 @@
   /* Border Colors */
   --color-border-light: #E2E8F0;
   --color-border-hover: #FF6B35;
+
+  /* mapcn MapLibre primitive (components/ui/map.tsx) uses shadcn token names. */
+  --color-background: #FFFFFF;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #1A1A1A;
+  --color-border: #E2E8F0;
+  --color-accent: #F7F7F7;
+  --color-ring: #FF6B35;
 }
 
 :root {
@@ -837,4 +845,11 @@ footer h1, footer h2, footer .logo-text {
     animation: none;
   }
   .hero-campaign .hero-burst { transform: rotate(-8deg); }
+}
+
+/* MapLibre popup: mapcn renders its own card into the popup DOM. */
+.maplibregl-popup-content {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
 }

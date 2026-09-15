@@ -1,181 +1,38 @@
-'use client';
-
-import { getBlogBySlug, getAllBlogs } from '@/lib/blogHelpers';
-import { BLOG_COVER_FALLBACK } from '@/lib/blogData';
-import Image from 'next/image';
-import Link from 'next/link';
-import { ArrowLeft, Clock, User } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useState, useEffect, useMemo } from 'react';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import DOMPurify from 'isomorphic-dompurify';
 
-type BlogPostPageProps = {
-  params: Promise<{ slug: string }> | { slug: string };
-};
+import {
+  getPublishedBlogBySlug,
+  getRelatedBlogs,
+} from '@/lib/blog/queries';
+import { getBlogSeo } from '@/lib/blog/seo';
 
-export default function BlogPostPage({ params }: BlogPostPageProps) {
-  const [slug, setSlug] = useState<string>('');
+import BlogPostClient from './BlogPostClient';
 
-  useEffect(() => {
-    // Handle both Promise and direct params (for Next.js compatibility)
-    if (params instanceof Promise) {
-      params.then((resolved) => {
-        setSlug(resolved.slug);
-      });
-    } else {
-      setSlug(params.slug);
-    }
-  }, [params]);
+type Params = { params: Promise<{ slug: string }> };
 
-  const blog = useMemo(() => (slug ? getBlogBySlug(slug) : null), [slug]);
+// Posts are admin-editable, so a published edit must not wait for a rebuild.
+export const dynamic = 'force-dynamic';
 
-  const safeContent = useMemo(
-    () => (blog?.content ? DOMPurify.sanitize(blog.content) : ''),
-    [blog],
-  );
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const seo = await getBlogSeo((await params).slug);
+  return seo ?? { title: 'Post not found | LaMa Convenience' };
+}
 
-  // Don't render until slug is resolved
-  if (!slug) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+export default async function BlogPostPage({ params }: Params) {
+  const { slug } = await params;
 
-  if (!blog) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="typography-h1 text-secondary mb-4">404</h1>
-          <p className="typography-body-lg text-gray-600 mb-8">This blog post could not be found.</p>
-          <Link href="/media/blog" className="btn-primary">
-            Back to Blog
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const post = await getPublishedBlogBySlug(slug);
+  if (!post) notFound();
 
-  // Get related blogs (exclude current)
-  const relatedBlogs = getAllBlogs()
-    .filter(b => b.slug !== slug)
-    .slice(0, 3);
+  const related = await getRelatedBlogs(slug);
+
+  // Sanitising on the server means the browser never holds the raw HTML, and
+  // the content is identical on first paint.
+  const safeContent = DOMPurify.sanitize(post.content);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Breadcrumb */}
-      <section className="bg-gray-50 border-b border-gray-200 py-4">
-        <div className="container-standard px-4 md:px-6">
-          <Link
-            href="/media/blog"
-            className="inline-flex items-center gap-2 typography-body-sm text-gray-600 hover:text-primary transition-colors"
-          >
-            <ArrowLeft size={16} />
-            Back to Blog
-          </Link>
-        </div>
-      </section>
-
-      {/* Blog Post */}
-      <article className="py-8 md:py-12">
-        <div className="container-standard px-4 md:px-6">
-          <div className="max-w-4xl mx-auto">
-            {/* Header */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="mb-8"
-            >
-              <div className="flex items-center gap-4 text-gray-600 typography-body-sm mb-4">
-                <div className="flex items-center gap-2">
-                  <Clock size={16} />
-                  <span>{blog.date}</span>
-                </div>
-                <span>•</span>
-                <div className="flex items-center gap-2">
-                  <User size={16} />
-                  <span>{blog.author}</span>
-                </div>
-              </div>
-              <h1 className="typography-h1 text-secondary mb-6">
-                {blog.title}
-              </h1>
-              <p className="typography-body-lg text-gray-600">
-                {blog.description}
-              </p>
-            </motion.div>
-
-            {/* Featured Image */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative w-full aspect-[16/9] rounded-md overflow-hidden mb-8 bg-gray-200"
-            >
-              <Image
-                src={blog.image || BLOG_COVER_FALLBACK}
-                alt={blog.title}
-                fill
-                className="object-cover"
-              />
-            </motion.div>
-
-            {/* Content */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="prose max-w-none"
-              dangerouslySetInnerHTML={{ __html: safeContent }}
-            />
-
-            {/* Related Posts */}
-            {relatedBlogs.length > 0 && (
-              <motion.section
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="mt-16 pt-12 border-t border-gray-200"
-              >
-                <h2 className="typography-h2 text-secondary mb-8">
-                  Related Posts
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {relatedBlogs.map((relatedBlog) => (
-                    <Link
-                      key={relatedBlog.id}
-                      href={`/media/blog/${relatedBlog.slug}`}
-                      className="block card overflow-hidden group hover:shadow-lg transition-all duration-300"
-                    >
-                      <div className="relative w-full aspect-[4/3] overflow-hidden bg-gray-200">
-                        <Image
-                          src={relatedBlog.image || BLOG_COVER_FALLBACK}
-                          alt={relatedBlog.title}
-                          fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="typography-h4 text-secondary mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                          {relatedBlog.title}
-                        </h3>
-                        <p className="typography-body-sm text-gray-600 line-clamp-2">
-                          {relatedBlog.description}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </motion.section>
-            )}
-          </div>
-        </div>
-      </article>
-    </div>
+    <BlogPostClient post={post} safeContent={safeContent} related={related} />
   );
 }

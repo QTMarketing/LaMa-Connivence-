@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { Instagram, Facebook, Twitter } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export default function Footer() {
+import type { SiteSettings } from '@/lib/settings/keys';
+
+export default function Footer({ settings }: { settings: SiteSettings }) {
   const currentYear = new Date().getFullYear();
 
   const aboutLinks = [
@@ -26,12 +28,24 @@ export default function Footer() {
     { href: '/media', label: 'Press Room' },
   ];
 
-  // TODO: Update with actual social media URLs before launch
+  // Empty URLs are omitted so the footer never links to bare platform homepages.
   const socialLinks = [
-    { href: 'https://instagram.com', icon: Instagram, label: 'Instagram' },
-    { href: 'https://facebook.com', icon: Facebook, label: 'Facebook' },
-    { href: 'https://twitter.com', icon: Twitter, label: 'Twitter' },
-  ];
+    {
+      href: settings.socialInstagram,
+      icon: Instagram,
+      label: 'Instagram',
+    },
+    {
+      href: settings.socialFacebook,
+      icon: Facebook,
+      label: 'Facebook',
+    },
+    {
+      href: settings.socialTwitter,
+      icon: Twitter,
+      label: 'X',
+    },
+  ].filter((link) => link.href);
 
   return (
     <footer

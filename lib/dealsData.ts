@@ -162,64 +162,10 @@ export const deals: Deal[] = [
 ];
 
 /**
- * Get all deals (for listing pages)
- * Reads from localStorage if available (admin-managed), otherwise uses static array
+ * Reads live in lib/deals/queries.ts and go to Postgres.
+ *
+ * The localStorage getters that used to sit here were removed rather than
+ * ported: they merged saved edits onto the seed array by id, so any deal
+ * created in the admin was silently dropped, and they forced `image` and
+ * `stockLeft` back to seed values on every read.
  */
-export const getAllDeals = (): Deal[] => {
-  if (typeof window !== 'undefined') {
-    const savedDeals = localStorage.getItem('adminAllDeals');
-    if (savedDeals) {
-      try {
-        const parsed = JSON.parse(savedDeals) as Deal[];
-        const byId = new Map(deals.map((deal) => [deal.id, deal]));
-        return parsed.map((deal) => {
-          const canonical = byId.get(deal.id);
-          return canonical ? { ...deal, image: canonical.image, stockLeft: canonical.stockLeft } : deal;
-        });
-      } catch {
-        return deals;
-      }
-    }
-  }
-  return deals;
-};
-
-/**
- * Get deals by category (reads from getAllDeals to get admin-managed deals)
- */
-export const getDealsByCategory = (category: Deal['category']): Deal[] => {
-  return getAllDeals().filter(deal => deal.category === category);
-};
-
-/**
- * Get featured deals (reads from getAllDeals to get admin-managed deals)
- */
-export const getFeaturedDeals = (): Deal[] => {
-  return getAllDeals().filter(deal => deal.featured);
-};
-
-/**
- * Get homepage promo cards - returns up to 4 deals in display order
- */
-export const getHomepagePromos = (): Deal[] => {
-  const allDeals = getAllDeals();
-  const featured = allDeals.filter(deal => deal.featured || deal.homepageOrder);
-
-  const sorted = featured.sort((a, b) => {
-    const orderA = a.homepageOrder ?? 999;
-    const orderB = b.homepageOrder ?? 999;
-    return orderA - orderB;
-  });
-
-  return sorted.slice(0, 4).map(deal => ({
-    ...deal,
-    title: deal.displayName || deal.title,
-  }));
-};
-
-/**
- * Get a single deal by ID (reads from getAllDeals to get admin-managed deals)
- */
-export const getDealById = (id: number): Deal | undefined => {
-  return getAllDeals().find(deal => deal.id === id);
-};

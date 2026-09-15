@@ -1,99 +1,77 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { getFeaturedDeals, type Deal } from '@/lib/dealsData';
-import { getFeaturedDrinks, type Drink } from '@/lib/drinksData';
+import { useEffect, useRef, useState } from 'react';
 
-// Union type for both Deal and Drink
+import type { Deal } from '@/lib/dealsData';
+import type { Drink } from '@/lib/drinksData';
+
 type PromoItem = Deal | Drink;
 
-// Default fallback promo
+/** Shown only when a page has no featured items at all. */
 const defaultPromo: PromoItem = {
   id: 0,
   title: 'Join LaMa Convenience Rewards',
-  description: 'Unlock exclusive member-only deals and earn points on every purchase!',
+  description:
+    'Unlock exclusive member-only deals and earn points on every purchase!',
   image: '/campaign/ad-mixmatch-16x9.webp',
   category: 'meal-deals',
   savings: '',
   featured: true,
 } as Deal;
 
-export function usePromo(type: 'deals' | 'drinks' = 'deals') {
+const ROTATE_MS = 5000;
+
+/**
+ * Rotating promo carousel.
+ *
+ * Takes the featured items as an argument rather than fetching them: the data
+ * now comes from Postgres through a server component. The old version read
+ * localStorage and listened for 'allDealsUpdated' events, which is what let the
+ * admin and the public site disagree about what was published.
+ */
+export function usePromo(featured: PromoItem[]) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [featuredDeals, setFeaturedDeals] = useState<PromoItem[]>(() =>
-    type === 'drinks' ? (getFeaturedDrinks() as PromoItem[]) : getFeaturedDeals()
-  );
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const total = featured.length;
+
+  // Keep the index valid if the list shrinks between renders.
+  useEffect(() => {
+    if (currentIndex >= total && total > 0) setCurrentIndex(0);
+  }, [currentIndex, total]);
 
   useEffect(() => {
-    // Load featured deals or drinks based on type
-    const loadFeaturedPromos = () => {
-      if (type === 'drinks') {
-        setFeaturedDeals(getFeaturedDrinks() as PromoItem[]);
-      } else {
-        setFeaturedDeals(getFeaturedDeals() as PromoItem[]);
-      }
-    };
+    if (total <= 1) return;
 
-    loadFeaturedPromos();
-
-    // Listen for storage changes (when admin updates promos)
-    const handleStorageChange = () => {
-      loadFeaturedPromos();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    // Also listen for custom events for same-tab updates
-    window.addEventListener('promosUpdated', handleStorageChange);
-    window.addEventListener('allDealsUpdated', handleStorageChange);
-    if (type === 'drinks') {
-      window.addEventListener('allDrinksUpdated', handleStorageChange);
-    }
+    intervalRef.current = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % total);
+    }, ROTATE_MS);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('promosUpdated', handleStorageChange);
-      window.removeEventListener('allDealsUpdated', handleStorageChange);
-      if (type === 'drinks') {
-        window.removeEventListener('allDrinksUpdated', handleStorageChange);
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [type]);
-
-  useEffect(() => {
-    if (featuredDeals.length > 1) {
-      intervalRef.current = setInterval(() => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % featuredDeals.length);
-      }, 5000); // Change every 5 seconds
-
-      return () => {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-        }
-      };
-    }
-  }, [featuredDeals.length]);
+  }, [total]);
 
   const goToPromo = (index: number) => {
     setCurrentIndex(index);
-    // Reset the interval when user manually navigates
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
+
+    // Restart the timer so a manual jump gets a full interval before moving on.
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (total > 1) {
+      intervalRef.current = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % total);
+      }, ROTATE_MS);
     }
-    intervalRef.current = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % featuredDeals.length);
-    }, 5000);
   };
 
-  const currentPromo = featuredDeals.length > 0
-    ? (featuredDeals[currentIndex] || featuredDeals[0])
-    : defaultPromo;
+  const currentPromo =
+    total > 0 ? (featured[currentIndex] ?? featured[0]) : defaultPromo;
 
   return {
     currentPromo,
-    currentIndex: featuredDeals.length > 0 ? currentIndex : 0,
-    totalPromos: featuredDeals.length,
+    currentIndex: total > 0 ? currentIndex : 0,
+    totalPromos: total,
     goToPromo,
-    featuredDeals,
+    featuredDeals: featured,
   };
 }

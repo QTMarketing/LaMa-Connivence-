@@ -1,89 +1,95 @@
 # Environment Variables Guide
 
-This document lists all environment variables needed for the LaMa CMS application.
+All values live in `.env.local` for local development and in the Vercel project
+settings for preview and production. `.env*` is gitignored.
 
-## Required Variables
+> **Never paste a real secret into this file.** A live Neon connection string was
+> committed here in `aea125f` and had to be rotated. Anything written here is
+> permanent in git history. Use placeholders only.
+
+## Required
 
 ### `DATABASE_URL`
-**Type:** String  
-**Required:** Yes  
-**Description:** PostgreSQL connection string for Neon database  
-**Example:**
+
+Neon Postgres connection string. Use the **pooled** endpoint.
+
 ```
-DATABASE_URL=postgresql://neondb_owner:npg_dnoia7pm8qVT@ep-aged-forest-ahxsf2ub-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+DATABASE_URL=postgresql://<user>:<password>@<host>-pooler.<region>.aws.neon.tech/<db>?sslmode=require
 ```
+
+Used by `lib/db/client.ts`.
+
+### `ADMIN_JWT_SECRET`
+
+Signs the `lama_admin_session` cookie. Generate with:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
+```
+
+If this is missing, `app/api/admin/login/route.ts` throws and returns a 500 on
+every login attempt, and `proxy.ts` denies all `/admin` routes. The admin panel
+is completely unreachable without it.
 
 ### `NEXT_PUBLIC_BASE_URL`
-**Type:** String  
-**Required:** Yes  
-**Description:** Base URL of your application (used in sitemaps, SEO metadata, canonical URLs)  
-**Local Development:**
+
+Base URL used for sitemaps, canonical URLs and absolute links in email.
+
 ```
-NEXT_PUBLIC_BASE_URL=http://localhost:3002
-```
-**Production:**
-```
-NEXT_PUBLIC_BASE_URL=https://your-domain.com
+NEXT_PUBLIC_BASE_URL=http://localhost:3001   # local
+NEXT_PUBLIC_BASE_URL=https://your-domain.com # production
 ```
 
-## Optional Variables
+## Required for careers
+
+### `BLOB_READ_WRITE_TOKEN`
+
+Vercel Blob token, used to store uploaded CVs and admin images. Created
+automatically when you add a Blob store to the Vercel project; pull it locally
+with `vercel env pull .env.local`.
+
+### `RESEND_API_KEY`
+
+Resend API key for job application notifications.
+
+### `CAREERS_NOTIFY_EMAIL`
+
+Where new job applications are sent.
+
+```
+CAREERS_NOTIFY_EMAIL=suzee@quicktrackinc.com
+```
+
+### `CAREERS_FROM_EMAIL`
+
+Sender address. Must sit on a domain verified in Resend.
+
+```
+CAREERS_FROM_EMAIL=careers@quicktrackinc.com
+```
+
+## Optional
 
 ### `ADMIN_PASSWORD`
-**Type:** String  
-**Required:** No (currently hardcoded)  
-**Description:** Admin password for CMS access  
-**Note:** Currently hardcoded in `app/admin/login/page.tsx`. Recommended to move to environment variable for better security.  
-**Example:**
-```
-ADMIN_PASSWORD=your_secure_password_here
-```
+
+Legacy shared-password login. Superseded by per-user accounts in the `users`
+table. Kept as a fallback so the panel stays reachable before those accounts are
+seeded; remove it once real accounts exist.
 
 ### `NODE_ENV`
-**Type:** String  
-**Required:** No (automatically set by Next.js)  
-**Description:** Node.js environment mode  
-**Values:** `development` | `production` | `test`  
-**Note:** Usually set automatically by Next.js based on the command you run (`npm run dev` sets it to `development`, `npm run build` sets it to `production`)
 
-## Future/Planned Variables
+Set automatically by Next.js. Does not need to be defined.
 
-### Cloudinary Image Hosting (Optional)
-If you plan to integrate Cloudinary for image hosting:
+## Setup
 
-```
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
-NEXT_PUBLIC_CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-```
+1. Copy the keys above into `.env.local`.
+2. Fill in real values.
+3. Restart the dev server — Next.js only reads env files at boot.
 
-## Setup Instructions
+## Security notes
 
-1. **Create `.env.local` file** in the root directory:
-   ```bash
-   cp .env.local.example .env.local
-   ```
-
-2. **Fill in your values** in `.env.local`
-
-3. **Restart your development server** after making changes:
-   ```bash
-   npm run dev
-   ```
-
-## Security Notes
-
-- ⚠️ **Never commit `.env.local` to git** (it's already in `.gitignore`)
-- ⚠️ **Never share your `DATABASE_URL` publicly** - it contains credentials
-- ⚠️ **Use strong passwords** for admin access
-- ⚠️ **In production**, use environment variables provided by your hosting platform (Vercel, etc.)
-
-## Where Variables Are Used
-
-| Variable | Used In |
-|----------|---------|
-| `DATABASE_URL` | `lib/db.ts` - Database connection |
-| `NEXT_PUBLIC_BASE_URL` | `app/api/sitemap-blogs/route.ts` - Sitemap generation |
-| `NEXT_PUBLIC_BASE_URL` | `lib/sitemapHelper.ts` - Sitemap helper functions |
-| `NEXT_PUBLIC_BASE_URL` | `app/llm.txt/route.ts` - LLM.txt generation |
-| `NEXT_PUBLIC_BASE_URL` | `app/robots.txt/route.ts` - Robots.txt generation |
-| `NEXT_PUBLIC_BASE_URL` | `app/sitemap.xml/route.ts` - Sitemap XML generation |
+- Never commit `.env.local`.
+- Never paste a real credential into documentation, including this file.
+- Rotate immediately if a secret is ever committed; deleting the line does not
+  remove it from git history.
+- In production, set these through the Vercel dashboard rather than a file.

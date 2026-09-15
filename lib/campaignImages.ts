@@ -42,16 +42,6 @@ export const CAMPAIGN = {
   cutGrocery: '/campaign/cut-grocery.webp',
 } as const;
 
-/** Admin localStorage still points some sausage cards at the old 16:9 ads, which fill the frame. */
-const DEAL_IMAGE_REMAP: Record<string, string> = {
-  '/campaign/ad-frank-16x9.webp': '/campaign/unsplash-sausage.jpg',
-  '/campaign/ad-sausage-16x9.webp': '/campaign/unsplash-sausage.jpg',
-  '/campaign/card-sausage-16x9.webp': '/campaign/unsplash-sausage.jpg',
-  '/campaign/grill-frank-16x9.jpg': '/campaign/unsplash-sausage.jpg',
-  '/campaign/grill-sausage-16x9.jpg': '/campaign/unsplash-sausage.jpg',
-  '/campaign/cut-sausage.webp': '/campaign/unsplash-sausage.jpg',
-};
-
-export function resolveDealImage(src: string) {
-  return DEAL_IMAGE_REMAP[src] ?? src;
-}
+// DEAL_IMAGE_REMAP lived here to rewrite stale image paths that the old
+// localStorage admin had saved into deal records. Deals now come from Postgres
+// with whatever image the admin actually set, so the workaround is gone.

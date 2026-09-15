@@ -8,18 +8,14 @@ import Placeholder from '@tiptap/extension-placeholder';
 import { CustomImageExtension } from '@/lib/customImageExtension';
 import { SlashCommand } from '@/lib/slashCommandExtension';
 import { DraggableBlocks } from '@/lib/draggableBlocksExtension';
-import { 
-  Undo, Redo, Image as ImageIcon, LayoutGrid, X
-} from 'lucide-react';
-import { WidgetExtension } from '@/lib/tiptapWidgetExtension';
-import WidgetSidebar from './WidgetSidebar';
-import InlineWidgetEditor from './InlineWidgetEditor';
+import { X } from 'lucide-react';
+import type { EditorView } from '@tiptap/pm/view';
 import ImageUploadModal from './ImageUploadModal';
 import SlashMenu from './SlashMenu';
 import BubbleMenuComponent from './BubbleMenu';
 import BlockMenu from './BlockMenu';
 import EditorBlockMenu from './EditorBlockMenu';
-import { PageBuilderBlock } from '@/lib/pageBuilderStorage';
+import { uploadAdminImage } from '@/lib/content/uploadImage';
 import { Editor } from '@tiptap/react';
 
 interface RichTextEditorProps {
@@ -34,24 +30,48 @@ interface RichTextEditorProps {
 
 export default function RichTextEditor({ content, onChange, placeholder = 'Type / to choose a block', onBlockSelect, editorRef: setEditorRef, title, onTitleChange }: RichTextEditorProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const [showWidgetSidebar, setShowWidgetSidebar] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showSlashMenu, setShowSlashMenu] = useState(false);
-  const [editingWidget, setEditingWidget] = useState<{ block: PageBuilderBlock; nodePos: number } | null>(null);
-  const [draggedBlockId, setDraggedBlockId] = useState<string | null>(null);
-  const editorRef = useRef<HTMLDivElement>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const titleTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  /**
+   * Dropped and pasted images go to Blob storage. They used to be read with
+   * FileReader and inlined as base64, which put multi-megabyte data URLs inside
+   * the post body itself.
+   */
+  const insertUploadedImage = async (view: EditorView, file: File) => {
+    setUploadError(null);
+
+    const result = await uploadAdminImage(file, 'blog');
+    if (!result.ok) {
+      setUploadError(result.error);
+      return;
+    }
+
+    const { state, dispatch } = view;
+    const image = state.schema.nodes.customImage.create({
+      src: result.url,
+      alt: '',
+      width: '100%',
+      textAlign: 'left',
+    });
+    dispatch(state.tr.replaceSelectionWith(image));
+    onChange(view.dom.innerHTML);
+  };
+
   const editor = useEditor({
     extensions: [
       StarterKit,
       CustomImageExtension.configure({
         inline: true,
-        allowBase64: true,
+        // Uploads produce URLs now; a data URL here would only come from
+        // pasted HTML, and it would bloat the row it is saved into.
+        allowBase64: false,
         HTMLAttributes: {},
       }),
       Link.configure({
@@ -66,7 +86,6 @@ export default function RichTextEditor({ content, onChange, placeholder = 'Type 
         showOnlyCurrent: true,
       }),
       SlashCommand,
-      WidgetExtension,
       DraggableBlocks,
     ],
     content,
@@ -77,64 +96,24 @@ export default function RichTextEditor({ content, onChange, placeholder = 'Type 
       attributes: {
         class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none focus:outline-none min-h-full',
       },
-      handleDrop: (view, event, slice, moved) => {
-        // Handle image file drops directly into editor
-        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length) {
-          const file = event.dataTransfer.files[0];
-          if (file.type.startsWith('image/')) {
-            event.preventDefault();
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              const base64String = reader.result as string;
-              const { state, dispatch } = view;
-              const { selection } = state;
-              const image = state.schema.nodes.image.create({
-                src: base64String,
-                alt: '',
-              });
-              const transaction = state.tr.replaceSelectionWith(image);
-              dispatch(transaction);
-              // Trigger onChange after a brief delay to ensure DOM is updated
-              setTimeout(() => {
-                const html = view.dom.innerHTML;
-                onChange(html);
-              }, 0);
-            };
-            reader.readAsDataURL(file);
-            return true;
-          }
+      handleDrop: (view, event, _slice, moved) => {
+        const file = moved ? null : event.dataTransfer?.files?.[0];
+        if (file?.type.startsWith('image/')) {
+          event.preventDefault();
+          insertUploadedImage(view, file);
+          return true;
         }
         return false;
       },
-      handlePaste: (view, event, slice) => {
-        // Handle image paste from clipboard
-        const items = Array.from(event.clipboardData?.items || []);
-        for (const item of items) {
-          if (item.type.startsWith('image/')) {
+      handlePaste: (view, event) => {
+        for (const item of Array.from(event.clipboardData?.items ?? [])) {
+          if (!item.type.startsWith('image/')) continue;
+
+          const file = item.getAsFile();
+          if (file) {
             event.preventDefault();
-            const file = item.getAsFile();
-            if (file) {
-              const reader = new FileReader();
-              reader.onloadend = () => {
-                const base64String = reader.result as string;
-                const { state, dispatch } = view;
-                const image = state.schema.nodes.customImage.create({
-                  src: base64String,
-                  alt: '',
-                  width: '100%',
-                  textAlign: 'left',
-                });
-                const transaction = state.tr.replaceSelectionWith(image);
-                dispatch(transaction);
-                // Trigger onChange after a brief delay to ensure DOM is updated
-                setTimeout(() => {
-                  const html = view.dom.innerHTML;
-                  onChange(html);
-                }, 0);
-              };
-              reader.readAsDataURL(file);
-              return true;
-            }
+            insertUploadedImage(view, file);
+            return true;
           }
         }
         return false;
@@ -310,88 +289,22 @@ export default function RichTextEditor({ content, onChange, placeholder = 'Type 
     };
   }, []);
 
-  // Set up widget click handler after editor is initialized
+  // Double-clicking an image opens the insert modal to replace it.
   useEffect(() => {
     if (!editor) return;
 
     const editorElement = editor.view.dom;
-    
+
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const widgetElement = target.closest('[data-type="widget"]');
-      
-      if (widgetElement) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const blockDataStr = widgetElement.getAttribute('data-block');
-        if (blockDataStr) {
-          try {
-            const blockData = JSON.parse(blockDataStr) as PageBuilderBlock;
-            const { state } = editor;
-            const { doc } = state;
-            let nodePos = -1;
-            
-            // Find the actual widget node position
-            doc.nodesBetween(0, doc.content.size, (node, position) => {
-              if (node.type.name === 'widget') {
-                const nodeBlockData = node.attrs.blockData as PageBuilderBlock;
-                if (nodeBlockData && nodeBlockData.id === blockData.id) {
-                  nodePos = position;
-                  return false;
-                }
-              }
-            });
-            
-            if (nodePos >= 0) {
-              setEditingWidget({ block: blockData, nodePos });
-            }
-          } catch (err) {
-            // Silently handle widget parsing errors - invalid widget data
-            // Widget will not be editable but page will still function
-          }
-        }
-        return;
-      }
-
-      // Check for image clicks (double-click to edit)
       if (target.tagName === 'IMG' && e.detail === 2) {
         e.preventDefault();
-        e.stopPropagation();
-        
-        const { state } = editor;
-        const { selection } = state;
-        const { $from } = selection;
-        
-        // Find image node at cursor
-        let imageNode: any = null;
-        let imagePos = -1;
-        
-        state.doc.nodesBetween(Math.max(0, $from.pos - 100), Math.min(state.doc.content.size, $from.pos + 100), (node, pos) => {
-          if (node.type.name === 'customImage') {
-            imageNode = node;
-            imagePos = pos;
-            return false;
-          }
-        });
-
-        if (imageNode && imagePos >= 0) {
-          const currentSrc = imageNode.attrs?.src || '';
-          const currentAlt = imageNode.attrs?.alt || '';
-          
-          // Open image modal with current values
-          setShowImageModal(true);
-          // We'll need to handle pre-filling the modal, but for now just open it
-          // The user can update the image manually
-        }
+        setShowImageModal(true);
       }
     };
 
     editorElement.addEventListener('click', handleClick);
-
-    return () => {
-      editorElement.removeEventListener('click', handleClick);
-    };
+    return () => editorElement.removeEventListener('click', handleClick);
   }, [editor]);
 
   if (!isMounted || !editor) {
@@ -413,69 +326,6 @@ export default function RichTextEditor({ content, onChange, placeholder = 'Type 
     if (editor) {
       editor.chain().focus().setImage({ src, alt, width: '100%', textAlign: 'left' }).run();
     }
-  };
-
-  const addLink = () => {
-    const url = window.prompt('Enter URL:');
-    if (url) {
-      editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
-    }
-  };
-
-  const handleInsertWidget = (block: PageBuilderBlock) => {
-    if (editor) {
-      editor.chain().focus().insertWidget(block).run();
-      setShowWidgetSidebar(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const widgetType = e.dataTransfer.getData('widget-type');
-    if (widgetType && editor) {
-      const block = {
-        id: `block-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        type: widgetType as PageBuilderBlock['type'],
-        content: {},
-        styles: {},
-        settings: {},
-      } as PageBuilderBlock;
-      
-      // Set default content based on type
-      switch (block.type) {
-        case 'heading':
-          block.content = { text: 'Heading', level: 2 };
-          break;
-        case 'text':
-          block.content = { text: '' };
-          break;
-        case 'image':
-          block.content = { url: '', alt: '' };
-          break;
-        case 'button':
-          block.content = { text: 'Click Here', url: '', target: '_self' };
-          break;
-        case 'video':
-          block.content = { url: '', autoplay: false, loop: false, controls: true };
-          break;
-        case 'gallery':
-          block.content = { images: [] };
-          break;
-        case 'spacer':
-          block.content = { height: 50 };
-          break;
-        case 'divider':
-          block.content = { style: 'solid', width: 100, color: '#E5E7EB' };
-          break;
-      }
-      
-      editor.chain().focus().insertWidget(block).run();
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
   };
 
   const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -502,20 +352,24 @@ export default function RichTextEditor({ content, onChange, placeholder = 'Type 
       
       {/* Editor Block Menu - FloatingMenu component from @tiptap/react */}
       {editor && <EditorBlockMenu editor={editor} />}
-      
-      <WidgetSidebar
-        isOpen={showWidgetSidebar}
-        onClose={() => setShowWidgetSidebar(false)}
-        onInsertWidget={handleInsertWidget}
-      />
-      
-      <div 
-        className={`flex-1 flex flex-col overflow-hidden transition-all ${
-          showWidgetSidebar ? 'ml-80' : ''
-        }`}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-      >
+
+      {uploadError && (
+        <div
+          className="absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-4 border-b border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700"
+          role="alert"
+        >
+          <span>{uploadError}</span>
+          <button
+            onClick={() => setUploadError(null)}
+            className="shrink-0"
+            aria-label="Dismiss"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
+      <div className="flex-1 flex flex-col overflow-hidden">
 
       {/* Editor Content - Canvas Style with Integrated Title */}
       <div className="flex-1 overflow-y-auto bg-gray-50">
@@ -552,72 +406,6 @@ export default function RichTextEditor({ content, onChange, placeholder = 'Type 
         onClose={() => setShowImageModal(false)}
         onInsert={handleInsertImage}
       />
-
-      {/* Inline Widget Editor Modal */}
-      {editingWidget && editor && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-              <h2 className="text-xl font-bold text-gray-900">
-                Edit {editingWidget.block.type.charAt(0).toUpperCase() + editingWidget.block.type.slice(1)} Widget
-              </h2>
-              <button
-                onClick={() => setEditingWidget(null)}
-                className="p-2 hover:bg-gray-100 rounded-md"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="p-6">
-              <InlineWidgetEditor
-                block={editingWidget.block}
-                onUpdate={(updatedBlock) => {
-                  // Update the widget in the editor
-                  if (editor) {
-                    const { state } = editor;
-                    const { tr } = state;
-                    const node = state.doc.nodeAt(editingWidget.nodePos);
-                    
-                    if (node && node.type.name === 'widget') {
-                      tr.setNodeMarkup(editingWidget.nodePos, undefined, {
-                        blockData: updatedBlock,
-                      });
-                      editor.view.dispatch(tr);
-                      
-                      // Update content
-                      const html = editor.getHTML();
-                      onChange(html);
-                      
-                      // Update editing widget
-                      setEditingWidget({ block: updatedBlock, nodePos: editingWidget.nodePos });
-                    }
-                  }
-                }}
-                onDelete={() => {
-                  // Delete the widget from editor
-                  if (editor) {
-                    const { state } = editor;
-                    const { tr } = state;
-                    const node = state.doc.nodeAt(editingWidget.nodePos);
-                    
-                    if (node && node.type.name === 'widget') {
-                      tr.delete(editingWidget.nodePos, editingWidget.nodePos + node.nodeSize);
-                      editor.view.dispatch(tr);
-                      
-                      // Update content
-                      const html = editor.getHTML();
-                      onChange(html);
-                      
-                      setEditingWidget(null);
-                    }
-                  }
-                }}
-                onClose={() => setEditingWidget(null)}
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
     </div>
   );

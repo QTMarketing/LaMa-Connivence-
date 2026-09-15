@@ -107,43 +107,11 @@ export const drinks: Drink[] = [
   },
 ];
 
-export const getAllDrinks = (): Drink[] => {
-  if (typeof window !== 'undefined') {
-    const savedDrinks = localStorage.getItem('adminAllDrinks');
-    if (savedDrinks) {
-      try {
-        const parsed = JSON.parse(savedDrinks) as Drink[];
-
-        // Merge any saved admin edits onto the default seed data by id so that
-        // missing fields (like price) still fall back to the server defaults.
-        return drinks.map((base) => {
-          const override = parsed.find((d) => d.id === base.id);
-          if (!override) return base;
-          const staleSharedCola = override.image?.includes('photo-1554866585-cd94860890b7');
-          return {
-            ...base,
-            ...override,
-            image: staleSharedCola ? base.image : override.image || base.image,
-            savings: base.savings,
-            expirationDate: base.expirationDate,
-          };
-        });
-      } catch {
-        return drinks;
-      }
-    }
-  }
-  return drinks;
-};
-
-export const getDrinksByCategory = (category: Drink['category']): Drink[] => {
-  return getAllDrinks().filter(drink => drink.category === category);
-};
-
-export const getFeaturedDrinks = (): Drink[] => {
-  return getAllDrinks().filter(drink => drink.featured);
-};
-
-export const getDrinkById = (id: number): Drink | undefined => {
-  return getAllDrinks().find(drink => drink.id === id);
-};
+/**
+ * Reads live in lib/drinks/queries.ts and go to Postgres.
+ *
+ * The localStorage getter that used to sit here mapped over the seed array, so
+ * any drink the admin created was dropped for having an id the seed did not
+ * contain, and it overwrote saved `savings` and `expirationDate` with seed
+ * values on every read. It was deleted rather than ported.
+ */

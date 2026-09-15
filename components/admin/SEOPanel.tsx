@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { 
   TrendingUp, CheckCircle, XCircle, AlertTriangle,
   Eye, EyeOff, Link as LinkIcon, Image as ImageIcon,
-  BarChart3, FileText, Share2, Settings, Globe
+  FileText, Share2, Settings, Globe
 } from 'lucide-react';
 
 interface SEOData {
@@ -22,19 +22,22 @@ interface SEOData {
   twitterTitle?: string;
   twitterDescription?: string;
   twitterImage?: string;
-  schemaType?: string;
 }
 
 interface SEOPanelProps {
   data: SEOData;
   onChange: (data: SEOData) => void;
+  /** Reported upward so the editor chrome can show the same number. */
+  onScoreChange?: (score: number) => void;
   title?: string;
   content?: string;
   slug?: string;
 }
 
-export default function SEOPanel({ data, onChange, title, content, slug }: SEOPanelProps) {
-  const [activeTab, setActiveTab] = useState<'general' | 'social' | 'advanced' | 'schema'>('general');
+export type { SEOData };
+
+export default function SEOPanel({ data, onChange, onScoreChange, title, content, slug }: SEOPanelProps) {
+  const [activeTab, setActiveTab] = useState<'general' | 'social' | 'advanced'>('general');
   const [seoScore, setSeoScore] = useState(0);
   const [readabilityScore, setReadabilityScore] = useState(0);
   const [seoChecks, setSeoChecks] = useState<{ name: string; passed: boolean; message?: string }[]>([]);
@@ -141,9 +144,11 @@ export default function SEOPanel({ data, onChange, title, content, slug }: SEOPa
       checks.push({ name: 'Title in content', passed: true });
     }
 
-    setSeoScore(Math.min(100, score));
+    const total = Math.min(100, score);
+    setSeoScore(total);
     setSeoChecks(checks);
-  }, [data, content, title]);
+    onScoreChange?.(total);
+  }, [data, content, title, onScoreChange]);
 
   // Calculate Readability Score
   useEffect(() => {
@@ -252,7 +257,6 @@ export default function SEOPanel({ data, onChange, title, content, slug }: SEOPa
           { id: 'general', label: 'General', icon: FileText },
           { id: 'social', label: 'Social', icon: Share2 },
           { id: 'advanced', label: 'Advanced', icon: Settings },
-          { id: 'schema', label: 'Schema', icon: BarChart3 },
         ].map((tab) => {
           const Icon = tab.icon;
           return (
@@ -515,28 +519,6 @@ export default function SEOPanel({ data, onChange, title, content, slug }: SEOPa
           </div>
         )}
 
-        {/* Schema Tab */}
-        {activeTab === 'schema' && (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Schema Type
-              </label>
-              <select
-                value={data.schemaType || ''}
-                onChange={(e) => updateData({ schemaType: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">None</option>
-                <option value="Article">Article</option>
-                <option value="BlogPosting">Blog Posting</option>
-                <option value="NewsArticle">News Article</option>
-                <option value="WebPage">Web Page</option>
-              </select>
-              <p className="text-xs text-gray-500 mt-1">Select schema type for structured data</p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

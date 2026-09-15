@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Plus, Settings, Save, Image as ImageIcon, LayoutGrid, Undo, Redo } from 'lucide-react';
+import { ArrowLeft, Image as ImageIcon, Redo, Save, Undo } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Editor } from '@tiptap/react';
 
@@ -16,7 +16,6 @@ interface EditorLayoutProps {
   savedStatus?: 'saved' | 'saving' | 'unsaved';
   editor?: Editor | null;
   onImageInsert?: () => void;
-  onWidgetToggle?: () => void;
   rightSidebarContent?: {
     postTab?: React.ReactNode;
     blockTab?: React.ReactNode;
@@ -35,7 +34,6 @@ export default function EditorLayout({
   rightSidebarContent,
   editor,
   onImageInsert,
-  onWidgetToggle,
 }: EditorLayoutProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'post' | 'block'>('post');
@@ -93,14 +91,6 @@ export default function EditorLayout({
           >
             <ArrowLeft size={20} className="text-gray-700" />
           </button>
-          <button
-            className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-md text-sm font-medium text-gray-700 transition-colors"
-            title="Add Block"
-          >
-            <Plus size={18} />
-            <span>Add Block</span>
-          </button>
-          
           {/* Fixed Toolbar for Block-Level Actions */}
           {editor && (
             <>
@@ -111,13 +101,6 @@ export default function EditorLayout({
                 title="Add Image"
               >
                 <ImageIcon size={18} className="text-gray-700" />
-              </button>
-              <button
-                onClick={onWidgetToggle}
-                className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-                title="Widgets"
-              >
-                <LayoutGrid size={18} className="text-gray-700" />
               </button>
               <div className="w-px h-6 bg-gray-300 mx-2" />
               <button
@@ -156,12 +139,14 @@ export default function EditorLayout({
             SEO: {seoScore}
           </div>
           
-          {/* Settings Icon */}
+          {/* onSave used to have no button at all, so a draft could never be saved. */}
           <button
-            className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-            title="Settings"
+            onClick={onSave}
+            disabled={isSaving}
+            className="flex items-center gap-2 rounded-md border border-gray-300 px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Settings size={20} className="text-gray-700" />
+            <Save size={16} />
+            Save draft
           </button>
 
           {/* Publish Button */}
