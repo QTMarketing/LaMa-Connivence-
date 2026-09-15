@@ -1584,27 +1584,8 @@ export const stores: Store[] = [
 
 ];
 
-/** Look up one store by id. */
-export function getStoreById(id: number): Store | undefined {
-  return stores.find((store) => store.id === id);
-}
-
-/** All stores, in stable state/city/name order. */
-export function getAllStores(): Store[] {
-  return stores;
-}
-
-/** Stores whose hours are still placeholder. Should reach zero. */
-export function getStoresNeedingHours(): Store[] {
-  return stores.filter((s) => !s.hoursVerified);
-}
-
-/** Stores whose address has no street number. Should reach zero. */
-export function getStoresNeedingAddress(): Store[] {
-  return stores.filter((s) => s.addressComplete === false);
-}
-
-/** Stores with no phone number recovered. Should reach zero. */
-export function getStoresNeedingPhone(): Store[] {
-  return stores.filter((s) => !s.phoneVerified);
-}
+/**
+ * Reads live in lib/stores/queries.ts and go to Postgres. The admin used to
+ * write `adminAllStores` to localStorage, which nothing ever read back, so
+ * every store edit was silently discarded.
+ */

@@ -18,7 +18,6 @@ type Props = {
   currentIndex: number;
   items: Promo[];
   onGoTo: (index: number) => void;
-  resolveImage?: (src: string) => string;
 };
 
 /** Same featured offer card on Deals and Drinks — gray field, photo + copy, orange CTA. */
@@ -27,9 +26,8 @@ export default function FeaturedPromo({
   currentIndex,
   items,
   onGoTo,
-  resolveImage,
 }: Props) {
-  const src = resolveImage ? resolveImage(current.image) : current.image;
+  const src = current.image;
 
   return (
     <section className="bg-white px-4 py-section-xs md:px-6 md:py-section-sm">

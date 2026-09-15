@@ -1,154 +1,201 @@
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import { SignJWT, jwtVerify } from "jose";
+import { NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { eq, sql } from 'drizzle-orm';
 
-// In-memory rate limiting per IP for this runtime
+import {
+  ADMIN_SESSION_COOKIE,
+  SESSION_MAX_AGE_SECONDS,
+  createSessionToken,
+  type AdminSession,
+} from '@/lib/auth/session';
+import { getDb, isDatabaseConfigured } from '@/lib/db/client';
+import { users, type AdminSection } from '@/lib/db/schema';
+
+// In-memory rate limiting per IP for this runtime.
 const MAX_ATTEMPTS = 5;
-const WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const WINDOW_MS = 10 * 60 * 1000;
 
 type AttemptInfo = { count: number; firstAttempt: number };
 const attempts = new Map<string, AttemptInfo>();
 
-const ADMIN_SESSION_COOKIE = "lama_admin_session";
+/**
+ * Compared against when no user matches, so a wrong email costs the same as a
+ * wrong password and the response time cannot be used to enumerate accounts.
+ */
+const DECOY_HASH = '$2a$10$AwuDBQV/5pWTjmhDtz.3ye.TPcG2F07uCW3caMFm7M6nI/pZuqKpC';
+
+const GENERIC_FAILURE = 'Incorrect email or password. Please try again.';
 
 function getClientIp(request: Request) {
-  const xff = request.headers.get("x-forwarded-for");
-  if (xff) return xff.split(",")[0].trim();
-  return request.headers.get("x-real-ip") || "unknown";
+  const xff = request.headers.get('x-forwarded-for');
+  if (xff) return xff.split(',')[0].trim();
+  return request.headers.get('x-real-ip') || 'unknown';
 }
 
-async function getJwtSecret() {
-  const secret = process.env.ADMIN_JWT_SECRET;
-  if (!secret) {
-    throw new Error(
-      "ADMIN_JWT_SECRET is not set. Please configure it in your environment.",
-    );
+function recordAttempt(ip: string) {
+  const now = Date.now();
+  const info = attempts.get(ip);
+  attempts.set(
+    ip,
+    info && now - info.firstAttempt < WINDOW_MS
+      ? { count: info.count + 1, firstAttempt: info.firstAttempt }
+      : { count: 1, firstAttempt: now },
+  );
+}
+
+function isRateLimited(ip: string) {
+  const info = attempts.get(ip);
+  if (!info) return false;
+  if (Date.now() - info.firstAttempt >= WINDOW_MS) {
+    attempts.delete(ip);
+    return false;
   }
-  return new TextEncoder().encode(secret);
+  return info.count >= MAX_ATTEMPTS;
 }
 
-async function createSessionToken() {
-  const secret = await getJwtSecret();
-  const now = Math.floor(Date.now() / 1000);
-  const exp = now + 60 * 60 * 8; // 8 hours
+/** Constant-time string compare for the bootstrap password path. */
+function safeEqual(a: string, b: string) {
+  if (a.length !== b.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i++) {
+    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return mismatch === 0;
+}
 
-  return new SignJWT({ role: "admin" })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt(now)
-    .setExpirationTime(exp)
-    .setSubject("lama-admin")
-    .sign(secret);
+async function countUsers(): Promise<number | null> {
+  if (!isDatabaseConfigured()) return null;
+  try {
+    const [row] = await getDb()
+      .select({ count: sql<number>`count(*)::int` })
+      .from(users);
+    return row?.count ?? 0;
+  } catch (error) {
+    console.error('[admin-login] Could not count users:', error);
+    return null;
+  }
 }
 
 export async function POST(request: Request) {
   try {
     const ip = getClientIp(request);
-    const now = Date.now();
-    const info = attempts.get(ip);
 
-    if (info && now - info.firstAttempt < WINDOW_MS && info.count >= MAX_ATTEMPTS) {
+    if (isRateLimited(ip)) {
       return NextResponse.json(
-        { error: "Too many login attempts. Please try again later." },
+        { error: 'Too many login attempts. Please try again later.' },
         { status: 429 },
       );
     }
 
-    const body = await request.json().catch(() => ({}));
-    const { password } = body as { password?: string };
+    const body = (await request.json().catch(() => ({}))) as {
+      email?: string;
+      password?: string;
+    };
+    const email = body.email?.trim().toLowerCase();
+    const password = body.password;
 
     if (!password) {
       return NextResponse.json(
-        { error: "Password is required." },
+        { error: 'Password is required.' },
         { status: 400 },
       );
     }
 
-    const plainEnvPassword = process.env.ADMIN_PASSWORD;
-    const hashedPassword = process.env.ADMIN_PASSWORD_HASH;
+    const userCount = await countUsers();
+    // Real accounts take over as soon as any exist. Until then (no database
+    // configured, or an empty users table) the shared password is the only way
+    // in, so the panel is never bricked.
+    const useAccounts = userCount !== null && userCount > 0;
 
-    if (!plainEnvPassword && !hashedPassword) {
-      console.warn(
-        "[admin-login] ADMIN_PASSWORD or ADMIN_PASSWORD_HASH is not configured.",
-      );
-      return NextResponse.json(
-        { error: "Admin login is not configured. Please contact the site owner." },
-        { status: 500 },
-      );
-    }
+    let session: AdminSession | null = null;
 
-    let valid = false;
-
-    if (hashedPassword) {
-      // Preferred: bcrypt hash comparison
-      try {
-        valid = await bcrypt.compare(password, hashedPassword);
-      } catch (e) {
-        console.error("[admin-login] Error comparing bcrypt hash:", e);
+    if (useAccounts) {
+      if (!email) {
+        recordAttempt(ip);
+        return NextResponse.json(
+          { error: 'Email is required.' },
+          { status: 400 },
+        );
       }
-    } else if (plainEnvPassword) {
-      // Fallback: constant-time compare for plain env password
-      if (password.length === plainEnvPassword.length) {
-        let mismatch = 0;
-        for (let i = 0; i < password.length; i++) {
-          mismatch |= password.charCodeAt(i) ^ plainEnvPassword.charCodeAt(i);
-        }
-        valid = mismatch === 0;
+
+      const [user] = await getDb()
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+
+      const matches = await bcrypt.compare(
+        password,
+        user?.passwordHash ?? DECOY_HASH,
+      );
+
+      if (user && matches) {
+        session = {
+          userId: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          permissions: (user.permissions ?? []) as AdminSection[],
+        };
+      }
+    } else {
+      const bootstrapPassword = process.env.ADMIN_PASSWORD;
+      if (!bootstrapPassword) {
+        console.warn('[admin-login] No users seeded and ADMIN_PASSWORD is unset.');
+        return NextResponse.json(
+          {
+            error:
+              'Admin login is not configured. Please contact the site owner.',
+          },
+          { status: 500 },
+        );
+      }
+
+      if (safeEqual(password, bootstrapPassword)) {
+        session = {
+          userId: 'bootstrap',
+          email: 'bootstrap@local',
+          name: 'Bootstrap Owner',
+          role: 'owner',
+          permissions: [],
+        };
       }
     }
 
-    const updated: AttemptInfo = info
-      ? { count: (info.count || 0) + 1, firstAttempt: info.firstAttempt }
-      : { count: 1, firstAttempt: now };
-    attempts.set(ip, updated);
-
-    if (!valid) {
-      console.warn("[admin-login] Failed login attempt from IP:", ip);
-      return NextResponse.json(
-        { error: "Incorrect password. Please try again." },
-        { status: 401 },
-      );
+    if (!session) {
+      recordAttempt(ip);
+      console.warn('[admin-login] Failed login attempt from IP:', ip);
+      return NextResponse.json({ error: GENERIC_FAILURE }, { status: 401 });
     }
 
-    // Successful login – reset attempts for this IP
     attempts.delete(ip);
 
-    const token = await createSessionToken();
-
-    const response = NextResponse.json({ success: true });
-    response.cookies.set(ADMIN_SESSION_COOKIE, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 8, // 8 hours
+    const token = await createSessionToken(session);
+    const response = NextResponse.json({
+      success: true,
+      user: {
+        name: session.name,
+        email: session.email,
+        role: session.role,
+        permissions: session.permissions,
+      },
     });
 
-    console.info("[admin-login] Successful admin login from IP:", ip);
+    response.cookies.set(ADMIN_SESSION_COOKIE, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: SESSION_MAX_AGE_SECONDS,
+    });
 
+    console.info('[admin-login] Successful login:', session.email);
     return response;
   } catch (error) {
-    console.error("[admin-login] Unexpected error:", error);
+    console.error('[admin-login] Unexpected error:', error);
     return NextResponse.json(
-      { error: "Unable to login at this time." },
+      { error: 'Unable to login at this time.' },
       { status: 500 },
     );
   }
 }
-
-// Utility used by server components/middleware to verify the admin session cookie.
-export async function verifyAdminSession() {
-  // In Next.js App Router, cookies() can be async in some runtimes, so we await it.
-  const cookieStore = await cookies();
-  const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
-  if (!token) return false;
-
-  try {
-    const secret = await getJwtSecret();
-    const result = await jwtVerify(token, secret);
-    return result.payload?.role === "admin";
-  } catch {
-    return false;
-  }
-}
-

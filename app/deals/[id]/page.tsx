@@ -1,31 +1,34 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getDealById, getAllDeals } from '@/lib/dealsData';
+import { getDealById, getAllDeals } from '@/lib/deals/queries';
 import { ArrowLeft, ShoppingBag, Truck } from 'lucide-react';
 import { DealCountdownBadge } from '@/components/DealCountdownBadge';
 import { savingsChipClass } from '@/lib/semantic';
 
 type DealDetailPageProps = {
-  params: Promise<{ id: string }> | { id: string };
+  params: Promise<{ id: string }>;
 };
 
+// Now that deals come from Postgres this page reflects admin edits, which it
+// never could while the data lived in localStorage.
+export const dynamic = 'force-dynamic';
+
 export default async function DealDetailPage({ params }: DealDetailPageProps) {
-  // Handle both Promise and direct params (for Next.js compatibility)
-  const resolvedParams = params instanceof Promise ? await params : params;
-  const id = Number(resolvedParams.id);
+  const { id: rawId } = await params;
+  const id = Number(rawId);
   if (Number.isNaN(id)) {
     return notFound();
   }
 
-  const deal = getDealById(id);
+  const deal = await getDealById(id);
 
   if (!deal) {
     return notFound();
   }
 
-  // Get related deals (same category, excluding current)
-  const relatedDeals = getAllDeals()
+  // Related deals: same category, excluding the current one.
+  const relatedDeals = (await getAllDeals())
     .filter(d => d.category === deal.category && d.id !== deal.id)
     .slice(0, 4);
 

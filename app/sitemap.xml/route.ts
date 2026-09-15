@@ -1,84 +1,90 @@
 import { NextResponse } from 'next/server';
 
-// Dynamic sitemap.xml route that combines static pages with blog posts
-// When you move to a database, uncomment the blog posts section below
+import { getPublishedBlogSlugs } from '@/lib/blog/queries';
+import { PRODUCT_CATEGORIES } from '@/lib/products/categories';
+import { getAllStores } from '@/lib/stores/queries';
+
+interface SitemapUrl {
+  loc: string;
+  lastmod: Date;
+  changefreq: string;
+  priority: string;
+}
+
+function renderUrl({ loc, lastmod, changefreq, priority }: SitemapUrl) {
+  return [
+    '  <url>',
+    `    <loc>${loc}</loc>`,
+    `    <lastmod>${lastmod.toISOString().split('T')[0]}</lastmod>`,
+    `    <changefreq>${changefreq}</changefreq>`,
+    `    <priority>${priority}</priority>`,
+    '  </url>',
+  ].join('\n');
+}
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://la-ma-connivence.vercel.app';
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || 'https://la-ma-connivence.vercel.app';
+  const now = new Date();
 
-  // Static pages
-  const staticPages = [
-    { url: baseUrl, priority: '1.0', changefreq: 'daily', lastmod: new Date() },
-    { url: `${baseUrl}/stores`, priority: '0.9', changefreq: 'weekly', lastmod: new Date() },
-    { url: `${baseUrl}/products`, priority: '0.8', changefreq: 'weekly', lastmod: new Date() },
-    { url: `${baseUrl}/deals`, priority: '0.9', changefreq: 'daily', lastmod: new Date() },
-    { url: `${baseUrl}/media/blog`, priority: '0.8', changefreq: 'daily', lastmod: new Date() },
-    { url: `${baseUrl}/about`, priority: '0.5', changefreq: 'monthly', lastmod: new Date() },
-    { url: `${baseUrl}/contact`, priority: '0.5', changefreq: 'monthly', lastmod: new Date() },
-    { url: `${baseUrl}/careers`, priority: '0.6', changefreq: 'monthly', lastmod: new Date() },
-    { url: `${baseUrl}/franchise`, priority: '0.6', changefreq: 'monthly', lastmod: new Date() },
-    { url: `${baseUrl}/rewards`, priority: '0.7', changefreq: 'monthly', lastmod: new Date() },
-    { url: `${baseUrl}/services`, priority: '0.7', changefreq: 'monthly', lastmod: new Date() },
+  const urls: SitemapUrl[] = [
+    { loc: baseUrl, lastmod: now, changefreq: 'daily', priority: '1.0' },
+    { loc: `${baseUrl}/stores`, lastmod: now, changefreq: 'weekly', priority: '0.9' },
+    { loc: `${baseUrl}/deals`, lastmod: now, changefreq: 'daily', priority: '0.9' },
+    { loc: `${baseUrl}/drinks`, lastmod: now, changefreq: 'daily', priority: '0.8' },
+    { loc: `${baseUrl}/products`, lastmod: now, changefreq: 'weekly', priority: '0.8' },
+    { loc: `${baseUrl}/media/blog`, lastmod: now, changefreq: 'daily', priority: '0.8' },
+    { loc: `${baseUrl}/services`, lastmod: now, changefreq: 'monthly', priority: '0.7' },
+    { loc: `${baseUrl}/rewards`, lastmod: now, changefreq: 'monthly', priority: '0.7' },
+    { loc: `${baseUrl}/careers`, lastmod: now, changefreq: 'weekly', priority: '0.6' },
+    { loc: `${baseUrl}/franchise`, lastmod: now, changefreq: 'monthly', priority: '0.6' },
+    { loc: `${baseUrl}/about`, lastmod: now, changefreq: 'monthly', priority: '0.5' },
+    { loc: `${baseUrl}/contact`, lastmod: now, changefreq: 'monthly', priority: '0.5' },
   ];
 
-  // Start building XML
-  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-
-  // Add static pages
-  staticPages.forEach((page) => {
-    xml += '  <url>\n';
-    xml += `    <loc>${page.url}</loc>\n`;
-    xml += `    <lastmod>${page.lastmod.toISOString().split('T')[0]}</lastmod>\n`;
-    xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
-    xml += `    <priority>${page.priority}</priority>\n`;
-    xml += '  </url>\n';
-  });
-
-  // Blog posts - UNCOMMENT WHEN YOU HAVE DATABASE CONNECTION
-  // Example implementation:
-  /*
-  try {
-    const blogs = await prisma.blog.findMany({
-      where: { status: 'published' },
-      select: { slug: true, updatedAt: true, publishedAt: true },
-      orderBy: { updatedAt: 'desc' },
+  for (const category of PRODUCT_CATEGORIES) {
+    urls.push({
+      loc: `${baseUrl}/products/${category.slug}`,
+      lastmod: now,
+      changefreq: 'weekly',
+      priority: '0.7',
     });
-
-    blogs.forEach(blog => {
-      xml += '  <url>\n';
-      xml += `    <loc>${baseUrl}/media/blog/${blog.slug}</loc>\n`;
-      xml += `    <lastmod>${new Date(blog.updatedAt || blog.publishedAt).toISOString().split('T')[0]}</lastmod>\n`;
-      xml += '    <changefreq>weekly</changefreq>\n';
-      xml += '    <priority>0.7</priority>\n';
-      xml += '  </url>\n';
-    });
-  } catch (error) {
-    console.error('Error fetching blogs for sitemap:', error);
   }
-  */
 
-  // Store pages - UNCOMMENT WHEN YOU HAVE DATABASE CONNECTION
-  /*
+  // A failed query here would drop every dynamic URL from the sitemap, so each
+  // section is isolated and the static pages always ship.
   try {
-    const stores = await prisma.store.findMany({
-      select: { id: true, updatedAt: true },
-    });
-
-    stores.forEach(store => {
-      xml += '  <url>\n';
-      xml += `    <loc>${baseUrl}/stores/${store.id}</loc>\n`;
-      xml += `    <lastmod>${new Date(store.updatedAt).toISOString().split('T')[0]}</lastmod>\n`;
-      xml += '    <changefreq>monthly</changefreq>\n';
-      xml += '    <priority>0.6</priority>\n';
-      xml += '  </url>\n';
-    });
+    for (const post of await getPublishedBlogSlugs()) {
+      urls.push({
+        loc: `${baseUrl}/media/blog/${post.slug}`,
+        lastmod: post.updatedAt,
+        changefreq: 'weekly',
+        priority: '0.7',
+      });
+    }
   } catch (error) {
-    console.error('Error fetching stores for sitemap:', error);
+    console.error('[sitemap] Could not list blog posts:', error);
   }
-  */
 
-  xml += '</urlset>';
+  try {
+    for (const store of await getAllStores()) {
+      urls.push({
+        loc: `${baseUrl}/stores/${store.id}`,
+        lastmod: now,
+        changefreq: 'monthly',
+        priority: '0.6',
+      });
+    }
+  } catch (error) {
+    console.error('[sitemap] Could not list stores:', error);
+  }
+
+  const xml = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...urls.map(renderUrl),
+    '</urlset>',
+  ].join('\n');
 
   return new NextResponse(xml, {
     headers: {

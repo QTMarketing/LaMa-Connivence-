@@ -1,25 +1,22 @@
-'use client';
+import type { ReactNode } from 'react';
 
-import { usePathname } from 'next/navigation';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import MobileStickyCTA from '@/components/MobileStickyCTA';
+import ConditionalLayoutClient from '@/components/ConditionalLayoutClient';
+import { getSiteSettings } from '@/lib/settings/queries';
 
-export default function ConditionalLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const isAdminPage = pathname?.startsWith('/admin');
-
-  // Hide Navbar and Footer on admin pages
-  if (isAdminPage) {
-    return <>{children}</>;
-  }
+/**
+ * Server wrapper so the footer can receive real contact/social settings without
+ * turning the whole layout into a client fetch.
+ */
+export default async function ConditionalLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const settings = await getSiteSettings();
 
   return (
-    <div className="flex min-h-[100svh] flex-col">
-      <Navbar />
-      <div className="flex-1">{children}</div>
-      <MobileStickyCTA />
-      <Footer />
-    </div>
+    <ConditionalLayoutClient settings={settings}>
+      {children}
+    </ConditionalLayoutClient>
   );
 }

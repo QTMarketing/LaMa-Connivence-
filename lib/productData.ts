@@ -8,6 +8,15 @@ export interface Product {
   featured?: boolean;
 }
 
+/**
+ * Seed data only. Reads live in lib/products/queries.ts and go to Postgres;
+ * this array is what the seeder inserts and what public pages fall back to if
+ * the database is unreachable.
+ *
+ * Most `image` values are images.unsplash.com stock photos rather than real
+ * LaMa products. The seeder flags those so /admin/products can list what still
+ * needs a real photograph.
+ */
 export const products: Product[] = [
   // Hot Beverages
   {
@@ -403,15 +412,4 @@ export const products: Product[] = [
     category: 'services',
   },
 ];
-
-export const getProductsByCategory = (category: Product['category']): Product[] => {
-  return products.filter(product => product.category === category);
-};
-
-export const getFeaturedProduct = (category: Product['category']): Product | undefined => {
-  return products.find(product => product.category === category && product.featured);
-};
-
-
-
 

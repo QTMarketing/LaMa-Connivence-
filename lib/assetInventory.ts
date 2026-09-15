@@ -55,7 +55,7 @@ export const ASSETS: AssetRow[] = [
     "plan": "Deal cards on /deals",
     "status": "review",
     "used": [
-      "lib/blogHelpers.ts",
+      "lib/blog/types.ts",
       "lib/campaignImages.ts"
     ]
   },

@@ -1,9 +1,2 @@
-// Keep this file extremely small and delegate to the existing Admin page
-// so that we don't accidentally diverge the UI.
-
-'use client';
-
+// Legacy re-export — the dashboard now lives in page.tsx.
 export { default } from './page';
-
-
-

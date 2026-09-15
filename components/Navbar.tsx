@@ -6,7 +6,6 @@ import { useState, useRef, useEffect } from 'react';
 import { Menu, X, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
-import { getProductsByCategory } from '@/lib/productData';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -17,10 +16,6 @@ export default function Navbar() {
   const navbarRef = useRef<HTMLElement>(null);
   const mobileMenuRef = useRef<HTMLElement>(null);
   const { scrollY } = useScroll();
-  
-  // Get services for mobile menu dropdown
-  const services = getProductsByCategory('services');
-  
 
   // Track scroll position for shadow effect
   useMotionValueEvent(scrollY, 'change', (latest) => {
@@ -128,6 +123,15 @@ export default function Navbar() {
             >
               Delivery
             </span>
+            <Link
+              href="/careers"
+              className={`nav-link-premium relative text-[22px] xl:text-[24px] font-bold tracking-[0.01em] ${
+                pathname === '/careers' ? 'text-primary' : 'text-[#1A1A1A]'
+              } transition-colors duration-300`}
+              style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}
+            >
+              Careers
+            </Link>
             </nav>
           </div>
 
@@ -226,7 +230,6 @@ export default function Navbar() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: 0.3 }}
-                  className="py-2"
                 >
                   <Link
                     href="/services"
@@ -235,24 +238,20 @@ export default function Navbar() {
                   >
                     Services
                   </Link>
-                  <div className="ml-4 mt-2 flex flex-col gap-2">
-                    {services.map((service, index) => (
-                      <motion.div
-                        key={service.id}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.2, delay: 0.4 + index * 0.05 }}
-                      >
-                        <Link
-                          href="/services"
-                          className="text-[15px] font-medium text-gray-600 hover:text-[#FF6B35] transition-colors duration-300 py-2 block"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          {service.name}
-                        </Link>
-                      </motion.div>
-                    ))}
-                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.6 }}
+                >
+                  <Link
+                    href="/careers"
+                    className="nav-link-premium-mobile relative text-[16px] font-bold tracking-[0.01em] text-[#1A1A1A] py-4 block transition-colors duration-300"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Careers
+                  </Link>
                 </motion.div>
 
                 <motion.div

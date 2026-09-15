@@ -1,25 +1,23 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getStoreById } from '@/lib/storeData';
+import { getStoreById } from '@/lib/stores/queries';
 import { MapPin, Phone, Clock, ArrowLeft } from 'lucide-react';
 
 type StoreDetailPageProps = {
-  // Next 16: params is a Promise. Accepting both shapes matches the pattern
-  // already working in app/deals/[id]/page.tsx.
-  params: Promise<{ id: string }> | { id: string };
+  params: Promise<{ id: string }>;
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function StoreDetailPage({ params }: StoreDetailPageProps) {
-  // Without awaiting, params.id is undefined on the Promise, Number(undefined)
-  // is NaN, and EVERY store detail page 404s. That was the bug.
-  const resolvedParams = params instanceof Promise ? await params : params;
-  const id = Number(resolvedParams.id);
+  const { id: rawId } = await params;
+  const id = Number(rawId);
   if (Number.isNaN(id)) {
     return notFound();
   }
 
-  const store = getStoreById(id);
+  const store = await getStoreById(id);
 
   if (!store) {
     return notFound();

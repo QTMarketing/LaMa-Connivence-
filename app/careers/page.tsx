@@ -1,180 +1,69 @@
-'use client';
+import type { Metadata } from 'next';
+import Image from 'next/image';
+import { MapPin, CalendarClock, TrendingUp } from 'lucide-react';
 
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { ArrowRight, MapPin, Clock, DollarSign } from 'lucide-react';
-import GlassBanner from '@/components/GlassBanner';
-import InnerHero from '@/components/InnerHero';
-import { CAMPAIGN } from '@/lib/campaignImages';
+import CategoryBand from '@/components/CategoryBand';
+import { getOpenJobs } from '@/lib/careers/queries';
 
-export default function CareersPage() {
-  const benefits = [
-    {
-      icon: DollarSign,
-      title: 'Competitive Pay',
-      description: 'We offer competitive wages and opportunities for advancement.',
-    },
-    {
-      icon: Clock,
-      title: 'Flexible Schedules',
-      description: 'Work-life balance with flexible scheduling options.',
-    },
-    {
-      icon: MapPin,
-      title: 'Multiple Locations',
-      description: 'Work at a location convenient for you.',
-    },
-  ];
+import CareersBody from './CareersBody';
 
-  const positions = [
-    {
-      title: 'Store Associate',
-      department: 'Retail',
-      location: 'Multiple Locations',
-      type: 'Full-time / Part-time',
-    },
-    {
-      title: 'Shift Manager',
-      department: 'Management',
-      location: 'Multiple Locations',
-      type: 'Full-time',
-    },
-    {
-      title: 'Assistant Manager',
-      department: 'Management',
-      location: 'Multiple Locations',
-      type: 'Full-time',
-    },
-  ];
+export const metadata: Metadata = {
+  title: 'Careers | LaMa Convenience',
+  description:
+    'Full-time and part-time jobs at LaMa Convenience across Texas, Louisiana, Oklahoma, Arkansas, Mississippi and New Mexico.',
+};
+
+// Postings change when Suzeze edits them, so never serve a stale static page.
+export const dynamic = 'force-dynamic';
+
+const HIRING_FACTS = [
+  { icon: MapPin, label: '96 stores across six states' },
+  { icon: CalendarClock, label: 'Full-time and part-time shifts' },
+  { icon: TrendingUp, label: 'Shift lead and manager tracks' },
+];
+
+export default async function CareersPage() {
+  const jobs = await getOpenJobs();
 
   return (
     <div className="min-h-screen bg-white">
-        <InnerHero title="Careers" imageSrc={CAMPAIGN.innerCoffee} imageAlt="LaMa coffee on orange">
-          <GlassBanner />
-        </InnerHero>
-
-      {/* Benefits Section */}
-      <section className="py-12 md:py-16 px-6 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="mb-12 text-center"
-          >
-            <h2 className="text-3xl md:text-4xl font-black text-secondary mb-4">
-              Why Work at LaMa?
-            </h2>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {benefits.map((benefit, index) => {
-              const Icon = benefit.icon;
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="bg-white p-6 rounded-xl text-center"
-                >
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
-                    <Icon className="text-primary" size={32} />
-                  </div>
-                  <h3 className="text-xl font-black text-secondary mb-2">
-                    {benefit.title}
-                  </h3>
-                  <p className="text-gray-600">
-                    {benefit.description}
-                  </p>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Open Positions */}
-      <section className="py-12 md:py-16 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-black text-secondary mb-4">
-              Open Positions
-            </h2>
-            <p className="text-lg text-gray-600">
-              Check out our current job openings and find the perfect opportunity for you.
-            </p>
-          </motion.div>
-          <div className="space-y-4">
-            {positions.map((position, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-gray-50 p-6 rounded-xl hover:shadow-lg transition-all"
+      <CategoryBand
+        heading="h1"
+        field="sand"
+        eyebrow="Now hiring"
+        title="Work close to home"
+        subtitle="LaMa is a neighborhood chain, which means the store you work at is probably the one you already shop at. Find a shift that fits your week."
+        cta={{ label: 'See open roles', href: '#openings' }}
+        ctaNote="Full-time and part-time"
+        visual={
+          <div className="relative mx-auto flex w-full max-w-[268px] flex-col gap-2.5">
+            <div className="relative mx-auto mb-1 h-24 w-24">
+              <Image
+                src="/brand/lama-mascot.png"
+                alt=""
+                fill
+                className="object-contain"
+                sizes="96px"
+              />
+            </div>
+            {HIRING_FACTS.map(({ icon: Icon, label }) => (
+              <div
+                key={label}
+                className="flex items-center gap-2.5 rounded-md border border-[#1A1A1A]/10 bg-[#FFF6EC] px-3.5 py-2.5 shadow-[0_4px_12px_rgba(26,26,26,0.08)]"
               >
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <div>
-                    <h3 className="text-xl font-black text-secondary mb-2">
-                      {position.title}
-                    </h3>
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                      <span>{position.department}</span>
-                      <span>•</span>
-                      <span>{position.location}</span>
-                      <span>•</span>
-                      <span>{position.type}</span>
-                    </div>
-                  </div>
-                  <Link
-                    href="/contact"
-                    className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-bold transition-all hover:scale-105 whitespace-nowrap"
-                    style={{ backgroundColor: '#FF6B35' }}
-                  >
-                    Apply Now
-                    <ArrowRight size={16} />
-                  </Link>
-                </div>
-              </motion.div>
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#FF6B35]">
+                  <Icon size={15} className="text-[#1A1A1A]" />
+                </span>
+                <span className="text-[0.8rem] font-semibold leading-snug text-[#1A1A1A]">
+                  {label}
+                </span>
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        }
+      />
 
-      {/* CTA Section */}
-      <section className="py-12 md:py-16 px-6 bg-gray-50">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-3xl md:text-4xl font-black text-secondary mb-4">
-              Don't See a Position That Fits?
-            </h2>
-            <p className="text-lg text-gray-600 mb-6">
-              We're always accepting applications. Send us your resume and we'll keep you in mind for future opportunities.
-            </p>
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-lg font-bold transition-all hover:scale-105"
-              style={{ backgroundColor: '#FF6B35' }}
-            >
-              Contact Us
-            </Link>
-          </motion.div>
-        </div>
-      </section>
+      <CareersBody jobs={jobs} />
     </div>
   );
 }
