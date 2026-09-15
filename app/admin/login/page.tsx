@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Lock, LogIn, Eye, EyeOff } from 'lucide-react';
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = searchParams.get('next') ?? '/admin';
@@ -63,24 +63,22 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="bg-white rounded-md shadow-2xl p-8">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
+        <div className="rounded-md bg-white p-8 shadow-2xl">
+          <div className="mb-8 text-center">
+            <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <Lock className="text-primary" size={32} />
             </div>
-            <h1 className="text-3xl font-black text-secondary mb-2">
+            <h1 className="mb-2 text-3xl font-black text-secondary">
               Admin Login
             </h1>
-            <p className="text-gray-600">
-              Sign in with your LaMa admin account
-            </p>
+            <p className="text-gray-600">Sign in with your LaMa admin account</p>
           </div>
 
           <form
@@ -91,7 +89,7 @@ export default function AdminLoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="mb-2 block text-sm font-semibold text-gray-700"
               >
                 Email
               </label>
@@ -100,7 +98,7 @@ export default function AdminLoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors text-gray-900"
+                className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 text-gray-900 transition-colors focus:border-primary focus:outline-none"
                 placeholder="you@quicktrackinc.com"
                 autoComplete="username"
                 required
@@ -111,7 +109,7 @@ export default function AdminLoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="mb-2 block text-sm font-semibold text-gray-700"
               >
                 Password
               </label>
@@ -121,7 +119,7 @@ export default function AdminLoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pr-12 px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors text-gray-900"
+                  className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 pr-12 text-gray-900 transition-colors focus:border-primary focus:outline-none"
                   placeholder="Enter password"
                   autoComplete="current-password"
                   required
@@ -141,7 +139,7 @@ export default function AdminLoginPage() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
+                className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
                 role="alert"
               >
                 {error}
@@ -151,7 +149,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-bold text-white transition-all duration-300 hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLoading ? (
                 'Signing in...'
@@ -172,5 +170,21 @@ export default function AdminLoginPage() {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4">
+          <div className="w-full max-w-md rounded-md bg-white p-8 text-center text-gray-500 shadow-2xl">
+            Loading…
+          </div>
+        </div>
+      }
+    >
+      <AdminLoginForm />
+    </Suspense>
   );
 }
