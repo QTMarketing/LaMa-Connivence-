@@ -3,7 +3,8 @@ import Image from 'next/image';
 import { MapPin, CalendarClock, TrendingUp } from 'lucide-react';
 
 import CategoryBand from '@/components/CategoryBand';
-import { getOpenJobs } from '@/lib/careers/queries';
+import { getOpenJobs, getRegions } from '@/lib/careers/queries';
+import { isDatabaseConfigured } from '@/lib/db/client';
 
 import CareersBody from './CareersBody';
 
@@ -24,6 +25,14 @@ const HIRING_FACTS = [
 
 export default async function CareersPage() {
   const jobs = await getOpenJobs();
+  let regions: Awaited<ReturnType<typeof getRegions>> = [];
+  if (isDatabaseConfigured()) {
+    try {
+      regions = await getRegions();
+    } catch {
+      regions = [];
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -63,7 +72,7 @@ export default async function CareersPage() {
         }
       />
 
-      <CareersBody jobs={jobs} />
+      <CareersBody jobs={jobs} regions={regions} />
     </div>
   );
 }

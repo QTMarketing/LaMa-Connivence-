@@ -2,9 +2,11 @@ import {
   APPLICATION_STATUSES,
   EMPLOYMENT_TYPES,
   JOB_STATUSES,
+  LOCATION_SCOPES,
   type ApplicationStatus,
   type EmploymentType,
   type JobStatus,
+  type LocationScope,
 } from './types';
 
 /** Route segments under /careers that a slug must not shadow. */
@@ -24,6 +26,9 @@ export interface JobPayload {
   title: string;
   department: string;
   location: string;
+  locationScope: LocationScope;
+  regionIds: string[];
+  storeIds: number[];
   employmentType: EmploymentType;
   status: JobStatus;
   payRange: string | null;
@@ -50,6 +55,30 @@ function cleanText(value: unknown, max: number): string {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
 }
 
+function cleanUuidList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is string => typeof item === 'string')
+    .map((item) => item.trim())
+    .filter((item) => /^[0-9a-f-]{36}$/i.test(item))
+    .slice(0, 100);
+}
+
+function cleanStoreIdList(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+  const ids: number[] = [];
+  for (const item of value) {
+    const n =
+      typeof item === 'number'
+        ? item
+        : typeof item === 'string'
+          ? Number.parseInt(item, 10)
+          : NaN;
+    if (Number.isInteger(n) && n > 0) ids.push(n);
+  }
+  return [...new Set(ids)].slice(0, 200);
+}
+
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 export function parseJobPayload(
@@ -69,9 +98,6 @@ export function parseJobPayload(
 
   const department = cleanText(input.department, 80);
   if (!department) return { ok: false, error: 'A department is required.' };
-
-  const location = cleanText(input.location, 120);
-  if (!location) return { ok: false, error: 'A location is required.' };
 
   const slug = slugify(cleanText(input.slug, 80) || title);
   if (!slug) {
@@ -100,10 +126,43 @@ export function parseJobPayload(
     };
   }
 
+  const locationScope =
+    (cleanText(input.locationScope, 20) || 'chain') as LocationScope;
+  if (!LOCATION_SCOPES.includes(locationScope)) {
+    return {
+      ok: false,
+      error: `Location scope must be one of: ${LOCATION_SCOPES.join(', ')}.`,
+    };
+  }
+
+  const regionIds = cleanUuidList(input.regionIds);
+  const storeIds = cleanStoreIdList(input.storeIds);
+
+  if (locationScope === 'region' && regionIds.length === 0) {
+    return {
+      ok: false,
+      error: 'Select at least one region for a region-scoped job.',
+    };
+  }
+  if (locationScope === 'store' && storeIds.length === 0) {
+    return {
+      ok: false,
+      error: 'Select at least one store for a store-scoped job.',
+    };
+  }
+
   const postedAt = cleanText(input.postedAt, 10);
   if (postedAt && !DATE_PATTERN.test(postedAt)) {
     return { ok: false, error: 'Posted date must be YYYY-MM-DD.' };
   }
+
+  const location =
+    cleanText(input.location, 120) ||
+    (locationScope === 'chain'
+      ? 'All locations'
+      : locationScope === 'region'
+        ? 'Selected regions'
+        : 'Selected stores');
 
   return {
     ok: true,
@@ -112,6 +171,9 @@ export function parseJobPayload(
       title,
       department,
       location,
+      locationScope,
+      regionIds: locationScope === 'region' ? regionIds : [],
+      storeIds: locationScope === 'store' ? storeIds : [],
       employmentType: employmentType as EmploymentType,
       status: status as JobStatus,
       payRange: cleanText(input.payRange, 80) || null,
@@ -158,4 +220,28 @@ export function parseApplicationUpdate(
   }
 
   return { ok: true, value: update };
+}
+
+export interface RegionPayload {
+  name: string;
+  slug: string;
+}
+
+export function parseRegionPayload(
+  body: unknown,
+): ValidationResult<RegionPayload> {
+  if (typeof body !== 'object' || body === null) {
+    return { ok: false, error: 'Expected a JSON object.' };
+  }
+
+  const input = body as Record<string, unknown>;
+  const name = cleanText(input.name, 80);
+  if (!name) return { ok: false, error: 'A region name is required.' };
+
+  const slug = slugify(cleanText(input.slug, 80) || name);
+  if (!slug) {
+    return { ok: false, error: 'Could not build a slug from that name.' };
+  }
+
+  return { ok: true, value: { name, slug } };
 }

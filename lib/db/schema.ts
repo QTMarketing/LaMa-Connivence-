@@ -68,6 +68,28 @@ export const employmentTypeEnum = pgEnum('employment_type', [
 
 export const jobStatusEnum = pgEnum('job_status', ['draft', 'open', 'closed']);
 
+/**
+ * Where a posting is hiring: the whole chain, one or more regions, or specific
+ * stores. Join tables (job_regions / job_stores) hold the selections.
+ */
+export const locationScopeEnum = pgEnum('location_scope', [
+  'chain',
+  'region',
+  'store',
+]);
+
+export const regions = pgTable('regions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export const jobs = pgTable(
   'jobs',
   {
@@ -75,8 +97,14 @@ export const jobs = pgTable(
     slug: text('slug').notNull().unique(),
     title: text('title').notNull(),
     department: text('department').notNull(),
-    /** Free text: a city, or "Multiple locations" when the role is chain-wide. */
+    /**
+     * Display label for public cards — auto-filled from scope selection
+     * (e.g. "Texas · Louisiana", a store name, or "All locations").
+     */
     location: text('location').notNull(),
+    locationScope: locationScopeEnum('location_scope')
+      .notNull()
+      .default('chain'),
     employmentType: employmentTypeEnum('employment_type')
       .notNull()
       .default('Full-time'),
@@ -98,6 +126,39 @@ export const jobs = pgTable(
       .defaultNow(),
   },
   (table) => [index('jobs_status_idx').on(table.status)],
+);
+
+export const jobRegions = pgTable(
+  'job_regions',
+  {
+    jobId: uuid('job_id')
+      .notNull()
+      .references(() => jobs.id, { onDelete: 'cascade' }),
+    regionId: uuid('region_id')
+      .notNull()
+      .references(() => regions.id, { onDelete: 'cascade' }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.jobId, table.regionId] }),
+    index('job_regions_region_id_idx').on(table.regionId),
+  ],
+);
+
+/** Populated when location_scope = 'store'. Defined before stores via lazy FK. */
+export const jobStores = pgTable(
+  'job_stores',
+  {
+    jobId: uuid('job_id')
+      .notNull()
+      .references(() => jobs.id, { onDelete: 'cascade' }),
+    storeId: integer('store_id')
+      .notNull()
+      .references(() => stores.id, { onDelete: 'cascade' }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.jobId, table.storeId] }),
+    index('job_stores_store_id_idx').on(table.storeId),
+  ],
 );
 
 export const applicationStatusEnum = pgEnum('application_status', [
@@ -132,6 +193,13 @@ export const applications = pgTable(
     cvFilename: text('cv_filename'),
     cvContentType: text('cv_content_type'),
     cvSize: integer('cv_size'),
+    /**
+     * Store the candidate prefers / scanned a QR for. Survives store deletion
+     * as null; job_title snapshot still identifies the role.
+     */
+    preferredStoreId: integer('preferred_store_id').references(() => stores.id, {
+      onDelete: 'set null',
+    }),
     status: applicationStatusEnum('status').notNull().default('new'),
     /** Internal notes from whoever is reviewing. */
     notes: text('notes'),
@@ -146,11 +214,32 @@ export const applications = pgTable(
     index('applications_job_id_idx').on(table.jobId),
     index('applications_status_idx').on(table.status),
     index('applications_created_at_idx').on(table.createdAt),
+    index('applications_preferred_store_id_idx').on(table.preferredStoreId),
   ],
 );
 
 export const jobsRelations = relations(jobs, ({ many }) => ({
   applications: many(applications),
+  jobRegions: many(jobRegions),
+  jobStores: many(jobStores),
+}));
+
+export const regionsRelations = relations(regions, ({ many }) => ({
+  stores: many(stores),
+  jobRegions: many(jobRegions),
+}));
+
+export const jobRegionsRelations = relations(jobRegions, ({ one }) => ({
+  job: one(jobs, { fields: [jobRegions.jobId], references: [jobs.id] }),
+  region: one(regions, {
+    fields: [jobRegions.regionId],
+    references: [regions.id],
+  }),
+}));
+
+export const jobStoresRelations = relations(jobStores, ({ one }) => ({
+  job: one(jobs, { fields: [jobStores.jobId], references: [jobs.id] }),
+  store: one(stores, { fields: [jobStores.storeId], references: [stores.id] }),
 }));
 
 export const applicationsRelations = relations(applications, ({ one }) => ({
@@ -158,8 +247,14 @@ export const applicationsRelations = relations(applications, ({ one }) => ({
     fields: [applications.jobId],
     references: [jobs.id],
   }),
+  preferredStore: one(stores, {
+    fields: [applications.preferredStoreId],
+    references: [stores.id],
+  }),
 }));
 
+export type Region = typeof regions.$inferSelect;
+export type NewRegion = typeof regions.$inferInsert;
 export type Job = typeof jobs.$inferSelect;
 export type NewJob = typeof jobs.$inferInsert;
 export type Application = typeof applications.$inferSelect;
@@ -276,6 +371,10 @@ export const stores = pgTable(
     state: text('state'),
     zip: text('zip'),
     category: text('category'),
+    /** Hiring / ops region; null until HR assigns one. */
+    regionId: uuid('region_id').references(() => regions.id, {
+      onDelete: 'set null',
+    }),
     /**
      * Data-quality workflow, deliberately preserved: the store rows came from a
      * 2023 Wayback snapshot, so each field needs confirming before anyone
@@ -291,8 +390,20 @@ export const stores = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [index('stores_state_idx').on(table.state)],
+  (table) => [
+    index('stores_state_idx').on(table.state),
+    index('stores_region_id_idx').on(table.regionId),
+  ],
 );
+
+export const storesRelations = relations(stores, ({ one, many }) => ({
+  region: one(regions, {
+    fields: [stores.regionId],
+    references: [regions.id],
+  }),
+  jobStores: many(jobStores),
+  applications: many(applications),
+}));
 
 export type Store = typeof stores.$inferSelect;
 export type NewStore = typeof stores.$inferInsert;

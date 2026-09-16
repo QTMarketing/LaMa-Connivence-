@@ -4,10 +4,14 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, Check } from 'lucide-react';
 
 import ApplicationForm from '@/components/careers/ApplicationForm';
-import { getPublicJobBySlug } from '@/lib/careers/queries';
+import {
+  getEligibleStoresForJob,
+  getPublicJobBySlug,
+} from '@/lib/careers/queries';
 
 interface JobPageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ store?: string }>;
 }
 
 export const dynamic = 'force-dynamic';
@@ -28,11 +32,20 @@ export async function generateMetadata({
   };
 }
 
-export default async function JobPage({ params }: JobPageProps) {
+export default async function JobPage({ params, searchParams }: JobPageProps) {
   const { slug } = await params;
+  const { store: storeParam } = await searchParams;
   const job = await getPublicJobBySlug(slug);
 
   if (!job) notFound();
+
+  const eligibleStores = await getEligibleStoresForJob(job);
+  const parsedStoreId = storeParam ? Number.parseInt(storeParam, 10) : NaN;
+  const initialStoreId =
+    Number.isInteger(parsedStoreId) &&
+    eligibleStores.some((s) => s.id === parsedStoreId)
+      ? parsedStoreId
+      : null;
 
   const meta = [
     job.department,
@@ -130,7 +143,15 @@ export default async function JobPage({ params }: JobPageProps) {
               <h2 className="typography-h3 mb-5 text-[#1A1A1A]">
                 Apply for this role
               </h2>
-              <ApplicationForm jobId={job.id} jobTitle={job.title} />
+              <ApplicationForm
+                jobId={job.id}
+                jobTitle={job.title}
+                stores={eligibleStores}
+                initialStoreId={initialStoreId}
+                requireStore={
+                  job.locationScope !== 'chain' || Boolean(initialStoreId)
+                }
+              />
             </div>
           </div>
         </div>

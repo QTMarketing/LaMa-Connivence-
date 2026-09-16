@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 
 import { requireSection } from '@/lib/auth/server';
-import { getAllJobs } from '@/lib/careers/queries';
+import { buildLocationLabel } from '@/lib/careers/location';
+import {
+  getAllJobs,
+  getRegions,
+  getStoreOptions,
+  syncJobScopeJoins,
+} from '@/lib/careers/queries';
 import { parseJobPayload } from '@/lib/careers/validation';
 import { getDb } from '@/lib/db/client';
 import { jobs } from '@/lib/db/schema';
@@ -31,10 +37,34 @@ export async function POST(request: Request) {
   }
 
   try {
+    const regionRows = await getRegions();
+    const storeRows = await getStoreOptions();
+    const regionNames = regionRows
+      .filter((r) => parsed.value.regionIds.includes(r.id))
+      .map((r) => r.name);
+    const storeNames = storeRows
+      .filter((s) => parsed.value.storeIds.includes(s.id))
+      .map((s) => s.name);
+
+    const location = buildLocationLabel({
+      locationScope: parsed.value.locationScope,
+      regionNames,
+      storeNames,
+    });
+
+    const { regionIds, storeIds, ...jobFields } = parsed.value;
+
     const [created] = await getDb()
       .insert(jobs)
-      .values(parsed.value)
+      .values({ ...jobFields, location })
       .returning({ id: jobs.id, slug: jobs.slug });
+
+    await syncJobScopeJoins(
+      created.id,
+      parsed.value.locationScope,
+      regionIds,
+      storeIds,
+    );
 
     return NextResponse.json({ job: created }, { status: 201 });
   } catch (error) {

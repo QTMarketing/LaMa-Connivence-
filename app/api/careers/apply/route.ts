@@ -3,9 +3,14 @@ import { put } from '@vercel/blob';
 import { eq } from 'drizzle-orm';
 
 import { sendApplicationNotification } from '@/lib/careers/email';
+import {
+  getEligibleStoresForJob,
+  getJobById,
+  isStoreInJobScope,
+} from '@/lib/careers/queries';
 import { safeFilename, validateCv } from '@/lib/careers/upload';
 import { getDb, isDatabaseConfigured } from '@/lib/db/client';
-import { applications, jobs } from '@/lib/db/schema';
+import { applications, stores } from '@/lib/db/schema';
 
 // Spam guard. In-memory, so it is per-instance rather than global, which is
 // enough to blunt a single abusive client.
@@ -84,6 +89,10 @@ export async function POST(request: Request) {
   const coverLetter = readString(form, 'coverLetter', 4000);
   const jobId = readString(form, 'jobId', 64) || null;
   let jobTitle = readString(form, 'jobTitle', 200) || 'General application';
+  const preferredStoreRaw = readString(form, 'preferredStoreId', 20);
+  const preferredStoreId = preferredStoreRaw
+    ? Number.parseInt(preferredStoreRaw, 10)
+    : null;
 
   if (!name || !email || !phone) {
     return NextResponse.json(
@@ -95,6 +104,16 @@ export async function POST(request: Request) {
   if (!EMAIL_PATTERN.test(email)) {
     return NextResponse.json(
       { error: 'Please enter a valid email address.' },
+      { status: 400 },
+    );
+  }
+
+  if (
+    preferredStoreRaw &&
+    (!Number.isInteger(preferredStoreId) || (preferredStoreId ?? 0) <= 0)
+  ) {
+    return NextResponse.json(
+      { error: 'That store selection is not valid.' },
       { status: 400 },
     );
   }
@@ -117,22 +136,50 @@ export async function POST(request: Request) {
   // Trust the server's copy of the title, not the client's, and confirm the
   // posting is actually open before accepting an application for it.
   let resolvedJobId: string | null = null;
-  if (jobId) {
-    const [job] = await db
-      .select({ id: jobs.id, title: jobs.title, status: jobs.status })
-      .from(jobs)
-      .where(eq(jobs.id, jobId))
-      .limit(1);
+  let resolvedPreferredStoreId: number | null = null;
 
-    if (!job || job.status !== 'open') {
+  if (jobId) {
+    const jobView = await getJobById(jobId);
+
+    if (!jobView || jobView.status !== 'open') {
       return NextResponse.json(
         { error: 'That role is no longer accepting applications.' },
         { status: 409 },
       );
     }
 
-    resolvedJobId = job.id;
-    jobTitle = job.title;
+    resolvedJobId = jobView.id;
+    jobTitle = jobView.title;
+
+    if (preferredStoreId) {
+      const inScope = await isStoreInJobScope(jobView, preferredStoreId);
+      if (!inScope) {
+        return NextResponse.json(
+          { error: 'That store is not hiring for this role.' },
+          { status: 409 },
+        );
+      }
+      resolvedPreferredStoreId = preferredStoreId;
+    } else if (jobView.locationScope !== 'chain') {
+      // Region/store-scoped jobs should collect a preferred store when possible.
+      const eligible = await getEligibleStoresForJob(jobView);
+      if (eligible.length === 1) {
+        resolvedPreferredStoreId = eligible[0].id;
+      }
+    }
+  } else if (preferredStoreId) {
+    const [store] = await db
+      .select({ id: stores.id })
+      .from(stores)
+      .where(eq(stores.id, preferredStoreId))
+      .limit(1);
+    if (!store) {
+      return NextResponse.json(
+        { error: 'That store could not be found.' },
+        { status: 409 },
+      );
+    }
+    resolvedPreferredStoreId = store.id;
   }
 
   // The row lands first. Everything after this point can fail without losing
@@ -148,6 +195,7 @@ export async function POST(request: Request) {
         email,
         phone,
         coverLetter: coverLetter || null,
+        preferredStoreId: resolvedPreferredStoreId,
         cvFilename: hasCv ? safeFilename(cv.name) : null,
         cvContentType: cvContentType ?? null,
         cvSize: hasCv ? cv.size : null,

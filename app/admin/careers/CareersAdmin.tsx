@@ -9,6 +9,7 @@ import {
   Edit2,
   Inbox,
   Loader2,
+  MapPin,
   Plus,
   Trash2,
   X,
@@ -18,18 +19,26 @@ import {
   APPLICATION_STATUSES,
   APPLICATION_STATUS_LABELS,
   JOB_STATUSES,
+  LOCATION_SCOPE_LABELS,
   type ApplicationStatus,
   type ApplicationView,
   type EmploymentType,
   type JobStatus,
   type JobView,
+  type LocationScope,
+  type RegionView,
+  type StoreOption,
 } from '@/lib/careers/types';
 
 import JobForm, { type JobFormValues } from './JobForm';
+import JobQrPanel from './JobQrPanel';
+import RegionsPanel from './RegionsPanel';
 
 interface CareersAdminProps {
   initialJobs: JobView[];
   initialApplications: ApplicationView[];
+  initialRegions: RegionView[];
+  initialStores: StoreOption[];
 }
 
 const STATUS_STYLES: Record<JobStatus, string> = {
@@ -51,7 +60,10 @@ function emptyJob(): JobFormValues {
     slug: '',
     title: '',
     department: '',
-    location: '',
+    location: 'All locations',
+    locationScope: 'chain',
+    regionIds: [],
+    storeIds: [],
     employmentType: 'Full-time' as EmploymentType,
     status: 'draft' as JobStatus,
     payRange: '',
@@ -68,6 +80,9 @@ function toFormValues(job: JobView): JobFormValues {
     title: job.title,
     department: job.department,
     location: job.location,
+    locationScope: job.locationScope,
+    regionIds: job.regionIds,
+    storeIds: job.storeIds,
     employmentType: job.employmentType,
     status: job.status,
     payRange: job.payRange ?? '',
@@ -82,21 +97,53 @@ function toFormValues(job: JobView): JobFormValues {
 export default function CareersAdmin({
   initialJobs,
   initialApplications,
+  initialRegions,
+  initialStores,
 }: CareersAdminProps) {
-  const [tab, setTab] = useState<'jobs' | 'applications'>('jobs');
+  const [tab, setTab] = useState<'jobs' | 'applications' | 'regions'>('jobs');
   const [jobs, setJobs] = useState(initialJobs);
   const [applications, setApplications] = useState(initialApplications);
+  const [regions, setRegions] = useState(initialRegions);
+  const [stores, setStores] = useState(initialStores);
   const [editing, setEditing] = useState<{
     id: string | null;
     values: JobFormValues;
   } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [qrJobId, setQrJobId] = useState<string | null>(null);
+
+  const [filterStatus, setFilterStatus] = useState<ApplicationStatus | 'all'>(
+    'all',
+  );
+  const [filterJobId, setFilterJobId] = useState<string>('all');
+  const [filterRegionId, setFilterRegionId] = useState<string>('all');
+  const [filterStoreId, setFilterStoreId] = useState<string>('all');
 
   const newCount = useMemo(
     () => applications.filter((a) => a.status === 'new').length,
     [applications],
   );
+
+  const filteredApplications = useMemo(() => {
+    return applications.filter((a) => {
+      if (filterStatus !== 'all' && a.status !== filterStatus) return false;
+      if (filterJobId !== 'all' && a.jobId !== filterJobId) return false;
+      if (filterStoreId !== 'all') {
+        if (a.preferredStoreId !== Number(filterStoreId)) return false;
+      }
+      if (filterRegionId !== 'all') {
+        if (a.preferredStoreRegionId !== filterRegionId) return false;
+      }
+      return true;
+    });
+  }, [
+    applications,
+    filterStatus,
+    filterJobId,
+    filterRegionId,
+    filterStoreId,
+  ]);
 
   async function refreshJobs() {
     const res = await fetch('/api/admin/jobs');
@@ -106,6 +153,22 @@ export default function CareersAdmin({
   async function refreshApplications() {
     const res = await fetch('/api/admin/applications');
     if (res.ok) setApplications((await res.json()).applications);
+  }
+
+  async function createRegion(name: string): Promise<RegionView | null> {
+    setError(null);
+    const res = await fetch('/api/admin/regions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setError(data.error ?? 'Could not create region.');
+      return null;
+    }
+    setRegions((prev) => [...prev, data.region]);
+    return data.region as RegionView;
   }
 
   async function saveJob(values: JobFormValues) {
@@ -151,6 +214,9 @@ export default function CareersAdmin({
       body: JSON.stringify({
         ...job,
         payRange: job.payRange,
+        regionIds: job.regionIds,
+        storeIds: job.storeIds,
+        locationScope: job.locationScope,
         status,
       }),
     });
@@ -250,7 +316,7 @@ export default function CareersAdmin({
         <div>
           <h1 className="text-3xl font-black text-gray-900">Careers</h1>
           <p className="mt-1 text-sm text-gray-600">
-            Post and close roles, and work through applications.
+            Post by region or store, publish, and send QR codes to managers.
           </p>
         </div>
 
@@ -265,34 +331,26 @@ export default function CareersAdmin({
         )}
       </header>
 
-      <div className="mb-6 flex gap-2 border-b border-gray-200">
-        <button
+      <div className="mb-6 flex flex-wrap gap-2 border-b border-gray-200">
+        <TabButton
+          active={tab === 'jobs'}
           onClick={() => setTab('jobs')}
-          className={`flex items-center gap-2 px-4 py-3 font-bold transition-colors ${
-            tab === 'jobs'
-              ? 'border-b-2 border-primary text-primary'
-              : 'text-gray-500 hover:text-gray-800'
-          }`}
-        >
-          <Briefcase size={18} />
-          Jobs ({jobs.length})
-        </button>
-        <button
+          icon={<Briefcase size={18} />}
+          label={`Jobs (${jobs.length})`}
+        />
+        <TabButton
+          active={tab === 'applications'}
           onClick={() => setTab('applications')}
-          className={`flex items-center gap-2 px-4 py-3 font-bold transition-colors ${
-            tab === 'applications'
-              ? 'border-b-2 border-primary text-primary'
-              : 'text-gray-500 hover:text-gray-800'
-          }`}
-        >
-          <Inbox size={18} />
-          Applications ({applications.length})
-          {newCount > 0 && (
-            <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-white">
-              {newCount} new
-            </span>
-          )}
-        </button>
+          icon={<Inbox size={18} />}
+          label={`Applications (${applications.length})`}
+          badge={newCount > 0 ? `${newCount} new` : undefined}
+        />
+        <TabButton
+          active={tab === 'regions'}
+          onClick={() => setTab('regions')}
+          icon={<MapPin size={18} />}
+          label={`Regions (${regions.length})`}
+        />
       </div>
 
       {error && (
@@ -317,12 +375,25 @@ export default function CareersAdmin({
           values={editing.values}
           isEdit={Boolean(editing.id)}
           saving={busy === 'save'}
+          regions={regions}
+          stores={stores}
+          onCreateRegion={createRegion}
           onChange={(values) => setEditing({ ...editing, values })}
           onCancel={() => {
             setEditing(null);
             setError(null);
           }}
           onSubmit={saveJob}
+        />
+      )}
+
+      {tab === 'regions' && (
+        <RegionsPanel
+          regions={regions}
+          stores={stores}
+          onRegionsChange={setRegions}
+          onStoresChange={setStores}
+          onError={setError}
         />
       )}
 
@@ -355,6 +426,9 @@ export default function CareersAdmin({
                       >
                         {job.status}
                       </span>
+                      <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-700">
+                        {LOCATION_SCOPE_LABELS[job.locationScope as LocationScope]}
+                      </span>
                       {applicationCount > 0 && (
                         <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-700">
                           {applicationCount} application
@@ -382,6 +456,26 @@ export default function CareersAdmin({
                   </div>
 
                   <div className="flex shrink-0 flex-wrap items-center gap-2">
+                    {job.status !== 'open' ? (
+                      <button
+                        type="button"
+                        onClick={() => setJobStatus(job, 'open')}
+                        disabled={busy === job.id}
+                        className="rounded-lg bg-green-600 px-3 py-2 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50"
+                      >
+                        Publish
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setJobStatus(job, 'closed')}
+                        disabled={busy === job.id}
+                        className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+                      >
+                        Unpublish
+                      </button>
+                    )}
+
                     <select
                       value={job.status}
                       onChange={(e) =>
@@ -397,6 +491,16 @@ export default function CareersAdmin({
                         </option>
                       ))}
                     </select>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setQrJobId((id) => (id === job.id ? null : job.id))
+                      }
+                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+                    >
+                      QR
+                    </button>
 
                     <button
                       onClick={() =>
@@ -422,6 +526,10 @@ export default function CareersAdmin({
                     </button>
                   </div>
                 </div>
+
+                {qrJobId === job.id && (
+                  <JobQrPanel job={job} stores={stores} />
+                )}
               </article>
             );
           })}
@@ -430,13 +538,69 @@ export default function CareersAdmin({
 
       {tab === 'applications' && (
         <div className="space-y-4">
-          {applications.length === 0 && (
+          <div className="flex flex-wrap gap-3 rounded-md border border-gray-200 bg-white p-4">
+            <FilterSelect
+              label="Status"
+              value={filterStatus}
+              onChange={(v) =>
+                setFilterStatus(v as ApplicationStatus | 'all')
+              }
+              options={[
+                { value: 'all', label: 'All statuses' },
+                ...APPLICATION_STATUSES.map((s) => ({
+                  value: s,
+                  label: APPLICATION_STATUS_LABELS[s],
+                })),
+              ]}
+            />
+            <FilterSelect
+              label="Job"
+              value={filterJobId}
+              onChange={setFilterJobId}
+              options={[
+                { value: 'all', label: 'All jobs' },
+                ...jobs.map((j) => ({ value: j.id, label: j.title })),
+              ]}
+            />
+            <FilterSelect
+              label="Region"
+              value={filterRegionId}
+              onChange={(v) => {
+                setFilterRegionId(v);
+                setFilterStoreId('all');
+              }}
+              options={[
+                { value: 'all', label: 'All regions' },
+                ...regions.map((r) => ({ value: r.id, label: r.name })),
+              ]}
+            />
+            <FilterSelect
+              label="Store"
+              value={filterStoreId}
+              onChange={setFilterStoreId}
+              options={[
+                { value: 'all', label: 'All stores' },
+                ...stores
+                  .filter(
+                    (s) =>
+                      filterRegionId === 'all' ||
+                      s.regionId === filterRegionId,
+                  )
+                  .map((s) => ({
+                    value: String(s.id),
+                    label: s.name,
+                  })),
+              ]}
+            />
+          </div>
+
+          {filteredApplications.length === 0 && (
             <p className="rounded-md border border-gray-200 bg-white p-8 text-center text-gray-500">
-              No applications yet.
+              No applications match these filters.
             </p>
           )}
 
-          {applications.map((application) => (
+          {filteredApplications.map((application) => (
             <ApplicationCard
               key={application.id}
               application={application}
@@ -448,6 +612,68 @@ export default function CareersAdmin({
         </div>
       )}
     </div>
+  );
+}
+
+function TabButton({
+  active,
+  onClick,
+  icon,
+  label,
+  badge,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+  badge?: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-2 px-4 py-3 font-bold transition-colors ${
+        active
+          ? 'border-b-2 border-primary text-primary'
+          : 'text-gray-500 hover:text-gray-800'
+      }`}
+    >
+      {icon}
+      {label}
+      {badge && (
+        <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-white">
+          {badge}
+        </span>
+      )}
+    </button>
+  );
+}
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ value: string; label: string }>;
+}) {
+  return (
+    <label className="text-xs font-semibold text-gray-500">
+      {label}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="mt-1 block rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-800"
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
@@ -489,6 +715,13 @@ function ApplicationCard({
             {application.jobTitle}
           </p>
 
+          {application.preferredStoreName && (
+            <p className="mb-1 text-sm text-gray-600">
+              <MapPin size={14} className="mr-1 inline" />
+              Preferred store: {application.preferredStoreName}
+            </p>
+          )}
+
           <p className="text-sm text-gray-600">
             <a
               href={`mailto:${application.email}`}
@@ -497,10 +730,7 @@ function ApplicationCard({
               {application.email}
             </a>
             {' · '}
-            <a
-              href={`tel:${application.phone}`}
-              className="hover:underline"
-            >
+            <a href={`tel:${application.phone}`} className="hover:underline">
               {application.phone}
             </a>
           </p>

@@ -4,7 +4,7 @@ import { Database } from 'lucide-react';
 import AdminShell from '@/components/admin/AdminShell';
 import { getSession } from '@/lib/auth/server';
 import { canAccessSection } from '@/lib/auth/session';
-import { getApplications, getAllJobs } from '@/lib/careers/queries';
+import { getApplications, getAllJobs, getRegions, getStoreOptions } from '@/lib/careers/queries';
 import type { ApplicationView, JobView } from '@/lib/careers/types';
 import { isDatabaseConfigured } from '@/lib/db/client';
 import { ADMIN_SECTIONS } from '@/lib/db/schema';
@@ -23,6 +23,8 @@ export default async function AdminCareersPage() {
 
   let jobs: JobView[] = [];
   let applications: ApplicationView[] = [];
+  let regions: Awaited<ReturnType<typeof getRegions>> = [];
+  let stores: Awaited<ReturnType<typeof getStoreOptions>> = [];
   let loadError: string | null = null;
 
   if (!isDatabaseConfigured()) {
@@ -30,9 +32,11 @@ export default async function AdminCareersPage() {
       'DATABASE_URL is not set, so there is nothing to edit yet. Add the Neon connection string to .env.local, then run the migrations and the seed.';
   } else {
     try {
-      [jobs, applications] = await Promise.all([
+      [jobs, applications, regions, stores] = await Promise.all([
         getAllJobs(),
         getApplications(),
+        getRegions(),
+        getStoreOptions(),
       ]);
     } catch (error) {
       console.error('[admin-careers] Load failed:', error);
@@ -70,7 +74,12 @@ npm run db:seed`}
           </div>
         </div>
       ) : (
-        <CareersAdmin initialJobs={jobs} initialApplications={applications} />
+        <CareersAdmin
+          initialJobs={jobs}
+          initialApplications={applications}
+          initialRegions={regions}
+          initialStores={stores}
+        />
       )}
     </AdminShell>
   );

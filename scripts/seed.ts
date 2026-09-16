@@ -16,6 +16,7 @@ import { eq, sql } from 'drizzle-orm';
 
 import { countWords } from '../lib/blog/types';
 import { BLOG_SEED } from '../lib/blogData';
+import { STATE_REGION_SEED } from '../lib/careers/location';
 import { JOB_SEED } from '../lib/careersData';
 import { isStockPlaceholder } from '../lib/content/imageUpload';
 import { getDb } from '../lib/db/client';
@@ -27,6 +28,7 @@ import {
   heroSlides,
   jobs,
   products,
+  regions,
   siteSettings,
   stores,
   users,
@@ -85,6 +87,7 @@ async function seedJobs() {
         title: job.title,
         department: job.department,
         location: job.location,
+        locationScope: job.locationScope ?? 'chain',
         employmentType: job.employmentType,
         status: job.status,
         payRange: job.payRange,
@@ -102,6 +105,54 @@ async function seedJobs() {
         : `skipped  job ${job.slug} (already exists)`,
     );
   }
+}
+
+/**
+ * Ensures state-based regions exist and assigns stores whose state matches.
+ * Does not overwrite a store that already has a region_id (HR may have moved it).
+ */
+async function seedRegions() {
+  const db = getDb();
+  const regionByState = new Map<string, string>();
+
+  for (const seed of STATE_REGION_SEED) {
+    const existing = await db
+      .select({ id: regions.id })
+      .from(regions)
+      .where(eq(regions.slug, seed.slug))
+      .limit(1);
+
+    let regionId = existing[0]?.id;
+    if (!regionId) {
+      const [created] = await db
+        .insert(regions)
+        .values({ name: seed.name, slug: seed.slug })
+        .returning({ id: regions.id });
+      regionId = created.id;
+      console.log(`created  region ${seed.slug}`);
+    } else {
+      console.log(`skipped  region ${seed.slug} (already exists)`);
+    }
+    regionByState.set(seed.stateCode, regionId);
+  }
+
+  const storeRows = await db
+    .select({ id: stores.id, state: stores.state, regionId: stores.regionId })
+    .from(stores);
+
+  let assigned = 0;
+  for (const store of storeRows) {
+    if (store.regionId || !store.state) continue;
+    const regionId = regionByState.get(store.state.toUpperCase());
+    if (!regionId) continue;
+    await db
+      .update(stores)
+      .set({ regionId, updatedAt: new Date() })
+      .where(eq(stores.id, store.id));
+    assigned += 1;
+  }
+
+  console.log(`assigned ${assigned} stores to regions by state`);
 }
 
 /**
@@ -350,6 +401,7 @@ async function main() {
 
   await seedJobs();
   await seedContent();
+  await seedRegions();
 
   if (generated.length > 0) {
     console.log('\nGenerated passwords — shown once, store them now:');

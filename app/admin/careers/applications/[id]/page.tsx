@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
-import { ArrowLeft, Download, Mail, Phone } from 'lucide-react';
+import { ArrowLeft, Download, Mail, MapPin, Phone } from 'lucide-react';
 
 import AdminShell from '@/components/admin/AdminShell';
 import { getSession } from '@/lib/auth/server';
@@ -9,7 +9,7 @@ import { canAccessSection } from '@/lib/auth/session';
 import { toApplicationView } from '@/lib/careers/queries';
 import { APPLICATION_STATUS_LABELS } from '@/lib/careers/types';
 import { getDb, isDatabaseConfigured } from '@/lib/db/client';
-import { ADMIN_SECTIONS, applications } from '@/lib/db/schema';
+import { ADMIN_SECTIONS, applications, stores } from '@/lib/db/schema';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,14 +29,24 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   if (!isDatabaseConfigured()) notFound();
 
   const [row] = await getDb()
-    .select()
+    .select({
+      application: applications,
+      storeName: stores.name,
+      storeRegionId: stores.regionId,
+    })
     .from(applications)
+    .leftJoin(stores, eq(applications.preferredStoreId, stores.id))
     .where(eq(applications.id, id))
     .limit(1);
 
   if (!row) notFound();
 
-  const application = toApplicationView(row);
+  const application = toApplicationView(
+    row.application,
+    row.storeName
+      ? { name: row.storeName, regionId: row.storeRegionId }
+      : null,
+  );
   const sections =
     session.role === 'owner' ? [...ADMIN_SECTIONS] : session.permissions;
 
@@ -92,6 +102,14 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 {application.phone}
               </a>
             </div>
+            {application.preferredStoreName && (
+              <div className="flex items-center gap-3">
+                <MapPin size={16} className="shrink-0 text-gray-400" />
+                <span className="font-semibold text-gray-900">
+                  Preferred store: {application.preferredStoreName}
+                </span>
+              </div>
+            )}
           </dl>
 
           {application.coverLetter && (

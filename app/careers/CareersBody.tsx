@@ -1,17 +1,18 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight, MapPin, CalendarClock, TrendingUp } from 'lucide-react';
 
-import type { JobView } from '@/lib/careers/types';
+import type { JobView, RegionView } from '@/lib/careers/types';
 
 const BENEFITS = [
   {
     icon: MapPin,
     title: 'Work near home',
     description:
-      'We run 96 stores across Texas, Louisiana, Oklahoma, Arkansas, Mississippi and New Mexico, so there is usually one a short drive away.',
+      'We run stores across Texas, Louisiana, Oklahoma, Arkansas, Mississippi and New Mexico, so there is usually one a short drive away.',
   },
   {
     icon: CalendarClock,
@@ -27,10 +28,28 @@ const BENEFITS = [
   },
 ];
 
-export default function CareersBody({ jobs }: { jobs: JobView[] }) {
+export default function CareersBody({
+  jobs,
+  regions = [],
+}: {
+  jobs: JobView[];
+  regions?: RegionView[];
+}) {
+  const [regionFilter, setRegionFilter] = useState<string>('all');
+
+  const filteredJobs = useMemo(() => {
+    if (regionFilter === 'all') return jobs;
+    return jobs.filter((job) => {
+      if (job.locationScope === 'chain') return true;
+      if (job.locationScope === 'region') {
+        return job.regionIds.includes(regionFilter);
+      }
+      return job.stores.some((s) => s.regionId === regionFilter);
+    });
+  }, [jobs, regionFilter]);
+
   return (
     <>
-      {/* Why work here */}
       <section className="bg-[#F7F7F7] px-4 py-12 md:px-6 md:py-16">
         <div className="container-standard">
           <motion.h2
@@ -71,7 +90,6 @@ export default function CareersBody({ jobs }: { jobs: JobView[] }) {
         </div>
       </section>
 
-      {/* Open positions */}
       <section
         id="openings"
         className="scroll-mt-24 bg-white px-4 py-12 md:px-6 md:py-16"
@@ -82,7 +100,7 @@ export default function CareersBody({ jobs }: { jobs: JobView[] }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="mb-10 max-w-2xl"
+            className="mb-8 max-w-2xl"
           >
             <h2 className="typography-h2 mb-3 text-[#1A1A1A]">
               Open positions
@@ -94,8 +112,38 @@ export default function CareersBody({ jobs }: { jobs: JobView[] }) {
             </p>
           </motion.div>
 
+          {regions.length > 0 && jobs.length > 0 && (
+            <div className="mb-8 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setRegionFilter('all')}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                  regionFilter === 'all'
+                    ? 'bg-[#FF6B35] text-[#1A1A1A]'
+                    : 'bg-[#F1F1F1] text-[#4A5568] hover:bg-[#E2E8F0]'
+                }`}
+              >
+                All regions
+              </button>
+              {regions.map((region) => (
+                <button
+                  key={region.id}
+                  type="button"
+                  onClick={() => setRegionFilter(region.id)}
+                  className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                    regionFilter === region.id
+                      ? 'bg-[#FF6B35] text-[#1A1A1A]'
+                      : 'bg-[#F1F1F1] text-[#4A5568] hover:bg-[#E2E8F0]'
+                  }`}
+                >
+                  {region.name}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="space-y-4">
-            {jobs.map((job, index) => (
+            {filteredJobs.map((job, index) => (
               <motion.article
                 key={job.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -146,11 +194,17 @@ export default function CareersBody({ jobs }: { jobs: JobView[] }) {
                 </div>
               </motion.article>
             ))}
+
+            {filteredJobs.length === 0 && jobs.length > 0 && (
+              <p className="rounded-md border border-[#E2E8F0] bg-[#F7F7F7] p-6 text-[#444444]">
+                No openings in that region right now. Try another region or
+                send your details below.
+              </p>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Open application */}
       <section className="bg-[#F7F7F7] px-4 py-12 md:px-6 md:py-16">
         <div className="container-standard">
           <motion.div

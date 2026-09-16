@@ -43,6 +43,13 @@
       "when": 1788969168450,
       "tag": "0005_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789162500000,
+      "tag": "0006_careers_regions",
+      "breakpoints": true
     }
   ]
 }

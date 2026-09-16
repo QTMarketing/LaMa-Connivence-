@@ -8,11 +8,18 @@ import {
   MAX_CV_BYTES,
   MAX_CV_LABEL,
 } from '@/lib/careers/upload';
+import type { StoreOption } from '@/lib/careers/types';
 
 interface ApplicationFormProps {
   /** Omitted for a general application not tied to a posting. */
   jobId?: string;
   jobTitle: string;
+  /** Stores the candidate may choose (already filtered to job scope). */
+  stores?: StoreOption[];
+  /** From ?store= QR deep link. */
+  initialStoreId?: number | null;
+  /** When true, preferred store is required. */
+  requireStore?: boolean;
 }
 
 const inputClass =
@@ -23,10 +30,24 @@ const labelClass = 'mb-2 block text-sm font-semibold text-[#1A1A1A]';
 export default function ApplicationForm({
   jobId,
   jobTitle,
+  stores = [],
+  initialStoreId = null,
+  requireStore = false,
 }: ApplicationFormProps) {
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
   const [error, setError] = useState<string | null>(null);
   const [cvName, setCvName] = useState<string | null>(null);
+  const [preferredStoreId, setPreferredStoreId] = useState<string>(
+    initialStoreId && stores.some((s) => s.id === initialStoreId)
+      ? String(initialStoreId)
+      : stores.length === 1
+        ? String(stores[0].id)
+        : '',
+  );
+
+  const showStoreField = stores.length > 0;
+  const storeRequired =
+    requireStore || Boolean(initialStoreId) || stores.length === 1;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -41,8 +62,16 @@ export default function ApplicationForm({
       return;
     }
 
+    if (storeRequired && !preferredStoreId) {
+      setError('Please choose the store you want to work at.');
+      return;
+    }
+
     if (jobId) formData.set('jobId', jobId);
     formData.set('jobTitle', jobTitle);
+    if (preferredStoreId) {
+      formData.set('preferredStoreId', preferredStoreId);
+    }
 
     setStatus('sending');
 
@@ -66,6 +95,13 @@ export default function ApplicationForm({
 
       form.reset();
       setCvName(null);
+      setPreferredStoreId(
+        initialStoreId && stores.some((s) => s.id === initialStoreId)
+          ? String(initialStoreId)
+          : stores.length === 1
+            ? String(stores[0].id)
+            : '',
+      );
       setStatus('sent');
     } catch (err) {
       console.error('Application submit failed:', err);
@@ -152,6 +188,40 @@ export default function ApplicationForm({
             className={inputClass}
           />
         </div>
+
+        {showStoreField && (
+          <div className="md:col-span-2">
+            <label htmlFor="preferredStoreId" className={labelClass}>
+              Preferred store
+              {storeRequired && <span className="text-[#FF6B35]"> *</span>}
+            </label>
+            <select
+              id="preferredStoreId"
+              name="preferredStoreId"
+              value={preferredStoreId}
+              onChange={(e) => setPreferredStoreId(e.target.value)}
+              required={storeRequired}
+              className={inputClass}
+            >
+              <option value="">
+                {storeRequired ? 'Select a store' : 'Any / not sure yet'}
+              </option>
+              {stores.map((store) => (
+                <option key={store.id} value={store.id}>
+                  {store.name}
+                  {store.city || store.state
+                    ? ` — ${[store.city, store.state].filter(Boolean).join(', ')}`
+                    : ''}
+                </option>
+              ))}
+            </select>
+            {initialStoreId && preferredStoreId === String(initialStoreId) && (
+              <p className="mt-2 text-xs text-[#4A5568]">
+                Pre-selected from the store QR code you scanned.
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="md:col-span-2">
           <label htmlFor="coverLetter" className={labelClass}>

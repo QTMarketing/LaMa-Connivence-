@@ -2,7 +2,13 @@ import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 
 import { requireSection } from '@/lib/auth/server';
-import { getJobById } from '@/lib/careers/queries';
+import { buildLocationLabel } from '@/lib/careers/location';
+import {
+  getJobById,
+  getRegions,
+  getStoreOptions,
+  syncJobScopeJoins,
+} from '@/lib/careers/queries';
 import { parseJobPayload } from '@/lib/careers/validation';
 import { getDb } from '@/lib/db/client';
 import { jobs } from '@/lib/db/schema';
@@ -41,15 +47,39 @@ export async function PUT(request: Request, { params }: Params) {
   }
 
   try {
+    const regionRows = await getRegions();
+    const storeRows = await getStoreOptions();
+    const regionNames = regionRows
+      .filter((r) => parsed.value.regionIds.includes(r.id))
+      .map((r) => r.name);
+    const storeNames = storeRows
+      .filter((s) => parsed.value.storeIds.includes(s.id))
+      .map((s) => s.name);
+
+    const location = buildLocationLabel({
+      locationScope: parsed.value.locationScope,
+      regionNames,
+      storeNames,
+    });
+
+    const { regionIds, storeIds, ...jobFields } = parsed.value;
+
     const [updated] = await getDb()
       .update(jobs)
-      .set({ ...parsed.value, updatedAt: new Date() })
+      .set({ ...jobFields, location, updatedAt: new Date() })
       .where(eq(jobs.id, id))
       .returning({ id: jobs.id, slug: jobs.slug });
 
     if (!updated) {
       return NextResponse.json({ error: 'Job not found.' }, { status: 404 });
     }
+
+    await syncJobScopeJoins(
+      id,
+      parsed.value.locationScope,
+      regionIds,
+      storeIds,
+    );
 
     return NextResponse.json({ job: updated });
   } catch (error) {
@@ -75,7 +105,7 @@ export async function DELETE(_request: Request, { params }: Params) {
 
   try {
     // Applications keep their job_title snapshot and survive this; the FK is
-    // ON DELETE SET NULL.
+    // ON DELETE SET NULL. Join rows cascade away with the job.
     const [deleted] = await getDb()
       .delete(jobs)
       .where(eq(jobs.id, id))
