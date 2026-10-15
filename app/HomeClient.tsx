@@ -7,21 +7,27 @@ import Image from 'next/image';
 import { readingMinutes, type BlogView } from '@/lib/blog/types';
 import { type Deal } from '@/lib/dealsData';
 import type { HeroSlideView } from '@/lib/settings/queries';
+import type { OpenJobsResult } from '@/lib/careers/queries';
 import { CAMPAIGN } from '@/lib/campaignImages';
 import { useState, useEffect, useLayoutEffect } from 'react';
 import { DealCountdownBadge } from '@/components/DealCountdownBadge';
 import HeroCampaignBand from '@/components/HeroCampaignBand';
+import HiringPopup from '@/components/careers/HiringPopup';
 
 interface HomeClientProps {
   promoSlides: Deal[];
   blogCards: BlogView[];
   heroSlides: HeroSlideView[];
+  hiring: OpenJobsResult;
+  hiringQaReadOnly: boolean;
 }
 
 export default function HomeClient({
   promoSlides,
   blogCards,
   heroSlides,
+  hiring,
+  hiringQaReadOnly,
 }: HomeClientProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -110,6 +116,7 @@ export default function HomeClient({
 
   return (
     <>
+      <HiringPopup result={hiring} qaReadOnly={hiringQaReadOnly} />
     <div className="min-h-screen bg-white pb-20 md:pb-0">
       {/* Campaign band — see ART_DIRECTION.md. Copy and price come from
           hero_slides so Monday coffee deals / combo pricing can change without

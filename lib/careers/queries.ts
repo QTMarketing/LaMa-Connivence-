@@ -194,6 +194,26 @@ function seedJobView(job: (typeof JOB_SEED)[number]): JobView {
 // Public reads
 // ---------------------------------------------------------------------------
 
+export type OpenJobsResult =
+  | { status: 'ready'; jobs: JobView[] }
+  | { status: 'unavailable'; jobs: [] };
+
+/** The homepage must never advertise seed roles when the jobs database is down. */
+export async function getOpenJobsResult(): Promise<OpenJobsResult> {
+  try {
+    const rows = await getDb()
+      .select()
+      .from(jobs)
+      .where(eq(jobs.status, 'open'))
+      .orderBy(desc(jobs.postedAt));
+    const { regionsByJob, storesByJob } = await loadJobExtras(rows.map((row) => row.id));
+    return { status: 'ready', jobs: attachExtras(rows, regionsByJob, storesByJob) };
+  } catch (error) {
+    console.error('[careers] Could not load current openings:', error);
+    return { status: 'unavailable', jobs: [] };
+  }
+}
+
 export async function getOpenJobs(): Promise<JobView[]> {
   return publicRead(
     'getOpenJobs',
