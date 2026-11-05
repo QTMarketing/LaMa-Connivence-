@@ -20,6 +20,8 @@ interface ApplicationFormProps {
   initialStoreId?: number | null;
   /** When true, preferred store is required. */
   requireStore?: boolean;
+  /** Popup and general applications: the person types the role. */
+  askPosition?: boolean;
 }
 
 const inputClass =
@@ -33,8 +35,10 @@ export default function ApplicationForm({
   stores = [],
   initialStoreId = null,
   requireStore = false,
+  askPosition = false,
 }: ApplicationFormProps) {
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
+  const [sentTitle, setSentTitle] = useState(jobTitle);
   const [error, setError] = useState<string | null>(null);
   const [cvName, setCvName] = useState<string | null>(null);
   const [preferredStoreId, setPreferredStoreId] = useState<string>(
@@ -67,8 +71,18 @@ export default function ApplicationForm({
       return;
     }
 
+    const positionValue = formData.get('position');
+    const typedPosition =
+      typeof positionValue === 'string' ? positionValue.trim().slice(0, 200) : '';
+    const resolvedTitle = askPosition ? typedPosition : jobTitle;
+    if (!resolvedTitle) {
+      setError('Tell us which position you want.');
+      return;
+    }
+
     if (jobId) formData.set('jobId', jobId);
-    formData.set('jobTitle', jobTitle);
+    formData.set('jobTitle', resolvedTitle);
+    setSentTitle(resolvedTitle);
     if (preferredStoreId) {
       formData.set('preferredStoreId', preferredStoreId);
     }
@@ -123,7 +137,7 @@ export default function ApplicationForm({
         </span>
         <h3 className="typography-h4 mb-2 text-[#1A1A1A]">Application sent</h3>
         <p className="typography-body mx-auto max-w-md text-[#444444]">
-          Thanks for applying for {jobTitle}. Our hiring team reviews every
+          Thanks for applying for {sentTitle}. Our hiring team reviews every
           application and will get in touch if you are a fit.
         </p>
         <button
@@ -141,9 +155,27 @@ export default function ApplicationForm({
     <form
       onSubmit={handleSubmit}
       className="rounded-md border border-[#E2E8F0] bg-white p-6 md:p-8"
-      aria-label={`Application form for ${jobTitle}`}
+      aria-label={askPosition ? 'Application form' : `Application form for ${jobTitle}`}
     >
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        {askPosition && (
+          <div className="md:col-span-2">
+            <label htmlFor="position" className={labelClass}>
+              Position <span className="text-[#FF6B35]">*</span>
+            </label>
+            <input
+              id="position"
+              name="position"
+              type="text"
+              required
+              maxLength={200}
+              placeholder="Store Associate, Shift Manager, or another role"
+              autoComplete="organization-title"
+              className={inputClass}
+            />
+          </div>
+        )}
+
         <div>
           <label htmlFor="name" className={labelClass}>
             Full name <span className="text-[#FF6B35]">*</span>

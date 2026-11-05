@@ -88,7 +88,14 @@ export async function POST(request: Request) {
   const phone = readString(form, 'phone', 40);
   const coverLetter = readString(form, 'coverLetter', 4000);
   const jobId = readString(form, 'jobId', 64) || null;
-  let jobTitle = readString(form, 'jobTitle', 200) || 'General application';
+  let jobTitle = readString(form, 'jobTitle', 200);
+  if (!jobId && !jobTitle) {
+    return NextResponse.json(
+      { error: 'Tell us which position you are applying for.' },
+      { status: 400 },
+    );
+  }
+  if (!jobTitle) jobTitle = 'General application';
   const preferredStoreRaw = readString(form, 'preferredStoreId', 20);
   const preferredStoreId = preferredStoreRaw
     ? Number.parseInt(preferredStoreRaw, 10)

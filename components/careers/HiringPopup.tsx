@@ -70,7 +70,7 @@ export default function HiringPopup({ qaReadOnly = false }: { qaReadOnly?: boole
               Local QA preview · applications disabled
             </p>
           ) : (
-            <ApplicationForm jobTitle="a role at LaMa" />
+            <ApplicationForm askPosition jobTitle="a role at LaMa" />
           )}
         </div>
       </div>
