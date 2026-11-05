@@ -158,24 +158,6 @@ export default function ApplicationForm({
       aria-label={askPosition ? 'Application form' : `Application form for ${jobTitle}`}
     >
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-        {askPosition && (
-          <div className="md:col-span-2">
-            <label htmlFor="position" className={labelClass}>
-              Position <span className="text-[#FF6B35]">*</span>
-            </label>
-            <input
-              id="position"
-              name="position"
-              type="text"
-              required
-              maxLength={200}
-              placeholder="Store Associate, Shift Manager, or another role"
-              autoComplete="organization-title"
-              className={inputClass}
-            />
-          </div>
-        )}
-
         <div>
           <label htmlFor="name" className={labelClass}>
             Full name <span className="text-[#FF6B35]">*</span>
@@ -220,6 +202,24 @@ export default function ApplicationForm({
             className={inputClass}
           />
         </div>
+
+        {askPosition && (
+          <div className="md:col-span-2">
+            <label htmlFor="position" className={labelClass}>
+              Position <span className="text-[#FF6B35]">*</span>
+            </label>
+            <input
+              id="position"
+              name="position"
+              type="text"
+              required
+              maxLength={200}
+              placeholder="Store Associate, Shift Manager, or another role"
+              autoComplete="organization-title"
+              className={inputClass}
+            />
+          </div>
+        )}
 
         {showStoreField && (
           <div className="md:col-span-2">
