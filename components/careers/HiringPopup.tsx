@@ -1,14 +1,17 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
-import { ArrowRight, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
+import ApplicationForm from '@/components/careers/ApplicationForm';
 import type { OpenJobsResult } from '@/lib/careers/queries';
 
 export default function HiringPopup({ result, qaReadOnly = false }: { result: OpenJobsResult; qaReadOnly?: boolean }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [dismissed, setDismissed] = useState(false);
+  const openJobs = result.status === 'ready' ? result.jobs : [];
+  const [selectedId, setSelectedId] = useState<string | null>(openJobs[0]?.id ?? null);
+  const selected = openJobs.find((job) => job.id === selectedId) ?? openJobs[0] ?? null;
 
   useEffect(() => {
     if (dismissed) return;
@@ -36,7 +39,7 @@ export default function HiringPopup({ result, qaReadOnly = false }: { result: Op
       onClick={(event) => {
         if (event.target === event.currentTarget) event.currentTarget.close();
       }}
-      className="fixed inset-0 m-auto w-[calc(100%-1.5rem)] max-w-[690px] max-h-[calc(100dvh-1.5rem)] overflow-hidden rounded-sm bg-white p-0 text-[#1A1A1A] shadow-[0_30px_90px_rgba(0,0,0,0.35)] backdrop:bg-[#10100f]/65 md:max-h-[calc(100dvh-3rem)]"
+      className="fixed inset-0 m-auto w-[calc(100%-1.5rem)] max-w-[760px] max-h-[calc(100dvh-1.5rem)] overflow-hidden rounded-sm bg-white p-0 text-[#1A1A1A] shadow-[0_30px_90px_rgba(0,0,0,0.35)] backdrop:bg-[#10100f]/65 md:max-h-[calc(100dvh-3rem)]"
     >
       <div className="flex max-h-[calc(100dvh-1.5rem)] flex-col md:max-h-[calc(100dvh-3rem)]">
         <div className="relative shrink-0 bg-[#252923] px-6 pb-7 pt-9 text-white md:px-10 md:pb-8 md:pt-10">
@@ -56,7 +59,7 @@ export default function HiringPopup({ result, qaReadOnly = false }: { result: Op
             Your next shift starts here.
           </h2>
           <p id="hiring-popup-intro" className="mt-3 max-w-[470px] text-sm leading-relaxed text-[#E7E6E1] md:text-base">
-            Pick an opening, see the role, and apply in a few minutes.
+            Pick an opening and send your application here.
           </p>
         </div>
 
@@ -71,35 +74,51 @@ export default function HiringPopup({ result, qaReadOnly = false }: { result: Op
               <h3 className="text-xl font-bold">Openings are temporarily unavailable</h3>
               <p className="mt-2 text-sm leading-relaxed text-[#555]">We cannot load the current jobs right now. Please check back later.</p>
             </div>
-          ) : result.jobs.length === 0 ? (
+          ) : openJobs.length === 0 ? (
             <div className="py-7" role="status">
               <h3 className="text-xl font-bold">No roles are open right now</h3>
               <p className="mt-2 text-sm leading-relaxed text-[#555]">You can still send us your details for future openings.</p>
-              <Link href="/careers/apply" className="mt-5 inline-flex min-h-11 items-center gap-2 rounded bg-[#E95E27] px-5 py-2 font-bold text-white hover:bg-[#C74717]">
-                Send a general application <ArrowRight aria-hidden="true" size={18} />
-              </Link>
             </div>
           ) : (
             <ul className="divide-y divide-[#E6E3DF]">
-              {result.jobs.map((job) => (
-                <li key={job.id} className="flex flex-col gap-3 py-5 first:pt-4 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
-                  <div className="min-w-0">
-                    <h3 className="text-lg font-extrabold leading-tight tracking-[-0.02em] md:text-xl">{job.title}</h3>
-                    <p className="mt-1 text-sm text-[#555]">
-                      {job.location} <span aria-hidden="true">·</span> {job.employmentType}
-                      {job.payRange ? <> <span aria-hidden="true">·</span> {job.payRange}</> : null}
-                    </p>
-                  </div>
-                  <Link
-                    href={`/careers/${encodeURIComponent(job.slug)}#apply`}
-                    className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 self-start rounded bg-[#E95E27] px-5 py-2 font-bold text-white transition-colors hover:bg-[#C74717] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E95E27] sm:self-auto"
-                    aria-label={`Apply for ${job.title}`}
-                  >
-                    Apply <ArrowRight aria-hidden="true" size={17} />
-                  </Link>
-                </li>
-              ))}
+              {openJobs.map((job) => {
+                const active = job.id === selected?.id;
+                return (
+                  <li key={job.id} className="flex flex-col gap-3 py-5 first:pt-4 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-extrabold leading-tight tracking-[-0.02em] md:text-xl">{job.title}</h3>
+                      <p className="mt-1 text-sm text-[#555]">
+                        {job.location} <span aria-hidden="true">·</span> {job.employmentType}
+                        {job.payRange ? <> <span aria-hidden="true">·</span> {job.payRange}</> : null}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => setSelectedId(job.id)}
+                      className={`inline-flex min-h-11 shrink-0 items-center justify-center self-start rounded px-5 py-2 font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E95E27] sm:self-auto ${
+                        active ? 'bg-[#1A1A1A] text-white' : 'bg-[#E95E27] text-white hover:bg-[#C74717]'
+                      }`}
+                    >
+                      {active ? 'Applying' : 'Apply'}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
+          )}
+
+          {!qaReadOnly && result.status !== 'unavailable' && (
+            <div className="mt-2 border-t border-[#E6E3DF] pt-6">
+              <h3 className="mb-4 text-xl font-extrabold tracking-[-0.02em]">
+                {selected ? `Apply for ${selected.title}` : 'Send a general application'}
+              </h3>
+              <ApplicationForm
+                key={selected?.id ?? 'general'}
+                jobId={selected?.id}
+                jobTitle={selected?.title ?? 'General application'}
+              />
+            </div>
           )}
         </div>
       </div>
