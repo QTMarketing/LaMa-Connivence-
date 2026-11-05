@@ -36,7 +36,7 @@ export default function GeneralApplicationPage() {
 
       <section className="px-4 py-12 md:px-6 md:py-16">
         <div className="container-standard max-w-2xl">
-          <ApplicationForm jobTitle="General application" />
+          <ApplicationForm askPosition jobTitle="General application" />
         </div>
       </section>
     </div>
