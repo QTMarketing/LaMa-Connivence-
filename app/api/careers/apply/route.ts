@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { eq } from 'drizzle-orm';
 
+import { careersBlobAuth } from '@/lib/careers/blobAuth';
 import { sendApplicationNotification } from '@/lib/careers/email';
 import {
   getEligibleStoresForJob,
@@ -223,21 +224,23 @@ export async function POST(request: Request) {
   // Upload second, then attach the URL to the saved row.
   let storedFilename: string | null = hasCv ? safeFilename(cv.name) : null;
   if (hasCv) {
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    const blobAuth = careersBlobAuth();
+    if (!blobAuth) {
       console.error(
-        `[careers-apply] BLOB_READ_WRITE_TOKEN is unset; application ${applicationId} saved without its CV.`,
+        `[careers-apply] Private careers blob credentials are unset; application ${applicationId} saved without its CV.`,
       );
       storedFilename = null;
     } else {
       try {
+        const cvBytes = Buffer.from(await cv.arrayBuffer());
         const blob = await put(
           `careers/${applicationId}/${safeFilename(cv.name)}`,
-          cv,
+          cvBytes,
           {
-            access: 'public',
+            access: 'private',
             contentType: cvContentType,
-            // Keep the path exactly as given so the gated download can find it.
             addRandomSuffix: false,
+            ...blobAuth,
           },
         );
 

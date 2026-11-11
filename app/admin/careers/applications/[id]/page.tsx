@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
-import { ArrowLeft, Download, Mail, MapPin, Phone } from 'lucide-react';
+import { ArrowLeft, FileText, Mail, MapPin, Phone } from 'lucide-react';
 
 import AdminShell from '@/components/admin/AdminShell';
 import { getSession } from '@/lib/auth/server';
@@ -137,10 +137,12 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           {application.hasCv ? (
             <a
               href={`/api/admin/applications/${application.id}/cv`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 font-bold text-white transition-opacity hover:opacity-90"
             >
-              <Download size={18} />
-              Download {application.cvFilename ?? 'CV'}
+              <FileText size={18} />
+              View {application.cvFilename ?? 'CV'}
             </a>
           ) : (
             <p className="text-sm text-gray-500">No CV was attached.</p>

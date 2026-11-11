@@ -7,7 +7,7 @@ import {
   AlertCircle,
   Briefcase,
   Check,
-  Download,
+  FileText,
   Edit2,
   Inbox,
   Loader2,
@@ -809,10 +809,12 @@ function ApplicationCard({
           {application.hasCv ? (
             <a
               href={`/api/admin/applications/${application.id}/cv`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
             >
-              <Download size={15} />
-              {application.cvFilename ?? 'Download CV'}
+              <FileText size={15} />
+              View {application.cvFilename ?? 'CV'}
             </a>
           ) : (
             <span className="rounded-lg border border-dashed border-gray-200 px-3 py-2 text-center text-xs text-gray-500">
