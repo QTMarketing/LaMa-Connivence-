@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import {
   AlertCircle,
   Briefcase,
@@ -702,7 +703,12 @@ function ApplicationCard({
         <div className="min-w-0">
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <h3 className="text-lg font-bold text-gray-900">
-              {application.name}
+              <Link
+                href={`/admin/careers/applications/${application.id}`}
+                className="hover:text-primary hover:underline"
+              >
+                {application.name}
+              </Link>
             </h3>
             <span
               className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${APPLICATION_STATUS_STYLES[application.status]}`}
@@ -713,6 +719,14 @@ function ApplicationCard({
 
           <p className="mb-1 text-sm font-semibold text-gray-700">
             {application.jobTitle}
+          </p>
+          <p className="mb-2">
+            <Link
+              href={`/admin/careers/applications/${application.id}`}
+              className="text-sm font-semibold text-primary hover:underline"
+            >
+              View full details
+            </Link>
           </p>
 
           {application.preferredStoreName && (
