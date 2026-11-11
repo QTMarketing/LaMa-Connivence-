@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   AlertCircle,
   Briefcase,
@@ -692,19 +693,48 @@ function ApplicationCard({
   ) => Promise<void>;
   onDelete: (application: ApplicationView) => Promise<void>;
 }) {
+  const router = useRouter();
+  const detailsHref = `/admin/careers/applications/${application.id}`;
   const [notes, setNotes] = useState(application.notes ?? '');
   const [notesSaved, setNotesSaved] = useState(false);
 
   const notesDirty = notes !== (application.notes ?? '');
 
+  const openDetails = () => {
+    router.push(detailsHref);
+  };
+
+  const isCardControl = (target: EventTarget | null) => {
+    if (!(target instanceof Element)) return false;
+    return Boolean(
+      target.closest('a, button, input, textarea, select, summary, label'),
+    );
+  };
+
   return (
-    <article className="rounded-md border border-gray-200 bg-white p-5">
+    <article
+      role="link"
+      tabIndex={0}
+      aria-label={`Open application from ${application.name}`}
+      onClick={(event) => {
+        if (isCardControl(event.target)) return;
+        openDetails();
+      }}
+      onKeyDown={(event) => {
+        if (isCardControl(event.target)) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openDetails();
+        }
+      }}
+      className="cursor-pointer rounded-md border border-gray-200 bg-white p-5 transition-colors hover:border-primary/40 hover:bg-[#FFF8F4]"
+    >
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <h3 className="text-lg font-bold text-gray-900">
               <Link
-                href={`/admin/careers/applications/${application.id}`}
+                href={detailsHref}
                 className="hover:text-primary hover:underline"
               >
                 {application.name}
@@ -719,14 +749,6 @@ function ApplicationCard({
 
           <p className="mb-1 text-sm font-semibold text-gray-700">
             {application.jobTitle}
-          </p>
-          <p className="mb-2">
-            <Link
-              href={`/admin/careers/applications/${application.id}`}
-              className="text-sm font-semibold text-primary hover:underline"
-            >
-              View full details
-            </Link>
           </p>
 
           {application.preferredStoreName && (
